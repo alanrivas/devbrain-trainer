@@ -15,15 +15,20 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Entidad `Challenge` implementada con factory method, validaciones y `IsCorrectAnswer`
 - [x] Enums `ChallengeCategory` y `Difficulty` creados
 - [x] `DomainException` creada
-- [x] Spec + implementación de `Attempt` (7 tests en verde)
+- [x] Spec + implementación de `Attempt` (9 tests en verde) — incluye `UserId` (SupabaseId)
+- [x] Spec + implementación de `User` (11 tests en verde) — SupabaseId, email, displayName, UpdateDisplayName
+- [x] `IChallengeRepository` — interfaz de persistencia en Domain (sin EF)
+- [x] Swagger UI con Scalar (`/scalar/v1`) — spec OpenAPI en `/openapi/v1.json`
+- [x] Docker — `Dockerfile` multi-stage + `docker-compose.yml` (API + PostgreSQL 17 + Redis 7)
+- [x] Colección Postman — `postman/devbrain-trainer.postman_collection.json` con todos los endpoints del MVP y ejemplos 200/400/401/404
+- [x] Skills `spec-implement` y `write-spec` actualizados — incluyen paso de actualización de colección Postman al terminar specs de API
 - [ ] Endpoint GET /challenges
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Spec + implementación de `IChallengeRepository` — interfaz de persistencia de challenges en Domain.  
-> Sin tests en este paso (los tests vienen con `ef-challenge-repository.spec.md`).  
-> Total: 30 tests en verde (sin cambios).  
+> Infraestructura de desarrollo completa: Scalar (Swagger UI), Docker (Dockerfile + docker-compose con PostgreSQL 17 + Redis 7), colección Postman con todos los endpoints MVP y ejemplos de 200/400/401/404. Skills `spec-implement` y `write-spec` actualizados para incluir actualización de Postman al terminar specs de API. context.md sincronizado con el estado real del proyecto.  
+> Total: 30 tests en verde (10 Challenge + 9 Attempt + 11 User).  
 > Próximo paso: `iattempt-repository.spec.md`.
 
 ---
@@ -42,9 +47,10 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Generación dinámica | Claude API |
 
 ## Metodología
-- SDD + TDD: spec → test → implementación → update-context
+- SDD + TDD: spec → test → implementación → update-context → commit → push
 - Nunca implementar sin spec previa
 - Actualizar este archivo al terminar cada iteración
+- Para specs de API: actualizar también `postman/devbrain-trainer.postman_collection.json`
 
 ---
 
@@ -113,12 +119,16 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] Crear solución ASP.NET Core 10
 - [x] Configurar metodología SDD + TDD
 - [x] Spec + implementación de `Challenge` (10 tests en verde)
-- [x] Spec + implementación de `Attempt` (7 tests en verde)
-- [x] Skills `write-spec` y `spec-implement` actualizados (reemplaza `spec-to-test`)
+- [x] Spec + implementación de `Attempt` (9 tests en verde — incluye UserId)
+- [x] Spec + implementación de `User` (11 tests en verde)
+- [x] Skills `write-spec` y `spec-implement` actualizados — ciclo completo con commit+push+Postman
 - [x] Solución `DevBrain.slnx` configurada con los 5 proyectos
 - [x] Referencias entre proyectos configuradas (Api→Domain+Infra, Infra→Domain, Api.Tests→Api)
-- [x] `Program.cs` limpio (sin template WeatherForecast)
+- [x] `Program.cs` limpio con Scalar (Swagger UI en `/scalar/v1`)
 - [x] Placeholders `Class1.cs` y `UnitTest1.cs` eliminados
+- [x] `IChallengeRepository` — interfaz de persistencia en Domain
+- [x] `Dockerfile` multi-stage + `docker-compose.yml` (API + PostgreSQL 17 + Redis 7)
+- [x] Colección Postman con todos los endpoints MVP y ejemplos por status code
 - [ ] Endpoint GET /challenges
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
