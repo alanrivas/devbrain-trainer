@@ -21,9 +21,9 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> `attempt.spec.md` e implementación actualizados para incluir `UserId` (SupabaseId).  
-> Total: 19 tests en verde (10 Challenge + 9 Attempt).  
-> Próximo paso: `user.spec.md`.
+> Spec + implementación de `User` (SupabaseId, email, displayName, UpdateDisplayName).  
+> Total: 30 tests en verde (10 Challenge + 9 Attempt + 11 User).  
+> Próximo paso: `ichallenge-repository.spec.md`.
 
 ---
 
@@ -71,7 +71,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### Fase A — Dominio
 - [x] `challenge.spec.md` — entidad Challenge con validaciones
 - [x] `attempt.spec.md` — actualizado con `UserId` (SupabaseId del usuario) — 9 tests en verde
-- [ ] `user.spec.md` — entidad User básica (SupabaseId, displayName, email)
+- [x] `user.spec.md` — entidad User básica (SupabaseId, displayName, email) — 11 tests en verde
 - [ ] `ichallenge-repository.spec.md` — interfaz de persistencia de challenges (en Domain, sin EF)
 - [ ] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
 
