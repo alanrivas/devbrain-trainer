@@ -14,6 +14,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     private DevBrainDbContext? _dbContext;
     private readonly string _dbName = $"DevBrainTestDb_{Guid.NewGuid()}";  // Unique per factory
 
+    public CustomWebApplicationFactory()
+    {
+        // Signal to Program.cs that we're running in a test environment
+        Environment.SetEnvironmentVariable("DOTNET_RUNNING_IN_TEST", "true");
+    }
+
     public async Task<DevBrainDbContext> GetDbContextAsync()
     {
         if (_dbContext == null)
@@ -43,14 +49,18 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Add in-memory database for testing with unique name to avoid bleeding between tests
+            // Add in-memory database for testing with unique name to avoid cross-test pollution
+            // Program.cs won't register Npgsql because we set DOTNET_RUNNING_IN_TEST
             services.AddDbContext<DevBrainDbContext>(options =>
-                options.UseInMemoryDatabase(_dbName)
+                options.UseInMemoryDatabase(_dbName),
+                ServiceLifetime.Scoped
             );
 
-            // Register services required for endpoints
+            // Ensure these services are registered (Program.cs registers them but we can re-add)
             services.AddScoped<IUserRepository, EFUserRepository>();
             services.AddScoped<IPasswordHashService, PasswordHashService>();
+            services.AddScoped<IChallengeRepository, EFChallengeRepository>();
+            services.AddScoped<IAttemptRepository, EFAttemptRepository>();
         });
 
         // Seed data after app is built

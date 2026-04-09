@@ -160,87 +160,109 @@ public class DevBrainDbContext : DbContext
 
     private static void SeedChallenges(ModelBuilder modelBuilder)
     {
+        var seedDate = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
         var challenges = new[]
         {
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000001"),
                 "SQL: Select Top N Records",
                 "Write a SQL query that returns the top 5 users by number of completed attempts",
                 ChallengeCategory.Sql,
                 Difficulty.Easy,
                 "SELECT TOP 5 u.id, COUNT(a.id) as attempt_count FROM users u LEFT JOIN attempts a ON u.id = a.user_id GROUP BY u.id ORDER BY attempt_count DESC",
-                60
+                60,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000002"),
                 "SQL: Join Multiple Tables",
                 "Write a query that joins users with their latest attempt, including the challenge title",
                 ChallengeCategory.Sql,
                 Difficulty.Medium,
                 "SELECT u.id, u.email, c.title, a.created_at FROM users u LEFT JOIN attempts a ON u.id = a.user_id LEFT JOIN challenges c ON a.challenge_id = c.id WHERE a.created_at = (SELECT MAX(created_at) FROM attempts WHERE user_id = u.id)",
-                120
+                120,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000003"),
                 "C#: Extract Method",
                 "Refactor this code to follow DRY: if (x > 10) print(\"big\"); if (y > 10) print(\"big\");",
                 ChallengeCategory.CodeLogic,
                 Difficulty.Easy,
                 "private void CheckAndPrint(int value) { if (value > 10) Print(\"big\"); }",
-                90
+                90,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000004"),
                 "C#: Null Coalescing",
                 "What operator returns the first non-null value in C#?",
                 ChallengeCategory.CodeLogic,
                 Difficulty.Easy,
                 "??",
-                45
+                45,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000005"),
                 "Architecture: SOLID - Single Responsibility",
                 "Which SOLID principle states that a class should have only one reason to change?",
                 ChallengeCategory.Architecture,
                 Difficulty.Medium,
                 "single responsibility principle",
-                75
+                75,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000006"),
                 "Architecture: Design Pattern",
                 "What design pattern restricts object instantiation to a single instance?",
                 ChallengeCategory.Architecture,
                 Difficulty.Hard,
                 "singleton",
-                150
+                150,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000007"),
                 "Docker: Container Listing",
                 "What Docker command lists all containers (running and stopped)?",
                 ChallengeCategory.DevOps,
                 Difficulty.Easy,
                 "docker ps -a",
-                60
+                60,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000008"),
                 "Docker: Image Cleanup",
                 "What Docker command removes all unused images?",
                 ChallengeCategory.DevOps,
                 Difficulty.Medium,
                 "docker image prune",
-                90
+                90,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000009"),
                 "Memory: Variable Tracing",
                 "Trace this code: x = 5; x += 3; x *= 2; x -= 1; What is the final value of x?",
                 ChallengeCategory.WorkingMemory,
                 Difficulty.Medium,
                 "15",
-                120
+                120,
+                seedDate
             ),
-            Challenge.Create(
+            Challenge.CreateForSeeding(
+                new Guid("10000000-0000-0000-0000-000000000010"),
                 "Memory: Loop Counting",
                 "Count how many times this loop executes: for (int i = 0; i < 20; i += 3) {}",
                 ChallengeCategory.WorkingMemory,
                 Difficulty.Easy,
                 "7",
-                60
+                60,
+                seedDate
             )
         };
 

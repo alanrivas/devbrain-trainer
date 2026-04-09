@@ -69,6 +69,29 @@ public sealed class Challenge
         );
     }
 
+    // For EF Core seeding only - uses fixed values to ensure deterministic migrations
+    public static Challenge CreateForSeeding(
+        Guid id,
+        string title,
+        string description,
+        ChallengeCategory category,
+        Difficulty difficulty,
+        string correctAnswer,
+        int timeLimitSecs,
+        DateTimeOffset createdAt)
+    {
+        return new Challenge(
+            id: id,
+            title: title.Trim(),
+            description: description.Trim(),
+            category: category,
+            difficulty: difficulty,
+            correctAnswer: correctAnswer.Trim(),
+            timeLimitSecs: timeLimitSecs,
+            createdAt: createdAt
+        );
+    }
+
     public bool IsCorrectAnswer(string attempt) =>
         string.Equals(attempt.Trim(), CorrectAnswer, StringComparison.OrdinalIgnoreCase);
 }

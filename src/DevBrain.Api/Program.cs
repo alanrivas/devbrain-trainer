@@ -8,15 +8,20 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DB context
+// Only use PostgreSQL if:
+// 1. Connection string exists in config
+// 2. NOT running under test/xUnit (which will inject In-Memory via WebApplicationFactory)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var isTestEnvironment = builder.Environment.EnvironmentName == "Testing" || 
+                       Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_TEST") == "true";
 
-if (!string.IsNullOrEmpty(connectionString))
+if (!string.IsNullOrEmpty(connectionString) && !isTestEnvironment)
 {
     builder.Services.AddDbContext<DevBrainDbContext>(options =>
         options.UseNpgsql(connectionString)
     );
 }
-// If no connection string, the factory will inject in-memory for tests
+// Otherwise, the factory will inject in-memory for tests
 
 // Register repositories
 builder.Services.AddScoped<IChallengeRepository, EFChallengeRepository>();
