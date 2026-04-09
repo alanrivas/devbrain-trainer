@@ -26,6 +26,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 ## Último paso completado
 > Spec + implementación de `DevBrainDbContext` — DbContext EF Core con tablas (users, challenges, attempts), índices de performance, relaciones FK + cascada, seed data con 10 challenges variados (categorías/dificultades mix).  
+> **Nota**: Actualizado spec de `Attempt` para documentar propiedades de navegación EF Core (User, Challenge) — agregadas para materialization de relaciones.  
 > Proyecto tests `DevBrain.Infrastructure.Tests` creado con 9 tests en verde.  
 > Total: 39 tests en verde (30 Domain + 9 Infrastructure).  
 > Próximo paso: `ef-challenge-repository.spec.md` (implementación EF de IChallengeRepository — Fase B).
