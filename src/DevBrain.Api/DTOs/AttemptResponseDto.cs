@@ -3,7 +3,7 @@ namespace DevBrain.Api.DTOs;
 public record AttemptResponseDto(
     Guid AttemptId,
     Guid ChallengeId,
-    string UserId,
+    Guid UserId,
     string UserAnswer,
     bool IsCorrect,
     string CorrectAnswer,

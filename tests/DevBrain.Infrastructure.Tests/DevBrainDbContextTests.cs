@@ -80,8 +80,8 @@ public class DevBrainDbContextTests
         using var context = CreateDbContext();
         context.Database.EnsureCreated();
 
-        var userId = "123e4567-e89b-12d3-a456-426614174000";
-        var user = User.Create(userId, "user@example.com", "TestUser");
+        var userId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
+        var user = User.Create(userId.ToString(), "user@example.com", "TestUser");
         var challenge = Challenge.Create(
             "SQL Challenge",
             "Write a query",
@@ -111,8 +111,8 @@ public class DevBrainDbContextTests
         using var context = CreateDbContext();
         context.Database.EnsureCreated();
 
-        var userId = "123e4567-e89b-12d3-a456-426614174000";
-        var user = User.Create(userId, "user@example.com", "TestUser");
+        var userId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
+        var user = User.Create(userId.ToString(), "user@example.com", "TestUser");
         var challenge = Challenge.Create(
             "Code Logic Challenge",
             "Refactor this code",
@@ -145,8 +145,8 @@ public class DevBrainDbContextTests
         using var context = CreateDbContext();
         context.Database.EnsureCreated();
 
-        var userId = "123e4567-e89b-12d3-a456-426614174000";
-        var user = User.Create(userId, "user@example.com", "TestUser");
+        var userId = Guid.Parse("123e4567-e89b-12d3-a456-426614174001");
+        var user = User.Create(userId.ToString(), "user@example.com", "TestUser");
         var challenge = Challenge.Create(
             "Architecture Challenge",
             "Design a system",

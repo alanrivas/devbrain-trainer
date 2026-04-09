@@ -25,12 +25,16 @@ public class DevBrainDbContext : DbContext
 
         modelBuilder.Entity<User>()
             .Property(u => u.Id)
-            .HasMaxLength(36)
+            .ValueGeneratedNever()  // We generate Guid.NewGuid() in domain
             .IsRequired();
 
         modelBuilder.Entity<User>()
             .Property(u => u.Email)
             .HasMaxLength(255)
+            .IsRequired();
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.PasswordHash)
             .IsRequired();
 
         modelBuilder.Entity<User>()
@@ -103,8 +107,7 @@ public class DevBrainDbContext : DbContext
 
         modelBuilder.Entity<Attempt>()
             .Property(a => a.UserId)
-            .HasMaxLength(36)
-            .IsRequired();
+            .IsRequired();  // Changed from HasMaxLength(36)
 
         modelBuilder.Entity<Attempt>()
             .Property(a => a.ChallengeId)

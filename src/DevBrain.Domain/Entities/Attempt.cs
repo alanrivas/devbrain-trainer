@@ -6,7 +6,7 @@ public sealed class Attempt
 {
     public Guid Id { get; }
     public Guid ChallengeId { get; }
-    public string UserId { get; }
+    public Guid UserId { get; }  // Changed from string to Guid
     public string UserAnswer { get; }
     public bool IsCorrect { get; }
     public int ElapsedSecs { get; }
@@ -19,7 +19,7 @@ public sealed class Attempt
     private Attempt(
         Guid id,
         Guid challengeId,
-        string userId,
+        Guid userId,  // Changed from string to Guid
         string userAnswer,
         bool isCorrect,
         int elapsedSecs,
@@ -34,12 +34,12 @@ public sealed class Attempt
         OccurredAt = occurredAt;
     }
 
-    public static Attempt Create(Guid challengeId, string userId, string userAnswer, int elapsedSecs, Challenge challenge)
+    public static Attempt Create(Guid challengeId, Guid userId, string userAnswer, int elapsedSecs, Challenge challenge)  // Changed string userId to Guid
     {
         if (challengeId == Guid.Empty)
             throw new DomainException("ChallengeId is required.");
 
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)  // Changed validation for Guid instead of string
             throw new DomainException("UserId is required.");
 
         if (string.IsNullOrWhiteSpace(userAnswer))
@@ -54,7 +54,7 @@ public sealed class Attempt
         return new Attempt(
             id: Guid.NewGuid(),
             challengeId: challengeId,
-            userId: userId.Trim(),
+            userId: userId,
             userAnswer: userAnswer.Trim(),
             isCorrect: challenge.IsCorrectAnswer(userAnswer),
             elapsedSecs: elapsedSecs,

@@ -17,8 +17,10 @@ public class AttemptTests
         timeLimitSecs: 60
     );
 
+    private static readonly Guid TestUserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440000");
+
     private static Attempt CreateValid(Challenge challenge) =>
-        Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 30, challenge);
+        Attempt.Create(challenge.Id, TestUserId, "selects all columns", elapsedSecs: 30, challenge);
 
     // --- Creación válida ---
 
@@ -37,7 +39,7 @@ public class AttemptTests
     {
         var challenge = CreateChallenge();
 
-        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "drops the table", elapsedSecs: 30, challenge);
+        var attempt = Attempt.Create(challenge.Id, TestUserId, "drops the table", elapsedSecs: 30, challenge);
 
         Assert.False(attempt.IsCorrect);
     }
@@ -58,9 +60,9 @@ public class AttemptTests
     {
         var challenge = CreateChallenge();
 
-        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 30, challenge);
+        var attempt = Attempt.Create(challenge.Id, TestUserId, "selects all columns", elapsedSecs: 30, challenge);
 
-        Assert.Equal("user-supabase-id-123", attempt.UserId);
+        Assert.Equal(TestUserId, attempt.UserId);
     }
 
     // --- Validaciones ---
@@ -71,7 +73,7 @@ public class AttemptTests
         var challenge = CreateChallenge();
 
         Assert.Throws<DomainException>(() =>
-            Attempt.Create(Guid.Empty, "user-supabase-id-123", "selects all columns", elapsedSecs: 30, challenge));
+            Attempt.Create(Guid.Empty, TestUserId, "selects all columns", elapsedSecs: 30, challenge));
     }
 
     [Fact]
@@ -80,7 +82,7 @@ public class AttemptTests
         var challenge = CreateChallenge();
 
         Assert.Throws<DomainException>(() =>
-            Attempt.Create(challenge.Id, "", "selects all columns", elapsedSecs: 30, challenge));
+            Attempt.Create(challenge.Id, Guid.Empty, "selects all columns", elapsedSecs: 30, challenge));
     }
 
     [Fact]
@@ -89,7 +91,7 @@ public class AttemptTests
         var challenge = CreateChallenge();
 
         Assert.Throws<DomainException>(() =>
-            Attempt.Create(challenge.Id, "user-supabase-id-123", "", elapsedSecs: 30, challenge));
+            Attempt.Create(challenge.Id, TestUserId, "", elapsedSecs: 30, challenge));
     }
 
     [Fact]
@@ -98,7 +100,7 @@ public class AttemptTests
         // Spec allows >= 0, so zero is valid (though unusual)
         var challenge = CreateChallenge();
 
-        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 0, challenge);
+        var attempt = Attempt.Create(challenge.Id, TestUserId, "selects all columns", elapsedSecs: 0, challenge);
 
         Assert.NotNull(attempt);
         Assert.Equal(0, attempt.ElapsedSecs);
@@ -110,7 +112,7 @@ public class AttemptTests
         // Spec allows exceeding time limit - user can try even after time expires
         var challenge = CreateChallenge(); // timeLimitSecs = 60
 
-        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 61, challenge);
+        var attempt = Attempt.Create(challenge.Id, TestUserId, "selects all columns", elapsedSecs: 61, challenge);
 
         Assert.NotNull(attempt);
         Assert.Equal(61, attempt.ElapsedSecs);

@@ -1,4 +1,5 @@
 using DevBrain.Api.Endpoints;
+using DevBrain.Api.Services;
 using DevBrain.Domain.Interfaces;
 using DevBrain.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,10 @@ if (!string.IsNullOrEmpty(connectionString))
 // Register repositories
 builder.Services.AddScoped<IChallengeRepository, EFChallengeRepository>();
 builder.Services.AddScoped<IAttemptRepository, EFAttemptRepository>();
+builder.Services.AddScoped<IUserRepository, EFUserRepository>();
+
+// Register services
+builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 
 builder.Services.AddOpenApi(options =>
 {
@@ -48,5 +53,6 @@ app.UseHttpsRedirection();
 
 // Map endpoints
 app.MapChallengeEndpoints();
+app.MapAuthEndpoints();
 
 app.Run();

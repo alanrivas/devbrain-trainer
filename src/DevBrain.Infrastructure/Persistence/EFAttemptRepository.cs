@@ -19,9 +19,9 @@ public sealed class EFAttemptRepository : IAttemptRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IReadOnlyList<Attempt>> GetByUserAsync(string userId)
+    public async Task<IReadOnlyList<Attempt>> GetByUserAsync(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
             return new List<Attempt>().AsReadOnly();
 
         var attempts = await _context.Attempts
@@ -32,9 +32,9 @@ public sealed class EFAttemptRepository : IAttemptRepository
         return attempts.AsReadOnly();
     }
 
-    public async Task<Attempt?> GetLastByUserAsync(string userId)
+    public async Task<Attempt?> GetLastByUserAsync(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
             return null;
 
         return await _context.Attempts
@@ -43,9 +43,9 @@ public sealed class EFAttemptRepository : IAttemptRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<int> CountCorrectByUserAsync(string userId)
+    public async Task<int> CountCorrectByUserAsync(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
             return 0;
 
         return await _context.Attempts

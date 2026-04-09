@@ -11,18 +11,19 @@ public class PostAttemptEndpointTests : IAsyncLifetime
 {
     private CustomWebApplicationFactory _factory = null!;
     private HttpClient _client = null!;
-        private Guid _firstChallengeId = Guid.Empty;
-        private string _firstChallengeAnswer = string.Empty;
-        private Guid _secondChallengeId = Guid.Empty;
-        private string _secondChallengeAnswer = string.Empty;
+    private readonly Guid _testUserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440000");  // Fixed test user ID
+    private Guid _firstChallengeId = Guid.Empty;
+    private string _firstChallengeAnswer = string.Empty;
+    private Guid _secondChallengeId = Guid.Empty;
+    private string _secondChallengeAnswer = string.Empty;
 
-        public async Task InitializeAsync()
-        {
-            _factory = new CustomWebApplicationFactory();
-            _client = _factory.CreateClient();
-            
-            // Set default header for userId
-            _client.DefaultRequestHeaders.Add("X-User-Id", "test_user_123");
+    public async Task InitializeAsync()
+    {
+        _factory = new CustomWebApplicationFactory();
+        _client = _factory.CreateClient();
+        
+        // Set default header for userId - must be a valid Guid
+        _client.DefaultRequestHeaders.Add("X-User-Id", _testUserId.ToString());
             
             // Get challenge IDs from seed data via GET endpoint
             var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
@@ -277,7 +278,7 @@ public class PostAttemptEndpointTests : IAsyncLifetime
         Assert.NotNull(result);
         Assert.NotEqual(Guid.Empty, result.AttemptId);
         Assert.NotEqual(Guid.Empty, result.ChallengeId);
-        Assert.NotEmpty(result.UserId);
+        Assert.NotEqual(Guid.Empty, result.UserId);
         Assert.NotEmpty(result.UserAnswer);
         Assert.NotEmpty(result.CorrectAnswer);
         Assert.Equal(45, result.ElapsedSeconds);

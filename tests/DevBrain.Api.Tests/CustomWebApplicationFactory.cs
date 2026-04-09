@@ -1,3 +1,4 @@
+using DevBrain.Api.Services;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
 using DevBrain.Infrastructure.Persistence;
@@ -46,6 +47,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.AddDbContext<DevBrainDbContext>(options =>
                 options.UseInMemoryDatabase(_dbName)
             );
+
+            // Register services required for endpoints
+            services.AddScoped<IUserRepository, EFUserRepository>();
+            services.AddScoped<IPasswordHashService, PasswordHashService>();
         });
 
         // Seed data after app is built

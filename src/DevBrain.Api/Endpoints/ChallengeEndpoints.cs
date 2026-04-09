@@ -148,10 +148,21 @@ public static class ChallengeEndpoints
         }
 
         // Extract userId from header (for testing; in production this comes from JWT)
-        var userId = httpContext.Request.Headers["X-User-Id"].ToString();
-        if (string.IsNullOrEmpty(userId))
+        var userIdHeader = httpContext.Request.Headers["X-User-Id"].ToString();
+        if (string.IsNullOrEmpty(userIdHeader))
         {
             return Results.Unauthorized();
+        }
+
+        // Try to parse userId as Guid
+        if (!Guid.TryParse(userIdHeader, out var userId))
+        {
+            return Results.BadRequest(new
+            {
+                status = 400,
+                title = "Bad Request",
+                detail = "User ID in header must be a valid GUID"
+            });
         }
 
         // Create attempt

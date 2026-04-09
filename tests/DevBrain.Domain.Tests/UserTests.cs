@@ -7,8 +7,10 @@ public class UserTests
 {
     // --- Helpers ---
 
+    private static readonly Guid TestUserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440000");
+
     private static User CreateValid() => User.Create(
-        supabaseId: "supabase-user-id-123",
+        supabaseId: TestUserId.ToString(),
         email: "alan@example.com",
         displayName: "Alan"
     );
@@ -21,7 +23,7 @@ public class UserTests
         var user = CreateValid();
 
         Assert.NotNull(user);
-        Assert.Equal("supabase-user-id-123", user.Id);
+        Assert.Equal(TestUserId, user.Id);
         Assert.Equal("alan@example.com", user.Email);
         Assert.Equal("Alan", user.DisplayName);
     }
@@ -47,13 +49,13 @@ public class UserTests
     [Fact]
     public void Create_GivenEmptyEmail_ShouldThrowDomainException()
     {
-        Assert.Throws<DomainException>(() => User.Create("supabase-user-id-123", "", "Alan"));
+        Assert.Throws<DomainException>(() => User.Create(TestUserId.ToString(), "", "Alan"));
     }
 
     [Fact]
     public void Create_GivenEmailWithoutAtSign_ShouldThrowDomainException()
     {
-        Assert.Throws<DomainException>(() => User.Create("supabase-user-id-123", "notanemail", "Alan"));
+        Assert.Throws<DomainException>(() => User.Create(TestUserId.ToString(), "notanemail", "Alan"));
     }
 
     // --- Validación de DisplayName ---
@@ -61,13 +63,13 @@ public class UserTests
     [Fact]
     public void Create_GivenEmptyDisplayName_ShouldThrowDomainException()
     {
-        Assert.Throws<DomainException>(() => User.Create("supabase-user-id-123", "alan@example.com", ""));
+        Assert.Throws<DomainException>(() => User.Create(TestUserId.ToString(), "alan@example.com", ""));
     }
 
     [Fact]
     public void Create_GivenDisplayNameWithOneCharacter_ShouldThrowDomainException()
     {
-        Assert.Throws<DomainException>(() => User.Create("supabase-user-id-123", "alan@example.com", "A"));
+        Assert.Throws<DomainException>(() => User.Create(TestUserId.ToString(), "alan@example.com", "A"));
     }
 
     [Fact]
@@ -75,7 +77,7 @@ public class UserTests
     {
         var longName = new string('A', 51);
 
-        Assert.Throws<DomainException>(() => User.Create("supabase-user-id-123", "alan@example.com", longName));
+        Assert.Throws<DomainException>(() => User.Create(TestUserId.ToString(), "alan@example.com", longName));
     }
 
     // --- UpdateDisplayName ---

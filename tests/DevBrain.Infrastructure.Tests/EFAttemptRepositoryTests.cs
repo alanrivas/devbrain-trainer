@@ -28,7 +28,8 @@ public class EFAttemptRepositoryTests
 
     private static async Task<(User user, Challenge challenge)> SetupUserAndChallengeAsync(DevBrainDbContext context)
     {
-        var user = User.Create("test-user-id", "test@example.com", "TestUser");
+        var testUserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440000");
+        var user = User.Create(testUserId.ToString(), "test@example.com", "TestUser");
         var challenge = (await context.Challenges.FirstOrDefaultAsync())!;
 
         context.Users.Add(user);
@@ -139,7 +140,7 @@ public class EFAttemptRepositoryTests
 
         await SetupUserAndChallengeAsync(context);
 
-        var result = await repository.GetByUserAsync("non-existent-user");
+        var result = await repository.GetByUserAsync(Guid.Empty);
 
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -152,7 +153,7 @@ public class EFAttemptRepositoryTests
         context.Database.EnsureCreated();
         var repository = CreateRepository(context);
 
-        var result = await repository.GetByUserAsync(string.Empty);
+        var result = await repository.GetByUserAsync(Guid.Empty);
 
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -213,7 +214,7 @@ public class EFAttemptRepositoryTests
 
         await SetupUserAndChallengeAsync(context);
 
-        var result = await repository.GetLastByUserAsync("non-existent-user");
+        var result = await repository.GetLastByUserAsync(Guid.Empty);
 
         Assert.Null(result);
     }
@@ -225,7 +226,7 @@ public class EFAttemptRepositoryTests
         context.Database.EnsureCreated();
         var repository = CreateRepository(context);
 
-        var result = await repository.GetLastByUserAsync(string.Empty);
+        var result = await repository.GetLastByUserAsync(Guid.Empty);
 
         Assert.Null(result);
     }
@@ -281,7 +282,7 @@ public class EFAttemptRepositoryTests
 
         await SetupUserAndChallengeAsync(context);
 
-        var result = await repository.CountCorrectByUserAsync("non-existent-user");
+        var result = await repository.CountCorrectByUserAsync(Guid.Empty);
 
         Assert.Equal(0, result);
     }
@@ -293,7 +294,7 @@ public class EFAttemptRepositoryTests
         context.Database.EnsureCreated();
         var repository = CreateRepository(context);
 
-        var result = await repository.CountCorrectByUserAsync(string.Empty);
+        var result = await repository.CountCorrectByUserAsync(Guid.Empty);
 
         Assert.Equal(0, result);
     }
