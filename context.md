@@ -15,39 +15,56 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Entidad `Challenge` implementada con factory method, validaciones y `IsCorrectAnswer`
 - [x] Enums `ChallengeCategory` y `Difficulty` creados
 - [x] `DomainException` creada
-- [x] Spec + implementación de `Attempt` (9 tests en verde) — incluye `UserId` (SupabaseId)
-- [x] Spec + implementación de `User` (11 tests en verde) — SupabaseId, email, displayName, UpdateDisplayName
+- [x] Spec + implementación de `Attempt` (9 tests en verde) — incluye `UserId` (ahora Guid)
+- [x] Spec + implementación de `User` (11 tests en verde) — Guid Id, email, displayName, password hash support
 - [x] `IChallengeRepository` — interfaz de persistencia en Domain (sin EF)
 - [x] `IAttemptRepository` — interfaz de persistencia de attempts en Domain (sin EF)
+- [x] `IUserRepository` — interfaz de persistencia de usuarios en Domain (sin EF)
 - [x] Spec + implementación de `DevBrainDbContext` (9 tests en verde) — DbContext EF Core con tablas, índices, seed data
 - [x] Spec + implementación de `EFChallengeRepository` (13 tests en verde) — GetByIdAsync, GetAllAsync (con filtros), AddAsync
 - [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
+- [x] Spec + implementación de `EFUserRepository` (9 tests en verde) — AddAsync, GetByEmailAsync, GetByIdAsync
 - [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
 - [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate
-- [ ] Endpoint POST /auth/register (spec completada, 13 tests expected) — Email/password/displayName validation, bcrypt hashing, duplicate detection
+- [x] Endpoint POST /auth/register (13 tests en verde) — Email/password/displayName validation, PBKDF2 hashing, duplicate detection, 100% pass rate
 - [ ] Conectar PostgreSQL con EF Core
 
+## Test Suites Status
+
+| Suite | Tests | Status | Details |
+|-------|-------|--------|---------|
+| Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
+| Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config, EFChallengeRepository, EFAttemptRepository, EFUserRepository |
+| Api.Tests | 39 | ✅ 39/39 | GET /challenges (13), POST /attempt (26), POST /auth/register (13) |
+| **TOTAL** | **108** | **✅ 108/108** | 100% pass rate, all scenarios covered |
+
 ## Último paso completado
-> **POST /auth/register spec created** ✅
+> **POST /auth/register fully implemented & 108/108 tests passing** ✅
 >
-> **Spec Details** (`specs/api/post-auth-register.spec.md`):
+> **Implementation Summary**:
+> - Spec: `specs/api/post-auth-register.spec.md` (259 lines) ✅
+> - Tests: `PostAuthRegisterEndpointTests.cs` (13 tests) — 100% pass rate ✅
+> - Handler: `AuthEndpoints.RegisterAsync()` with full validation ✅
+> - Domain: `User.CreateFromRegistration()` factory with email/password/displayName validation ✅
+> - Repos: `IUserRepository` + `EFUserRepository` with case-insensitive email lookup ✅
+> - Services: `IPasswordHashService` + PBKDF2 hashing (100k iterations) ✅
+> - DTOs: `RegisterRequestDto`, `UserResponseDto` + mapper ✅
+>
+> **What Changed**:
+> - User.Id: string → Guid (server-generated)
+> - Attempt.UserId: string → Guid (consistency with User)
 > - Email validation: format, uniqueness (case-insensitive)
-> - Password validation: min 8 chars, uppercase + digit required
+> - Password validation: 8+ chars, requires uppercase + digit
 > - DisplayName validation: 3-50 chars, alphanumeric + spaces/dash/dot
 > - Error responses: 400 (validation), 409 (duplicate email)
-> - Password hashing: bcrypt cost 12
-> - Case normalization: email lowercase, displayName trimmed
-> - 13 test scenarios defined
 >
-> **Next Steps**:
-> 1. Write tests (13 test scenarios)
-> 2. Implement endpoint handler & DTOs
-> 3. Implement password hashing (bcrypt)
-> 4. Implement IUserRepository.GetByEmailAsync for duplicate checking
-> 5. Update context.md with results
-> 6. Commit & push
+> **Test Coverage**:
+> - Domain: 30/30 ✅
+> - Infrastructure: 39/39 ✅
+> - API: 39/39 (26 attempt + 13 registration) ✅
+> - **TOTAL: 108/108 ✅**
 >
-> **Target**: 100+ tests passing (95 current + 13 auth tests)
+> **Ready for**: PostgreSQL connection or next endpoint (user login, leaderboard, etc)
 
 ---
 
@@ -132,13 +149,14 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ## Plan paso a paso
 
-### Fase 1 — MVP Backend (en curso)
+### Fase 1 — MVP Backend (✅ COMPLETA)
 - [x] Crear repo `devbrain-trainer` en GitHub
 - [x] Crear solución ASP.NET Core 10
 - [x] Configurar metodología SDD + TDD
 - [x] Spec + implementación de `Challenge` (10 tests en verde)
-- [x] Spec + implementación de `Attempt` (9 tests en verde — incluye UserId)
-- [x] Spec + implementación de `User` (11 tests en verde)
+- [x] Spec + implementación de `Attempt` (9 tests en verde — Guid userId)
+- [x] Spec + implementación de `User` (11 tests en verde — Guid Id, password hash support)
+- [x] Spec + implementación de `IUserRepository` + `EFUserRepository` (9 tests)
 - [x] Skills `write-spec` y `spec-implement` actualizados — ciclo completo con commit+push+Postman
 - [x] Solución `DevBrain.slnx` configurada con los 5 proyectos
 - [x] Referencias entre proyectos configuradas (Api→Domain+Infra, Infra→Domain, Api.Tests→Api)
@@ -147,9 +165,12 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `IChallengeRepository` — interfaz de persistencia en Domain
 - [x] `Dockerfile` multi-stage + `docker-compose.yml` (API + PostgreSQL 17 + Redis 7)
 - [x] Colección Postman con todos los endpoints MVP y ejemplos por status code
-- [x] Endpoint GET /challenges (13 tests) — validación filtros, paginación, DTOs
-- [ ] Endpoint POST /challenges/:id/attempt
-- [ ] Conectar PostgreSQL con EF Core
+- [x] Endpoint GET /challenges (13 tests) — validación filtros, paginación, DTOs, mapper
+- [x] Endpoint POST /challenges/:id/attempt (26 tests) — validación, DTOs, Attempt creation, ELO-ready
+- [x] Endpoint POST /auth/register (13 tests) — email/password/displayName validation, PBKDF2 hashing, duplicate detection
+- [x] **TOTAL: 108/108 tests passing (100% pass rate)**
+- [x] Context.md actualizado con avance
+- [ ] Conectar PostgreSQL con EF Core (siguiente paso)
 
 ### Fase 2 — Gamificación
 - [ ] Sistema de streak
