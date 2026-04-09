@@ -10,13 +10,41 @@ namespace DevBrain.Api.Tests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private DevBrainDbContext? _dbContext;
+    private readonly string _dbName = $"DevBrainTestDb_{Guid.NewGuid()}";  // Unique per factory
+
+    public async Task<DevBrainDbContext> GetDbContextAsync()
+    {
+        if (_dbContext == null)
+        {
+            var scope = Services.CreateScope();
+            _dbContext = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
+        }
+        return _dbContext;
+    }
+
+    public record TestChallenge(string Title, string CorrectAnswer);
+
+    public static List<TestChallenge> GetTestChallenges() => new()
+    {
+        new("Test Challenge 1", "YES"),
+        new("Test Challenge 2", "CORRECT"),
+        new("System Design", "microservices"),
+        new("Docker Deployment", "docker run"),
+        new("SQL Query", "SELECT * FROM users"),
+        new("Array Sorting", "ascending"),
+        new("Database Indexing", "B-tree"),
+        new("Kubernetes Basics", "smallest deployable unit"),
+        new("Complex SQL", "ROW_NUMBER() OVER (ORDER BY)"),
+        new("Memory Test", "12345"),
+    };
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
-            // Add in-memory database for testing
+            // Add in-memory database for testing with unique name to avoid bleeding between tests
             services.AddDbContext<DevBrainDbContext>(options =>
-                options.UseInMemoryDatabase("DevBrainTestDb")
+                options.UseInMemoryDatabase(_dbName)
             );
         });
 
@@ -34,29 +62,34 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     private async Task SeedTestData(DevBrainDbContext db, IChallengeRepository repo)
     {
-        db.Database.EnsureCreated();
+        await db.Database.EnsureCreatedAsync();
 
-        // If challenges already exist, seed is complete
-        if (await db.Challenges.AnyAsync())
-            return;
-
-        // Seed 10 challenges with known answers for testing
-        var challenges = new[]
+        // Clear any existing challenges (from OnModelCreating seed data in production mode)
+        // This ensures tests always use clean test seed data, not production data
+        var allChallenges = await db.Challenges.ToListAsync();
+        foreach (var challenge in allChallenges)
         {
-            Domain.Entities.Challenge.Create("Test Challenge 1", "Correct answer is YES", ChallengeCategory.Sql, Difficulty.Easy, "YES", 30),
-            Domain.Entities.Challenge.Create("Test Challenge 2", "Correct answer is CORRECT", ChallengeCategory.CodeLogic, Difficulty.Easy, "CORRECT", 60),
-            Domain.Entities.Challenge.Create("System Design", "Design a scalable architecture", ChallengeCategory.Architecture, Difficulty.Hard, "microservices", 200),
-            Domain.Entities.Challenge.Create("Docker Deployment", "Deploy a container", ChallengeCategory.DevOps, Difficulty.Medium, "docker run", 120),
-            Domain.Entities.Challenge.Create("SQL Query", "Write a query", ChallengeCategory.Sql, Difficulty.Medium, "SELECT * FROM users", 120),
-            Domain.Entities.Challenge.Create("Array Sorting", "Sort array", ChallengeCategory.CodeLogic, Difficulty.Medium, "ascending", 120),
-            Domain.Entities.Challenge.Create("Database Indexing", "Optimize with indices", ChallengeCategory.Architecture, Difficulty.Hard, "B-tree", 150),
-            Domain.Entities.Challenge.Create("Kubernetes Basics", "What is a Pod?", ChallengeCategory.DevOps, Difficulty.Easy, "smallest deployable unit", 90),
-            Domain.Entities.Challenge.Create("Complex SQL", "Window functions", ChallengeCategory.Sql, Difficulty.Hard, "ROW_NUMBER() OVER (ORDER BY)", 180),
-            Domain.Entities.Challenge.Create("Memory Test", "Recall number", ChallengeCategory.WorkingMemory, Difficulty.Medium, "12345", 60),
-        };
+            db.Challenges.Remove(challenge);
+        }
+        await db.SaveChangesAsync();
 
-        foreach (var challenge in challenges)
+        // Seed 10 test challenges with known answers only
+        var testChallenges = GetTestChallenges();
+        var categories = new[] { ChallengeCategory.Sql, ChallengeCategory.CodeLogic, ChallengeCategory.Architecture, ChallengeCategory.DevOps, ChallengeCategory.WorkingMemory };
+        var difficulties = new[] { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
+
+        for (int i = 0; i < testChallenges.Count; i++)
         {
+            var testChallenge = testChallenges[i];
+            var timeLimit = Math.Min(60 + (i * 30), 300); // Cap at 300 max
+            var challenge = Domain.Entities.Challenge.Create(
+                testChallenge.Title,
+                $"Test description for {testChallenge.Title}",
+                categories[i % categories.Length],
+                difficulties[i % difficulties.Length],
+                testChallenge.CorrectAnswer,
+                timeLimit
+            );
             await repo.AddAsync(challenge);
         }
     }

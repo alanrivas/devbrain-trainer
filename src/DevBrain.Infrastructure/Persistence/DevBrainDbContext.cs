@@ -151,6 +151,7 @@ public class DevBrainDbContext : DbContext
             .HasIndex(new[] { nameof(Attempt.UserId), nameof(Attempt.ChallengeId), nameof(Attempt.IsCorrect) });
 
         // Seed data - 10 challenges with mix of categories and difficulties
+        // Note: DisableAutoTraitoryGenerationSeeding() in test factory should prevent double seeding
         SeedChallenges(modelBuilder);
     }
 

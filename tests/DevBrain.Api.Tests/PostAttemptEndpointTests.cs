@@ -24,24 +24,43 @@ public class PostAttemptEndpointTests : IAsyncLifetime
             // Set default header for userId
             _client.DefaultRequestHeaders.Add("X-User-Id", "test_user_123");
             
-            // Get challenge IDs from seed data (we'll use defaults)
-            // From DbContext: first = "Memory: Loop Counting" (answer: "7")
-            //                second = "Memory: Variable Tracing" (answer: "15")
+            // Get challenge IDs from seed data via GET endpoint
             var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
             var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
             var challenges = result!.Items.ToList();
             
-            if (challenges.Count > 0)
+            Console.WriteLine($"Retrieved {challenges.Count} challenges from API");
+            foreach (var c in challenges)
             {
-                _firstChallengeId = challenges[challenges.Count - 1].Id;  // Get last one (newest)
-                _firstChallengeAnswer = "7"; // Known answer from seed
-                Console.WriteLine($"First Challenge ID: {_firstChallengeId}, Expected Answer: {_firstChallengeAnswer}");
+                Console.WriteLine($"  - {c.Title}");
             }
-            if (challenges.Count > 1)
+            
+            // Get test seed data config from factory
+            var testChallenges = CustomWebApplicationFactory.GetTestChallenges();
+            
+            // Match challenges by title to get IDs and answers
+            var firstMatch = challenges.FirstOrDefault(c => c.Title == testChallenges[0].Title);
+            if (firstMatch != null)
             {
-                _secondChallengeId = challenges[challenges.Count - 2].Id; // Get second to last
-                _secondChallengeAnswer = "15"; // Known answer from seed
-                Console.WriteLine($"Second Challenge ID: {_secondChallengeId}, Expected Answer: {_secondChallengeAnswer}");
+                _firstChallengeId = firstMatch.Id;
+                _firstChallengeAnswer = testChallenges[0].CorrectAnswer;
+                Console.WriteLine($"First Challenge ID: {_firstChallengeId}, Answer: '{_firstChallengeAnswer}'");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not find challenge with title '{testChallenges[0].Title}' in {challenges.Count} challenges");
+            }
+            
+            var secondMatch = challenges.FirstOrDefault(c => c.Title == testChallenges[1].Title);
+            if (secondMatch != null)
+            {
+                _secondChallengeId = secondMatch.Id;
+                _secondChallengeAnswer = testChallenges[1].CorrectAnswer;
+                Console.WriteLine($"Second Challenge ID: {_secondChallengeId}, Answer: '{_secondChallengeAnswer}'");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not find challenge with title '{testChallenges[1].Title}' in {challenges.Count} challenges");
             }
         }
 
