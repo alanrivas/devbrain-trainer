@@ -118,15 +118,38 @@ dotnet test tests/DevBrain.Domain.Tests/
 - No avanzar al siguiente paso hasta que todos estén en verde
 - No modificar los tests para que pasen — modificar la implementación
 
-## Paso 7 — Actualizar context.md
+## Paso 7 — Actualizar la colección Postman (solo specs de API)
+
+**Solo aplica si la spec está en `specs/api/`.**
+
+Leer `postman/devbrain-trainer.postman_collection.json` y agregar o actualizar el endpoint:
+
+1. Ubicar la carpeta correcta en `item` (ej: "Challenges", "Users") — crear la carpeta si no existe
+2. Agregar el request con:
+   - `method`, `url` (usando `{{baseUrl}}`), `header` con `Authorization: Bearer {{bearerToken}}`
+   - `body` en modo `raw` + `application/json` si es POST/PUT
+   - `description` con una línea explicando qué hace el endpoint
+3. Agregar ejemplos de respuesta (`response[]`) para **todos** los escenarios de la spec:
+   - `200 OK` — todos los casos felices definidos en la spec (puede ser más de uno)
+   - `400 Bad Request` — por cada validación que puede fallar
+   - `401 Unauthorized` — siempre, si el endpoint requiere auth
+   - `404 Not Found` — si aplica
+   - Cada ejemplo con `body` JSON real (no placeholder genérico) acorde al contrato de la spec
+
+Reglas:
+- No modificar requests ni ejemplos de endpoints ya existentes
+- Usar los mismos valores de ejemplo que se usaron en los tests de integración
+- El body de los ejemplos debe ser JSON formateado con indentación de 2 espacios
+
+## Paso 8 — Actualizar context.md
 
 Marcar como completado en `context.md`:
-- `- [x] Spec + implementación de {Entidad} (N tests en verde)`
+- `- [x] Spec + implementación de {Entidad/Endpoint} (N tests en verde)`
 - Actualizar "Último paso completado" con el resumen y el próximo paso
 
-## Paso 8 — Commit y push a GitHub
+## Paso 9 — Commit y push a GitHub
 
-Una vez que context.md está actualizado y todos los tests están en verde:
+Una vez que context.md está actualizado, los tests están en verde y la colección Postman actualizada (si aplica):
 
 ```bash
 git add {archivos nuevos o modificados en este ciclo}

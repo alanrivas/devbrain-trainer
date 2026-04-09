@@ -122,3 +122,7 @@ Usar el template de abajo. Completar **todas** las secciones con información re
 ## Después de crear la spec
 
 Ejecutar el skill `spec-implement` para generar los tests y la implementación completa.
+
+> **Nota para specs de API** (`specs/api/`): el skill `spec-implement` actualiza automáticamente  
+> `postman/devbrain-trainer.postman_collection.json` al terminar la implementación.  
+> No actualizar la colección manualmente antes de ese paso.
