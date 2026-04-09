@@ -144,74 +144,68 @@
           ]
         },
         {
-          "name": "GET /challenges/:id — Detalle de challenge",
+          "name": "GET /challenges/{id} — Detalle de challenge",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{bearerToken}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "raw": "{{baseUrl}}/api/v1/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
               "host": ["{{baseUrl}}"],
-              "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+              "path": ["api", "v1", "challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
             },
-            "description": "Retorna el detalle completo de un challenge por Id. No incluye la respuesta correcta."
+            "description": "Retorna el detalle completo de un challenge por Id. No incluye la respuesta correcta ni metadata de auditoría."
           },
           "response": [
             {
               "name": "200 OK — Challenge encontrado",
               "originalRequest": {
                 "method": "GET",
-                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "raw": "{{baseUrl}}/api/v1/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
                   "host": ["{{baseUrl}}"],
-                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+                  "path": ["api", "v1", "challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
                 }
               },
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/json" }],
-              "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"title\": \"¿Qué hace este SELECT?\",\n  \"description\": \"Dado este query SQL: SELECT COUNT(*) FROM users WHERE active = 1, ¿cuál es el resultado si hay 5 usuarios activos?\",\n  \"category\": \"Sql\",\n  \"difficulty\": \"Easy\",\n  \"timeLimitSecs\": 60,\n  \"createdAt\": \"2026-01-01T00:00:00Z\"\n}"
+              "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"title\": \"SQL: Select Top N Records\",\n  \"description\": \"Write a SQL query that returns the top 5 users by number of completed attempts\",\n  \"category\": \"Sql\",\n  \"difficulty\": \"Easy\",\n  \"timeLimitSecs\": 60\n}"
             },
             {
               "name": "404 Not Found — Challenge no existe",
               "originalRequest": {
                 "method": "GET",
-                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/challenges/00000000-0000-0000-0000-000000000000",
+                  "raw": "{{baseUrl}}/api/v1/challenges/00000000-0000-0000-0000-000000000000",
                   "host": ["{{baseUrl}}"],
-                  "path": ["challenges", "00000000-0000-0000-0000-000000000000"]
+                  "path": ["api", "v1", "challenges", "00000000-0000-0000-0000-000000000000"]
                 }
               },
               "status": "Not Found",
               "code": 404,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
-              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.5\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Challenge not found.\"\n}"
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc7231#section-6.5.4\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Challenge not found\"\n}"
             },
             {
-              "name": "401 Unauthorized — Sin token",
+              "name": "400 Bad Request — GUID inválido",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "raw": "{{baseUrl}}/api/v1/challenges/not-a-guid",
                   "host": ["{{baseUrl}}"],
-                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+                  "path": ["api", "v1", "challenges", "not-a-guid"]
                 }
               },
-              "status": "Unauthorized",
-              "code": 401,
+              "status": "Bad Request",
+              "code": 400,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
-              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.2\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401\n}"
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc7231#section-6.5.1\",\n  \"title\": \"Bad Request\",\n  \"status\": 400,\n  \"detail\": \"Invalid challenge ID format. Must be a valid GUID.\"\n}"
             }
           ]
         },

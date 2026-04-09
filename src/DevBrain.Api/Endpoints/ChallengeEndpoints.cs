@@ -16,6 +16,10 @@ public static class ChallengeEndpoints
             .WithName("GetChallenges")
             .WithDescription("Obtiene lista paginada de challenges con filtros opcionales");
 
+        group.MapGet("/{id}", GetChallenge)
+            .WithName("GetChallenge")
+            .WithDescription("Obtiene detalles de un challenge específico");
+
         group.MapPost("/{id}/attempt", PostAttempt)
             .WithName("PostAttempt")
             .WithDescription("Enviar respuesta a un challenge");
@@ -93,6 +97,38 @@ public static class ChallengeEndpoints
             Items: paginatedItems
         );
 
+        return Results.Ok(response);
+    }
+
+    private static async Task<IResult> GetChallenge(
+        Guid id,
+        IChallengeRepository repository
+    )
+    {
+        // Validate GUID format (though ASP.NET handles this automatically)
+        if (id == Guid.Empty)
+            return Results.BadRequest(new
+            {
+                type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                title = "Bad Request",
+                status = 400,
+                detail = "Invalid challenge ID format. Must be a valid GUID."
+            });
+
+        // Fetch challenge by ID
+        var challenge = await repository.GetByIdAsync(id);
+
+        if (challenge == null)
+            return Results.NotFound(new
+            {
+                type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                title = "Not Found",
+                status = 404,
+                detail = "Challenge not found"
+            });
+
+        // Map to response DTO (hides correctAnswer and createdAt)
+        var response = challenge.ToResponseDto();
         return Results.Ok(response);
     }
 
