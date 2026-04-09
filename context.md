@@ -27,7 +27,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
 - [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate
 - [x] Endpoint POST /auth/register (13 tests en verde) — Email/password/displayName validation, PBKDF2 hashing, duplicate detection, 100% pass rate
-- [ ] Conectar PostgreSQL con EF Core
+- [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433, tests siguen en verde (108/108)
 
 ## Test Suites Status
 
@@ -39,32 +39,44 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **TOTAL** | **108** | **✅ 108/108** | 100% pass rate, all scenarios covered |
 
 ## Último paso completado
-> **POST /auth/register fully implemented & 108/108 tests passing** ✅
+> **PostgreSQL 18 local setup complete — port 5433, migrations applied, 108/108 tests passing** ✅
 >
-> **Implementation Summary**:
-> - Spec: `specs/api/post-auth-register.spec.md` (259 lines) ✅
-> - Tests: `PostAuthRegisterEndpointTests.cs` (13 tests) — 100% pass rate ✅
-> - Handler: `AuthEndpoints.RegisterAsync()` with full validation ✅
-> - Domain: `User.CreateFromRegistration()` factory with email/password/displayName validation ✅
-> - Repos: `IUserRepository` + `EFUserRepository` with case-insensitive email lookup ✅
-> - Services: `IPasswordHashService` + PBKDF2 hashing (100k iterations) ✅
-> - DTOs: `RegisterRequestDto`, `UserResponseDto` + mapper ✅
+> **Setup Summary**:
+> - PostgreSQL 18 running on port 5433 (port 5432 had conflict with PG 16)
+> - Database: `devbrain_local`, User: `devbrain` with limited permissions
+> - Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0 installed + EF Core 10.0.4 aligned
+> - Connection string: stored securely in User Secrets (credentials never hardcoded)
+> - Trust authentication enabled for localhost (development only) via `pg_hba.conf`
+> - Initial migration created with **deterministic seed data** (fixed GUIDs + dates, not dynamic)
+>   - 10 challenges pre-seeded with cross-domain coverage (SQL, C#, Architecture, Docker, Memory)
+> - Database schema fully created: `users`, `challenges`, `attempts`, `__EFMigrationsHistory`
+> - Indexes: category, difficulty filters on challenges; userId + timestamps on attempts
 >
-> **What Changed**:
-> - User.Id: string → Guid (server-generated)
-> - Attempt.UserId: string → Guid (consistency with User)
-> - Email validation: format, uniqueness (case-insensitive)
-> - Password validation: 8+ chars, requires uppercase + digit
-> - DisplayName validation: 3-50 chars, alphanumeric + spaces/dash/dot
-> - Error responses: 400 (validation), 409 (duplicate email)
+> **Code Changes**:
+> - `Challenge.CreateForSeeding()` — new public factory for deterministic migration seeding
+> - `DevBrainDbContext.OnModelCreating()` — seed data now uses fixed IDs & dates (not Guid.NewGuid())
+> - `Program.cs` — conditional Npgsql registration (skipped if `DOTNET_RUNNING_IN_TEST` env var set)
+> - `CustomWebApplicationFactory` — sets `DOTNET_RUNNING_IN_TEST` to avoid provider conflicts
+> - `EF Core Migration InitialCreate` — deterministic model snapshot (no more dynamic values error)
 >
-> **Test Coverage**:
-> - Domain: 30/30 ✅
-> - Infrastructure: 39/39 ✅
-> - API: 39/39 (26 attempt + 13 registration) ✅
-> - **TOTAL: 108/108 ✅**
+> **Test Impact** (All 108/108 Passing):
+> - Domain tests: **30/30** — unaffected (no domain changes)
+> - Infrastructure tests: **39/39** — DbContext w/ In-Memory, no PostgreSQL access
+> - API tests: **39/39** — WebApplicationFactory injects In-Memory for all test scenarios
+> - Production app: uses PostgreSQL on port 5433 when connection string exists
+> - Tests: use In-Memory isolated DBs per factory instance (no cross-contamination)
 >
-> **Ready for**: PostgreSQL connection or next endpoint (user login, leaderboard, etc)
+> **Deployment Path**:
+> - Local dev: PostgreSQL 18 on 5433 (this setup)
+> - Production (Railway): PostgreSQL via Railway addon + connection string from env
+> - Tests: In-Memory (no DB dependency)
+> - Migration rollback: `Connection string not found → Program.cs skips Npgsql → EF uses In-Memory`
+>
+> **Next step**: Choose next feature to implement:
+> - Option A: User login endpoint (POST /auth/login)
+> - Option B: GET /challenges/{id} (single challenge detail)
+> - Option C: Gamification layer (streak, ELO, rating)
+> - Option D: Leaderboard (GET /users/stats or similar)
 
 ---
 
