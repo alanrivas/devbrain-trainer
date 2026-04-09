@@ -1,0 +1,459 @@
+{
+  "info": {
+    "name": "DevBrain Trainer API",
+    "description": "API de entrenamiento cognitivo gamificada para desarrolladores.\n\n**Base URL**: `{{baseUrl}}`\n\n**Auth**: Bearer token de Supabase en el header `Authorization: Bearer <token>`\n\nActualizar la variable `baseUrl` y `bearerToken` en el environment antes de usar.",
+    "_postman_id": "devbrain-trainer-v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "bearerToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT token de Supabase Auth"
+    }
+  ],
+  "item": [
+    {
+      "name": "Challenges",
+      "description": "Operaciones sobre los desafíos técnicos.",
+      "item": [
+        {
+          "name": "GET /challenges — Listar challenges",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challenges?category=Sql&difficulty=Easy&page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Sql",
+                  "description": "Opcional. Valores: Sql, CodeLogic, Architecture, DevOps, WorkingMemory"
+                },
+                {
+                  "key": "difficulty",
+                  "value": "Easy",
+                  "description": "Opcional. Valores: Easy, Medium, Hard"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página (1-based)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Resultados por página (máx 50)"
+                }
+              ]
+            },
+            "description": "Retorna lista paginada de challenges con filtros opcionales por categoría y dificultad."
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista con filtros",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges?category=Sql&difficulty=Easy&page=1&pageSize=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges"],
+                  "query": [
+                    { "key": "category", "value": "Sql" },
+                    { "key": "difficulty", "value": "Easy" },
+                    { "key": "page", "value": "1" },
+                    { "key": "pageSize", "value": "10" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"title\": \"¿Qué hace este SELECT?\",\n      \"description\": \"Dado este query SQL, ¿cuál es el resultado?\",\n      \"category\": \"Sql\",\n      \"difficulty\": \"Easy\",\n      \"timeLimitSecs\": 60\n    }\n  ],\n  \"totalCount\": 1,\n  \"page\": 1,\n  \"pageSize\": 10,\n  \"totalPages\": 1\n}"
+            },
+            {
+              "name": "200 OK — Lista vacía",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges?category=DevOps&difficulty=Hard",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges"],
+                  "query": [
+                    { "key": "category", "value": "DevOps" },
+                    { "key": "difficulty", "value": "Hard" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"items\": [],\n  \"totalCount\": 0,\n  \"page\": 1,\n  \"pageSize\": 10,\n  \"totalPages\": 0\n}"
+            },
+            {
+              "name": "400 Bad Request — Filtro inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges?category=INVALID",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges"],
+                  "query": [{ "key": "category", "value": "INVALID" }]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\n  \"title\": \"Bad Request\",\n  \"status\": 400,\n  \"detail\": \"Invalid category value: INVALID\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Sin token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/challenges", "host": ["{{baseUrl}}"], "path": ["challenges"] }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.2\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /challenges/:id — Detalle de challenge",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+            },
+            "description": "Retorna el detalle completo de un challenge por Id. No incluye la respuesta correcta."
+          },
+          "response": [
+            {
+              "name": "200 OK — Challenge encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"title\": \"¿Qué hace este SELECT?\",\n  \"description\": \"Dado este query SQL: SELECT COUNT(*) FROM users WHERE active = 1, ¿cuál es el resultado si hay 5 usuarios activos?\",\n  \"category\": \"Sql\",\n  \"difficulty\": \"Easy\",\n  \"timeLimitSecs\": 60,\n  \"createdAt\": \"2026-01-01T00:00:00Z\"\n}"
+            },
+            {
+              "name": "404 Not Found — Challenge no existe",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "00000000-0000-0000-0000-000000000000"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.5\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Challenge not found.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Sin token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.2\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /challenges/:id/attempt — Enviar respuesta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answer\": \"5\",\n  \"elapsedSecs\": 30\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+            },
+            "description": "Envía la respuesta del usuario para un challenge. Devuelve si fue correcta, el nuevo ELO y si rompió o mantiene el streak."
+          },
+          "response": [
+            {
+              "name": "200 OK — Respuesta correcta",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"answer\": \"5\",\n  \"elapsedSecs\": 30\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"attemptId\": \"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\",\n  \"isCorrect\": true,\n  \"elapsedSecs\": 30,\n  \"correctAnswer\": \"5\",\n  \"elo\": {\n    \"previous\": 1000,\n    \"current\": 1016,\n    \"delta\": 16\n  },\n  \"streak\": {\n    \"current\": 3,\n    \"maintained\": true\n  }\n}"
+            },
+            {
+              "name": "200 OK — Respuesta incorrecta",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"answer\": \"10\",\n  \"elapsedSecs\": 55\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"attemptId\": \"1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed\",\n  \"isCorrect\": false,\n  \"elapsedSecs\": 55,\n  \"correctAnswer\": \"5\",\n  \"elo\": {\n    \"previous\": 1000,\n    \"current\": 984,\n    \"delta\": -16\n  },\n  \"streak\": {\n    \"current\": 0,\n    \"maintained\": false\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Respuesta vacía",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"answer\": \"\",\n  \"elapsedSecs\": 30\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\n  \"title\": \"Bad Request\",\n  \"status\": 400,\n  \"detail\": \"User answer is required.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — Tiempo excedido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"answer\": \"5\",\n  \"elapsedSecs\": 999\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\n  \"title\": \"Bad Request\",\n  \"status\": 400,\n  \"detail\": \"Elapsed time exceeds the challenge time limit.\"\n}"
+            },
+            {
+              "name": "404 Not Found — Challenge no existe",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"answer\": \"5\",\n  \"elapsedSecs\": 30\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/00000000-0000-0000-0000-000000000000/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "00000000-0000-0000-0000-000000000000", "attempt"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.5\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Challenge not found.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Sin token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"answer\": \"5\",\n  \"elapsedSecs\": 30\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/challenges/3fa85f64-5717-4562-b3fc-2c963f66afa6/attempt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challenges", "3fa85f64-5717-4562-b3fc-2c963f66afa6", "attempt"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.2\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Estadísticas y perfil del usuario autenticado.",
+      "item": [
+        {
+          "name": "GET /users/me/stats — Estadísticas del usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me", "stats"]
+            },
+            "description": "Retorna el streak actual del usuario, su ELO por categoría y totales de attempts."
+          },
+          "response": [
+            {
+              "name": "200 OK — Stats del usuario",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/users/me/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "me", "stats"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"userId\": \"supabase-user-id-123\",\n  \"displayName\": \"Alan\",\n  \"streak\": {\n    \"current\": 3,\n    \"lastActivityAt\": \"2026-04-09T10:00:00Z\"\n  },\n  \"elo\": {\n    \"overall\": 1024,\n    \"byCategory\": {\n      \"Sql\": 1100,\n      \"CodeLogic\": 980,\n      \"Architecture\": 1000,\n      \"DevOps\": 1000,\n      \"WorkingMemory\": 1000\n    }\n  },\n  \"totals\": {\n    \"attempted\": 15,\n    \"correct\": 10,\n    \"accuracy\": 0.67\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized — Sin token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/me/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "me", "stats"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.2\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401\n}"
+            },
+            {
+              "name": "404 Not Found — Usuario no registrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{bearerToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/users/me/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "me", "stats"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/problem+json" }],
+              "body": "{\n  \"type\": \"https://tools.ietf.org/html/rfc9110#section-15.5.5\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"User not found.\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
