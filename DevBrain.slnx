@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DevBrain.Api/DevBrain.Api.csproj" />
+    <Project Path="src/DevBrain.Domain/DevBrain.Domain.csproj" />
+    <Project Path="src/DevBrain.Infrastructure/DevBrain.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DevBrain.Api.Tests/DevBrain.Api.Tests.csproj" />
+    <Project Path="tests/DevBrain.Domain.Tests/DevBrain.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

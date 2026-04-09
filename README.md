@@ -23,7 +23,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora tu lógic
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | ASP.NET Core 8 |
+| Backend | ASP.NET Core 10 |
 | Frontend | Next.js + Tailwind |
 | DB | PostgreSQL + Redis |
 | Deploy | Railway + GitHub Pages |

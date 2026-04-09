@@ -1,0 +1,6 @@
+@DevBrain.Api_HostAddress = http://localhost:5118
+
+GET {{DevBrain.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
