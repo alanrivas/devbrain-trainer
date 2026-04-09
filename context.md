@@ -21,16 +21,17 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] `IAttemptRepository` — interfaz de persistencia de attempts en Domain (sin EF)
 - [x] Spec + implementación de `DevBrainDbContext` (9 tests en verde) — DbContext EF Core con tablas, índices, seed data
 - [x] Spec + implementación de `EFChallengeRepository` (13 tests en verde) — GetByIdAsync, GetAllAsync (con filtros), AddAsync
+- [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
 - [ ] Endpoint GET /challenges
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Spec + implementación de `EFChallengeRepository` — repositorio EF Core que implementa `IChallengeRepository`.  
-> Métodos: GetByIdAsync (busca por GUID), GetAllAsync (con filtros opcionales de categoría/dificultad, siempre DESC por CreatedAt), AddAsync (persiste nuevos challenges).  
-> 13 tests en verde, todos validando casos de uso, ordenamiento, filtrado y persistencia.  
-> Total: 52 tests en verde (30 Domain + 22 Infrastructure).  
-> Próximo paso: `ef-attempt-repository.spec.md` (implementación EF de IAttemptRepository — Fase B).
+> Spec + implementación de `EFAttemptRepository` — repositorio EF Core que implementa `IAttemptRepository`.  
+> Métodos: AddAsync (persiste intentos), GetByUserAsync (lista intentos DESC por fecha), GetLastByUserAsync (obtiene último intento), CountCorrectByUserAsync (cuenta intentos correctos).  
+> 17 tests en verde, cubriendo casos con/sin intentos, filtrado por usuario, ordenamiento y conteos.  
+> Total: 69 tests en verde (30 Domain + 39 Infrastructure).  
+> Próximo paso: **Endpoints de API** — Comenzar Fase C (GET /challenges, POST /challenges/{id}/attempt — usar los repositorios).
 
 ---
 
@@ -86,7 +87,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### Fase B — Infraestructura
 - [x] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones, seed data)
 - [x] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
-- [ ] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
+- [x] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
 - [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
 ### Fase C — Auth
