@@ -1,0 +1,46 @@
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos est├ín actualizados para la restauraci├│n.
+  DevBrain.Domain -> C:\dev\devbrain-trainer\src\DevBrain.Domain\bin\Debug\net10.0\DevBrain.Domain.dll
+  DevBrain.Infrastructure -> C:\dev\devbrain-trainer\src\DevBrain.Infrastructure\bin\Debug\net10.0\DevBrain.Infrastructure.dll
+  DevBrain.Api -> C:\dev\devbrain-trainer\src\DevBrain.Api\bin\Debug\net10.0\DevBrain.Api.dll
+  DevBrain.Api.Tests -> C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\bin\Debug\net10.0\DevBrain.Api.Tests.dll
+Serie de pruebas para C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\bin\Debug\net10.0\DevBrain.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patr├│n especificado.
+[xUnit.net 00:00:01.38]     DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_WithWhitespace_TrimmedAndCompared [FAIL]
+  Con error DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_WithWhitespace_TrimmedAndCompared [5 ms]
+  Mensaje de error:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Seguimiento de la pila:
+     at DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_WithWhitespace_TrimmedAndCompared() in C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\PostAttemptEndpointTests.cs:line 145
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:01.46]     DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CorrectAnswer_ShouldReturn201WithIsCorrectTrue [FAIL]
+[xUnit.net 00:00:01.54]     DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CaseInsensitive_ShouldBeCorrect [FAIL]
+[xUnit.net 00:00:01.56]     DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_AllowsMultipleAttemptsForSameChallengeAndUser [FAIL]
+  Con error DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CorrectAnswer_ShouldReturn201WithIsCorrectTrue [3 ms]
+  Mensaje de error:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Seguimiento de la pila:
+     at DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CorrectAnswer_ShouldReturn201WithIsCorrectTrue() in C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\PostAttemptEndpointTests.cs:line 83
+--- End of stack trace from previous location ---
+  Con error DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CaseInsensitive_ShouldBeCorrect [5 ms]
+  Mensaje de error:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Seguimiento de la pila:
+     at DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_CaseInsensitive_ShouldBeCorrect() in C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\PostAttemptEndpointTests.cs:line 125
+--- End of stack trace from previous location ---
+  Con error DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_AllowsMultipleAttemptsForSameChallengeAndUser [6 ms]
+  Mensaje de error:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Seguimiento de la pila:
+     at DevBrain.Api.Tests.PostAttemptEndpointTests.PostAttempt_AllowsMultipleAttemptsForSameChallengeAndUser() in C:\dev\devbrain-trainer\tests\DevBrain.Api.Tests\PostAttemptEndpointTests.cs:line 312
+--- End of stack trace from previous location ---
+
+Con error! - Con error:     4, Superado:    22, Omitido:     0, Total:    26, Duraci├│n: 1 s - DevBrain.Api.Tests.dll (net10.0)

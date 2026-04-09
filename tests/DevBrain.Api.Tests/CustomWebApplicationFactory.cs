@@ -36,33 +36,28 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         db.Database.EnsureCreated();
 
+        // If challenges already exist, seed is complete
         if (await db.Challenges.AnyAsync())
-            return; // Already seeded
+            return;
 
-        // Seed 10 challenges across categories and difficulties
+        // Seed 10 challenges with known answers for testing
         var challenges = new[]
         {
-            Domain.Entities.Challenge.Create("SQL SELECT Performance", "Optimize a SELECT query with multiple JOINs", ChallengeCategory.Sql, Difficulty.Medium, "SELECT * FROM orders JOIN customers", 300),
-            Domain.Entities.Challenge.Create("Recursion Basics", "Write a recursive factorial function", ChallengeCategory.CodeLogic, Difficulty.Easy, "5", 180),
-            Domain.Entities.Challenge.Create("System Design", "Design a scalable architecture", ChallengeCategory.Architecture, Difficulty.Hard, "microservices", 600),
-            Domain.Entities.Challenge.Create("Docker Deployment", "Deploy a container", ChallengeCategory.DevOps, Difficulty.Medium, "docker run", 300),
-            Domain.Entities.Challenge.Create("SQL Joins", "Identify the type of JOIN used", ChallengeCategory.Sql, Difficulty.Easy, "INNER JOIN", 120),
-            Domain.Entities.Challenge.Create("Array Sorting", "Sort an array in ascending order", ChallengeCategory.CodeLogic, Difficulty.Easy, "true", 120),
-            Domain.Entities.Challenge.Create("Database Indexing", "How to optimize queries with indices?", ChallengeCategory.Architecture, Difficulty.Hard, "B-tree", 600),
-            Domain.Entities.Challenge.Create("Kubernetes Basics", "What is a Pod?", ChallengeCategory.DevOps, Difficulty.Easy, "smallest deployable unit", 60),
-            Domain.Entities.Challenge.Create("Complex SQL Query", "Write a window function query", ChallengeCategory.Sql, Difficulty.Hard, "ROW_NUMBER() OVER (ORDER BY)", 900),
-            Domain.Entities.Challenge.Create("Memory Retention", "Recall a 5-digit number after 10 seconds", ChallengeCategory.WorkingMemory, Difficulty.Medium, "12345", 10),
+            Domain.Entities.Challenge.Create("Test Challenge 1", "Correct answer is YES", ChallengeCategory.Sql, Difficulty.Easy, "YES", 30),
+            Domain.Entities.Challenge.Create("Test Challenge 2", "Correct answer is CORRECT", ChallengeCategory.CodeLogic, Difficulty.Easy, "CORRECT", 60),
+            Domain.Entities.Challenge.Create("System Design", "Design a scalable architecture", ChallengeCategory.Architecture, Difficulty.Hard, "microservices", 200),
+            Domain.Entities.Challenge.Create("Docker Deployment", "Deploy a container", ChallengeCategory.DevOps, Difficulty.Medium, "docker run", 120),
+            Domain.Entities.Challenge.Create("SQL Query", "Write a query", ChallengeCategory.Sql, Difficulty.Medium, "SELECT * FROM users", 120),
+            Domain.Entities.Challenge.Create("Array Sorting", "Sort array", ChallengeCategory.CodeLogic, Difficulty.Medium, "ascending", 120),
+            Domain.Entities.Challenge.Create("Database Indexing", "Optimize with indices", ChallengeCategory.Architecture, Difficulty.Hard, "B-tree", 150),
+            Domain.Entities.Challenge.Create("Kubernetes Basics", "What is a Pod?", ChallengeCategory.DevOps, Difficulty.Easy, "smallest deployable unit", 90),
+            Domain.Entities.Challenge.Create("Complex SQL", "Window functions", ChallengeCategory.Sql, Difficulty.Hard, "ROW_NUMBER() OVER (ORDER BY)", 180),
+            Domain.Entities.Challenge.Create("Memory Test", "Recall number", ChallengeCategory.WorkingMemory, Difficulty.Medium, "12345", 60),
         };
 
-        await repo.AddAsync(challenges[0]);
-        await repo.AddAsync(challenges[1]);
-        await repo.AddAsync(challenges[2]);
-        await repo.AddAsync(challenges[3]);
-        await repo.AddAsync(challenges[4]);
-        await repo.AddAsync(challenges[5]);
-        await repo.AddAsync(challenges[6]);
-        await repo.AddAsync(challenges[7]);
-        await repo.AddAsync(challenges[8]);
-        await repo.AddAsync(challenges[9]);
+        foreach (var challenge in challenges)
+        {
+            await repo.AddAsync(challenge);
+        }
     }
 }

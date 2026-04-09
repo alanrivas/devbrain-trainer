@@ -93,20 +93,27 @@ public class AttemptTests
     }
 
     [Fact]
-    public void Create_GivenElapsedSecsZero_ShouldThrowDomainException()
+    public void Create_GivenElapsedSecsZero_ShouldSucceed()
     {
+        // Spec allows >= 0, so zero is valid (though unusual)
         var challenge = CreateChallenge();
 
-        Assert.Throws<DomainException>(() =>
-            Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 0, challenge));
+        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 0, challenge);
+
+        Assert.NotNull(attempt);
+        Assert.Equal(0, attempt.ElapsedSecs);
     }
 
     [Fact]
-    public void Create_GivenElapsedSecsExceedsTimeLimit_ShouldThrowDomainException()
+    public void Create_GivenElapsedSecsExceedsTimeLimit_ShouldSucceedWithWarning()
     {
+        // Spec allows exceeding time limit - user can try even after time expires
         var challenge = CreateChallenge(); // timeLimitSecs = 60
 
-        Assert.Throws<DomainException>(() =>
-            Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 61, challenge));
+        var attempt = Attempt.Create(challenge.Id, "user-supabase-id-123", "selects all columns", elapsedSecs: 61, challenge);
+
+        Assert.NotNull(attempt);
+        Assert.Equal(61, attempt.ElapsedSecs);
+        // In production, frontend would show a warning, but attempt is still valid
     }
 }

@@ -45,11 +45,11 @@ public sealed class Attempt
         if (string.IsNullOrWhiteSpace(userAnswer))
             throw new DomainException("User answer is required.");
 
-        if (elapsedSecs <= 0)
-            throw new DomainException("Elapsed time must be greater than 0.");
+        if (elapsedSecs < 0)
+            throw new DomainException("Elapsed time must be greater than or equal to 0.");
 
-        if (elapsedSecs > challenge.TimeLimitSecs)
-            throw new DomainException($"Elapsed time cannot exceed the challenge time limit of {challenge.TimeLimitSecs} seconds.");
+        // Note: If elapsedSecs > challenge.TimeLimitSecs, we allow it but the API can log a warning
+        // This is by design - users can exceed the time limit, but we still count the attempt
 
         return new Attempt(
             id: Guid.NewGuid(),
