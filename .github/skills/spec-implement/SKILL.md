@@ -1,6 +1,6 @@
 ---
 name: spec-implement
-description: Lee una .spec.md y ejecuta el ciclo completo SDD+TDD — genera tests xUnit, implementa el código para que pasen, verifica que todos estén en verde, y actualiza context.md. Usar después de write-spec.
+description: Lee una .spec.md y ejecuta el ciclo completo SDD+TDD — genera tests xUnit, implementa el código para que pasen, verifica que todos estén en verde, actualiza context.md y sube los cambios a GitHub. Usar después de write-spec.
 compatibility: Claude Code
 allowed-tools: Read Write Edit Bash Glob
 ---
@@ -10,7 +10,7 @@ allowed-tools: Read Write Edit Bash Glob
 Tomar una spec existente y completar el ciclo de implementación sin intervención manual:
 
 ```
-spec.md → tests xUnit → implementación → dotnet test → update context.md
+spec.md → tests xUnit → implementación → dotnet test → update context.md → git commit → git push
 ```
 
 ## Cuándo usar
@@ -123,6 +123,23 @@ dotnet test tests/DevBrain.Domain.Tests/
 Marcar como completado en `context.md`:
 - `- [x] Spec + implementación de {Entidad} (N tests en verde)`
 - Actualizar "Último paso completado" con el resumen y el próximo paso
+
+## Paso 8 — Commit y push a GitHub
+
+Una vez que context.md está actualizado y todos los tests están en verde:
+
+```bash
+git add {archivos nuevos o modificados en este ciclo}
+git commit -m "feat: spec + implementación de {Entidad} ({N} tests en verde)
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push origin main
+```
+
+Reglas:
+- Nunca usar `git add .` — agregar solo los archivos de este ciclo (spec, tests, implementación, context.md)
+- No incluir `bin/`, `obj/`, ni `.claude/`
+- El mensaje de commit debe mencionar la entidad y la cantidad de tests
 
 ## Errores comunes
 

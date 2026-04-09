@@ -6,6 +6,7 @@ public sealed class Attempt
 {
     public Guid Id { get; }
     public Guid ChallengeId { get; }
+    public string UserId { get; }
     public string UserAnswer { get; }
     public bool IsCorrect { get; }
     public int ElapsedSecs { get; }
@@ -14,6 +15,7 @@ public sealed class Attempt
     private Attempt(
         Guid id,
         Guid challengeId,
+        string userId,
         string userAnswer,
         bool isCorrect,
         int elapsedSecs,
@@ -21,16 +23,20 @@ public sealed class Attempt
     {
         Id = id;
         ChallengeId = challengeId;
+        UserId = userId;
         UserAnswer = userAnswer;
         IsCorrect = isCorrect;
         ElapsedSecs = elapsedSecs;
         OccurredAt = occurredAt;
     }
 
-    public static Attempt Create(Guid challengeId, string userAnswer, int elapsedSecs, Challenge challenge)
+    public static Attempt Create(Guid challengeId, string userId, string userAnswer, int elapsedSecs, Challenge challenge)
     {
         if (challengeId == Guid.Empty)
             throw new DomainException("ChallengeId is required.");
+
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new DomainException("UserId is required.");
 
         if (string.IsNullOrWhiteSpace(userAnswer))
             throw new DomainException("User answer is required.");
@@ -44,6 +50,7 @@ public sealed class Attempt
         return new Attempt(
             id: Guid.NewGuid(),
             challengeId: challengeId,
+            userId: userId.Trim(),
             userAnswer: userAnswer.Trim(),
             isCorrect: challenge.IsCorrectAnswer(userAnswer),
             elapsedSecs: elapsedSecs,

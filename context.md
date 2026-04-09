@@ -21,9 +21,9 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Auditoría y limpieza estructural del proyecto:  
-> solución .slnx configurada, referencias entre proyectos cableadas, Program.cs limpio, placeholders eliminados, FluentAssertions/NSubstitute removidos del stack (xUnit nativo). 17 tests en verde.  
-> Próximo paso: spec + endpoint GET /challenges.
+> `attempt.spec.md` e implementación actualizados para incluir `UserId` (SupabaseId).  
+> Total: 19 tests en verde (10 Challenge + 9 Attempt).  
+> Próximo paso: `user.spec.md`.
 
 ---
 
@@ -61,6 +61,47 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - Explicación post-respuesta
 - Modo "sprint" (5 problemas en 3 min)
 - Logros / badges
+
+---
+
+## Roadmap de specs (MVP)
+
+El orden respeta dependencias estrictas. No se puede implementar un paso sin tener el anterior completo.
+
+### Fase A — Dominio
+- [x] `challenge.spec.md` — entidad Challenge con validaciones
+- [x] `attempt.spec.md` — actualizado con `UserId` (SupabaseId del usuario) — 9 tests en verde
+- [ ] `user.spec.md` — entidad User básica (SupabaseId, displayName, email)
+- [ ] `ichallenge-repository.spec.md` — interfaz de persistencia de challenges (en Domain, sin EF)
+- [ ] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
+
+### Fase B — Infraestructura
+- [ ] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones)
+- [ ] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
+- [ ] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
+- [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
+
+### Fase C — Auth
+- [ ] `supabase-auth.spec.md` — validación de JWT Supabase en ASP.NET Core, extracción de userId
+
+### Fase D — Servicios de aplicación
+- [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO
+
+### Fase E — API endpoints
+- [ ] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad
+- [ ] `get-challenge.spec.md` — GET /challenges/{id} — detalle de un challenge
+- [ ] `post-attempt.spec.md` — POST /challenges/{id}/attempt — enviar respuesta, devolver resultado + nuevo ELO
+- [ ] `get-user-stats.spec.md` — GET /users/me/stats — streak actual, ELO por categoría, totales
+
+### Fase F — Gamificación
+- [ ] `streak.spec.md` — regla de streak diario (Redis, se rompe si no hay attempt en 24h)
+- [ ] `elo-rating.spec.md` — cálculo de rating ELO por categoría tras cada attempt
+
+### Post-MVP (no bloquean el MVP)
+- Badges / logros
+- Modo sprint (5 problemas en 3 min)
+- Generación dinámica con Claude API
+- Frontend Next.js
 
 ---
 
