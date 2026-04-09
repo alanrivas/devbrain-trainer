@@ -18,19 +18,17 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec + implementación de `Attempt` (9 tests en verde) — incluye `UserId` (SupabaseId)
 - [x] Spec + implementación de `User` (11 tests en verde) — SupabaseId, email, displayName, UpdateDisplayName
 - [x] `IChallengeRepository` — interfaz de persistencia en Domain (sin EF)
-- [x] Swagger UI con Scalar (`/scalar/v1`) — spec OpenAPI en `/openapi/v1.json`
-- [x] Docker — `Dockerfile` multi-stage + `docker-compose.yml` (API + PostgreSQL 17 + Redis 7)
-- [x] Colección Postman — `postman/devbrain-trainer.postman_collection.json` con todos los endpoints del MVP y ejemplos 200/400/401/404
-- [x] Skills `spec-implement` y `write-spec` actualizados — incluyen paso de actualización de colección Postman al terminar specs de API
+- [x] `IAttemptRepository` — interfaz de persistencia de attempts en Domain (sin EF)
+- [x] Spec + implementación de `DevBrainDbContext` (9 tests en verde) —DbContext EF Core con tablas, índices, seed data
 - [ ] Endpoint GET /challenges
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Spec + implementación de `IAttemptRepository` — interfaz de persistencia de attempts en Domain (AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync).  
-> Sin tests en este paso (los tests vienen con `ef-attempt-repository.spec.md`).  
-> Total: 30 tests en verde (sin cambios).  
-> Próximo paso: `devbrain-dbcontext.spec.md` (Fase B — Infraestructura).
+> Spec + implementación de `DevBrainDbContext` — DbContext EF Core con tablas (users, challenges, attempts), índices de performance, relaciones FK + cascada, seed data con 10 challenges variados (categorías/dificultades mix).  
+> Proyecto tests `DevBrain.Infrastructure.Tests` creado con 9 tests en verde.  
+> Total: 39 tests en verde (30 Domain + 9 Infrastructure).  
+> Próximo paso: `ef-challenge-repository.spec.md` (implementación EF de IChallengeRepository — Fase B).
 
 ---
 
@@ -84,7 +82,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
 
 ### Fase B — Infraestructura
-- [ ] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones)
+- [x] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones, seed data)
 - [ ] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
 - [ ] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
 - [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)

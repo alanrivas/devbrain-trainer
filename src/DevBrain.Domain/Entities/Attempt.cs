@@ -12,6 +12,10 @@ public sealed class Attempt
     public int ElapsedSecs { get; }
     public DateTimeOffset OccurredAt { get; }
 
+    // Navigation properties (EF Core)
+    public User? User { get; set; }
+    public Challenge? Challenge { get; set; }
+
     private Attempt(
         Guid id,
         Guid challengeId,
