@@ -24,30 +24,30 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
 - [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
 - [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate
+- [ ] Endpoint POST /auth/register (spec completada, 13 tests expected) — Email/password/displayName validation, bcrypt hashing, duplicate detection
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> **Documentation Complete — All guides in place** ✅
+> **POST /auth/register spec created** ✅
 >
-> **Documentation Files:**
-> 1. ✅ `README.md` — Quick start, project structure, test coverage (95/95 passing)
-> 2. ✅ `DEVELOPMENT.md` — Step-by-step guide for adding new features (SDD+TDD methodology)
-> 3. ✅ `API.md` — Complete API reference with examples and error codes
-> 4. ✅ `context.md` — Project status and roadmap
-> 5. ✅ `CLAUDE.md` — Instructions for Claude Code
-> 6. ✅ `.github/copilot-instructions.md` — Instructions for GitHub Copilot
-> 7. ✅ `specs/` — All feature specifications (domain, infrastructure, API)
-> 8. ✅ `postman/` — API collection for testing endpoints
+> **Spec Details** (`specs/api/post-auth-register.spec.md`):
+> - Email validation: format, uniqueness (case-insensitive)
+> - Password validation: min 8 chars, uppercase + digit required
+> - DisplayName validation: 3-50 chars, alphanumeric + spaces/dash/dot
+> - Error responses: 400 (validation), 409 (duplicate email)
+> - Password hashing: bcrypt cost 12
+> - Case normalization: email lowercase, displayName trimmed
+> - 13 test scenarios defined
 >
-> **Documentation Quality:**
-> - Getting started instructions for new developers
-> - Complete API reference with curl examples
-> - SDD+TDD workflow documented with code examples
-> - File organization patterns explained
-> - Testing patterns and best practices
-> - Common pitfalls and solutions
+> **Next Steps**:
+> 1. Write tests (13 test scenarios)
+> 2. Implement endpoint handler & DTOs
+> 3. Implement password hashing (bcrypt)
+> 4. Implement IUserRepository.GetByEmailAsync for duplicate checking
+> 5. Update context.md with results
+> 6. Commit & push
 >
-> Próximo paso: **Conectar PostgreSQL** — Reemplazar in-memory database con PostgreSQL para persistencia real.
+> **Target**: 100+ tests passing (95 current + 13 auth tests)
 
 ---
 
