@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DevBrain.Api.DTOs;
 using DevBrain.Api.Mapping;
 using DevBrain.Domain.Enums;
@@ -22,7 +23,8 @@ public static class ChallengeEndpoints
 
         group.MapPost("/{id}/attempt", PostAttempt)
             .WithName("PostAttempt")
-            .WithDescription("Enviar respuesta a un challenge");
+            .WithDescription("Enviar respuesta a un challenge")
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> GetChallenges(
@@ -183,22 +185,11 @@ public static class ChallengeEndpoints
             });
         }
 
-        // Extract userId from header (for testing; in production this comes from JWT)
-        var userIdHeader = httpContext.Request.Headers["X-User-Id"].ToString();
-        if (string.IsNullOrEmpty(userIdHeader))
+        // Extract userId from JWT claims (guaranteed present by RequireAuthorization)
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Results.Unauthorized();
-        }
-
-        // Try to parse userId as Guid
-        if (!Guid.TryParse(userIdHeader, out var userId))
-        {
-            return Results.BadRequest(new
-            {
-                status = 400,
-                title = "Bad Request",
-                detail = "User ID in header must be a valid GUID"
-            });
         }
 
         // Create attempt

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "DevBrain Trainer API",
-    "description": "API de entrenamiento cognitivo gamificada para desarrolladores.\n\n**Base URL**: `{{baseUrl}}`\n\n**Auth**: Bearer token de Supabase en el header `Authorization: Bearer <token>`\n\nActualizar la variable `baseUrl` y `bearerToken` en el environment antes de usar.",
+    "description": "API de entrenamiento cognitivo gamificada para desarrolladores.\n\n**Base URL**: `{{baseUrl}}`\n\n**Auth**: JWT propio (HS256, 24h). Obtener token via `POST /auth/login` y usarlo en el header `Authorization: Bearer {{bearerToken}}`.\n\nActualizar la variable `baseUrl` y `bearerToken` en el environment antes de usar.",
     "_postman_id": "devbrain-trainer-v1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -15,7 +15,7 @@
       "key": "bearerToken",
       "value": "",
       "type": "string",
-      "description": "JWT token de Supabase Auth"
+      "description": "JWT propio (HS256) obtenido de POST /auth/login"
     }
   ],
   "item": [

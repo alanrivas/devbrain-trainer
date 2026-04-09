@@ -25,7 +25,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
 - [x] Spec + implementación de `EFUserRepository` (9 tests en verde) — AddAsync, GetByEmailAsync, GetByIdAsync
 - [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
-- [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate
+- [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate — **ahora protegido con JWT**
 - [x] Endpoint POST /auth/register (13 tests en verde) — Email/password/displayName validation, PBKDF2 hashing, duplicate detection, 100% pass rate
 - [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433, tests siguen en verde (108/108)
 
@@ -35,58 +35,46 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |-------|-------|--------|---------|
 | Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
 | Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17) — EFUserRepository cubierto por API tests |
-| Api.Tests | 58 | ✅ 58/58 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11) |
-| **TOTAL** | **127** | **✅ 127/127** | 100% pass rate, all scenarios covered — JWT auth live, detail endpoint live |
+| Api.Tests | 67 | ✅ 67/67 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9) — attempt endpoint protected |
+| **TOTAL** | **136** | **✅ 136/136** | 100% pass rate, JWT middleware live, POST /attempt now protected |
 
 ## Último paso completado
-> ✅ **GET /challenges/{id} endpoint implemented** — 8 comprehensive tests passing, **127/127 total** 
+> ✅ **JWT Authentication Middleware implemented** — 9 tests passing, **136/136 total**
 >
 > **Implementation Details**:
-> - Endpoint: `GET /api/v1/challenges/{id}` — accepts GUID, returns challenge detail
-> - Response fields: `id`, `title`, `description`, `category`, `difficulty`, `timeLimitSecs`
-> - **Excludes**: `correctAnswer` (security), `createdAt` (metadata)
-> - Reuses: `ChallengeResponseDto`, `IChallengeRepository.GetByIdAsync()`, `ChallengeMapper.ToResponseDto()`
-> - Error handling: 404 for non-existent ID, 400 for invalid GUID format
-> - Registered: `MapGet("/{id}", GetChallenge)` in `ChallengeEndpoints.cs`
+> - Middleware: `AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(...)` + `UseAuthentication()` + `UseAuthorization()`
+> - Same `TokenValidationParameters` que `JwtTokenService.ValidateToken` (consistencia garantizada)
+> - `POST /api/v1/challenges/{id}/attempt` protegido con `.RequireAuthorization()`
+> - `PostAttempt` handler ahora lee `userId` desde `HttpContext.User` (claims del JWT) en vez de `X-User-Id` header
 >
-> **Test Coverage (8/8 passing)**:
-> - Happy path: valid ID returns 200 (1 test)
-> - Security: no `correctAnswer` in response (1 test)
-> - Security: no `createdAt` in response (1 test)
-> - Error: 404 for non-existent ID (1 test)
-> - Error: 400 for invalid GUID format (1 test)
-> - Robustness: case-insensitive GUID (1 test)
-> - Multi-item: different IDs return different challenges (1 test)
-> - Consistency: GET /{id} matches item from list GET / (1 test)
+> **Test Coverage (9/9 passing)**:
+> - Public endpoints sin token: GET /challenges → 200, GET /challenges/{id} → 200 (2 tests)
+> - Endpoint protegido sin token: sin header → 401, Bearer vacío → 401 (2 tests)
+> - Token inválido: malformado → 401, firma incorrecta → 401, expirado → 401 (3 tests)
+> - Token válido: handler ejecutado → 201, claims disponibles en handler (userId correcto) (2 tests)
 >
-> **Test Evolution**: 
-> - Created test file that discovers challenge IDs dynamically from `GET /api/v1/challenges`
-> - Avoids hardcoded IDs (which differ between In-Memory test DB and production)
-> - All tests fetch a target ID, then test against dynamic data
->
-> **Total Test Count**: 127/127 (30 Domain + 39 Infrastructure + 58 API)
+> **Total Test Count**: 136/136 (30 Domain + 39 Infrastructure + 67 API)
 > - Domain: User + Attempt + Challenge logic (unchanged: 30/30)
 > - Infrastructure: DbContext + 3 repositories (unchanged: 39/39)
-> - API: GET /challenges (13) + GET /challenges/{id} (8) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) = 58/58
+> - API: GET /challenges (13) + GET /challenges/{id} (8) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) + JWT middleware (9) = 67/67
 >
 > **Code Changes**:
-> - Created: `GetChallengeEndpointTests.cs` (8 test methods, 170+ lines)
-> - Updated: `ChallengeEndpoints.cs` (added MapGet("/{id}") + GetChallenge handler)
-> - Updated: `postman/devbrain-trainer.postman_collection.json` (updated GET /{id} entry with correct responses)
-> - Updated: `context.md` (test counts, roadmap)
+> - Created: `JwtMiddlewareTests.cs` (9 test methods)
+> - Updated: `Program.cs` (AddAuthentication/JwtBearer, AddAuthorization, UseAuthentication, UseAuthorization)
+> - Updated: `ChallengeEndpoints.cs` (RequireAuthorization + userId desde claims)
+> - Updated: `PostAttemptEndpointTests.cs` (reemplazado X-User-Id por JWT real desde login)
+> - Updated: `postman/devbrain-trainer.postman_collection.json` (descripción de auth actualizada)
 >
-> **API Endpoints Summary (Post-Implementation)**:
-> - ✅ `GET /api/v1/challenges` — list with pagination + filtering
-> - ✅ `GET /api/v1/challenges/{id}` — single challenge detail (NEW)
-> - ✅ `POST /api/v1/challenges/{id}/attempt` — submit answer
+> **API Endpoints Summary**:
+> - ✅ `GET /api/v1/challenges` — list with pagination + filtering (public)
+> - ✅ `GET /api/v1/challenges/{id}` — single challenge detail (public)
+> - ✅ `POST /api/v1/challenges/{id}/attempt` — submit answer **(requires JWT)**
 > - ✅ `POST /api/v1/auth/register` — user registration + password hashing
 > - ✅ `POST /api/v1/auth/login` — JWT token generation (24h expiration)
 >
-> **Next Step Options**:
-> - Option A: `POST /challenges/{id}/attempt` improvements (hints, time tracking)
-> - Option B: Gamification layer — streak + ELO calculations (blocks: needs rating service)
-> - Option C: `GET /users/me/stats` — user statistics endpoint (blocks: needs ELO service)
-> - Option D: Token validation middleware — protect endpoints with JWT
+> **Next Step**:
+> - Fase D: `attempt-service.spec.md` — orquestar: guardar attempt + actualizar streak + recalcular ELO
+> - O: `GET /users/me/stats` — estadísticas del usuario autenticado
 
 ---
 
@@ -149,7 +137,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ### Fase C — Auth
 - [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT propio (11 tests, HS256, 24h expiration)
-- [ ] `jwt-middleware.spec.md` — validación de JWT en endpoints protegidos (Bearer token middleware)
+- [x] `jwt-middleware.spec.md` — JWT Bearer middleware + `.RequireAuthorization()` en POST /attempt (9 tests en verde)
 
 ### Fase D — Servicios de aplicación
 - [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO

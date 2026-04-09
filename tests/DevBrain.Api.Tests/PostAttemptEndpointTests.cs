@@ -1,7 +1,11 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using DevBrain.Api.DTOs;
+using DevBrain.Api.Services;
+using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -11,7 +15,6 @@ public class PostAttemptEndpointTests : IAsyncLifetime
 {
     private CustomWebApplicationFactory _factory = null!;
     private HttpClient _client = null!;
-    private readonly Guid _testUserId = Guid.Parse("550e8400-e29b-41d4-a716-446655440000");  // Fixed test user ID
     private Guid _firstChallengeId = Guid.Empty;
     private string _firstChallengeAnswer = string.Empty;
     private Guid _secondChallengeId = Guid.Empty;
@@ -21,9 +24,27 @@ public class PostAttemptEndpointTests : IAsyncLifetime
     {
         _factory = new CustomWebApplicationFactory();
         _client = _factory.CreateClient();
-        
-        // Set default header for userId - must be a valid Guid
-        _client.DefaultRequestHeaders.Add("X-User-Id", _testUserId.ToString());
+
+        // Create a test user and get a JWT token via login
+        var db = await _factory.GetDbContextAsync();
+        var passwordHashService = new PasswordHashService();
+        var passwordHash = passwordHashService.HashPassword("AttemptTest123!");
+        var user = User.CreateFromRegistration(
+            email: "attempt-tester@example.com",
+            passwordHash: passwordHash,
+            displayName: "Attempt Tester"
+        );
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        var loginRequest = new { email = "attempt-tester@example.com", password = "AttemptTest123!" };
+        var loginContent = new StringContent(
+            JsonSerializer.Serialize(loginRequest), Encoding.UTF8, "application/json"
+        );
+        var loginResponse = await _client.PostAsync("/api/v1/auth/login", loginContent);
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        _client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", loginBody!.Token);
             
             // Get challenge IDs from seed data via GET endpoint
             var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
