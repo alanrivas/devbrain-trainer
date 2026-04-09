@@ -34,7 +34,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
 | Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
-| Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config, EFChallengeRepository, EFAttemptRepository, EFUserRepository |
+| Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17) — EFUserRepository cubierto por API tests |
 | Api.Tests | 58 | ✅ 58/58 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11) |
 | **TOTAL** | **127** | **✅ 127/127** | 100% pass rate, all scenarios covered — JWT auth live, detail endpoint live |
 
@@ -100,7 +100,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Cache / streak | Redis |
 | Deploy backend | Railway |
 | Deploy frontend | GitHub Pages / Vercel |
-| Auth | Supabase Auth |
+| Auth | JWT propio (HS256, 24h expiration) |
 | Generación dinámica | Claude API |
 
 ## Metodología
@@ -134,20 +134,22 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ### Fase A — Dominio
 - [x] `challenge.spec.md` — entidad Challenge con validaciones
-- [x] `attempt.spec.md` — actualizado con `UserId` (SupabaseId del usuario) — 9 tests en verde
-- [x] `user.spec.md` — entidad User básica (SupabaseId, displayName, email) — 11 tests en verde
+- [x] `attempt.spec.md` — actualizado con `UserId` (Guid del usuario) — 9 tests en verde
+- [x] `user.spec.md` — entidad User básica (Guid Id, displayName, email, password hash) — 11 tests en verde
 - [x] `ichallenge-repository.spec.md` — interfaz de persistencia de challenges (en Domain, sin EF)
 - [x] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
+- [x] `iuser-repository.spec.md` — interfaz de persistencia de usuarios (en Domain, sin EF)
 
 ### Fase B — Infraestructura
 - [x] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones, seed data)
 - [x] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
 - [x] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
+- [x] `ef-user-repository.spec.md` — implementación EF de IUserRepository (AddAsync, GetByEmailAsync, GetByIdAsync) — sin test file dedicado, cubierto por API tests
 - [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
 ### Fase C — Auth
-- [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT/token (11 tests, HS256, 24h expiration)
-- [ ] `supabase-auth.spec.md` — validación de JWT Supabase
+- [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT propio (11 tests, HS256, 24h expiration)
+- [ ] `jwt-middleware.spec.md` — validación de JWT en endpoints protegidos (Bearer token middleware)
 
 ### Fase D — Servicios de aplicación
 - [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO
@@ -193,7 +195,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] Endpoint POST /auth/register (13 tests) — email/password/displayName validation, PBKDF2 hashing, duplicate detection
 - [x] **TOTAL: 108/108 tests passing (100% pass rate)**
 - [x] Context.md actualizado con avance
-- [ ] Conectar PostgreSQL con EF Core (siguiente paso)
+- [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433
 
 ### Fase 2 — Gamificación
 - [ ] Sistema de streak
