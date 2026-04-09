@@ -136,7 +136,8 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
 ### Fase C — Auth
-- [ ] `supabase-auth.spec.md` — validación de JWT Supabase en ASP.NET Core, extracción de userId
+- [ ] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT/token (ADDING THIS NEXT)
+- [ ] `supabase-auth.spec.md` — validación de JWT Supabase
 
 ### Fase D — Servicios de aplicación
 - [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO

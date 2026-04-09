@@ -16,6 +16,10 @@ public static class AuthEndpoints
         group.MapPost("/register", PostRegister)
             .WithName("PostRegister")
             .WithDescription("Register a new user");
+
+        group.MapPost("/login", PostLogin)
+            .WithName("PostLogin")
+            .WithDescription("Authenticate user and get JWT token");
     }
 
     private static async Task<IResult> PostRegister(
@@ -93,4 +97,54 @@ public static class AuthEndpoints
             });
         }
     }
+
+    private static async Task<IResult> PostLogin(
+        LoginRequestDto request,
+        IUserRepository userRepository,
+        IPasswordHashService passwordHashService,
+        IJwtTokenService jwtTokenService
+    )
+    {
+        // Validate email
+        var (emailValid, emailError) = RegistrationValidator.ValidateEmail(request.Email);
+        if (!emailValid)
+            return Results.BadRequest(new
+            {
+                status = 400,
+                title = "Bad Request",
+                detail = emailError
+            });
+
+        // Validate password not empty
+        if (string.IsNullOrWhiteSpace(request.Password))
+            return Results.BadRequest(new
+            {
+                status = 400,
+                title = "Bad Request",
+                detail = "Email and password are required"
+            });
+
+        // Find user by email (case-insensitive)
+        var user = await userRepository.GetByEmailAsync(request.Email.ToLower());
+        if (user == null)
+            return Results.Unauthorized();
+
+        // Verify password
+        var passwordMatch = passwordHashService.VerifyPassword(request.Password, user.PasswordHash);
+        if (!passwordMatch)
+            return Results.Unauthorized();
+
+        // Generate JWT token
+        var token = jwtTokenService.GenerateToken(user.Id, user.Email);
+
+        // Return 200 OK with token and user data
+        var response = new LoginResponseDto
+        {
+            Token = token,
+            User = user.ToResponseDto()
+        };
+
+        return Results.Ok(response);
+    }
 }
+

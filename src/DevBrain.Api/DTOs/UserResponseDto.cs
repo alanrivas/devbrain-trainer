@@ -1,7 +1,7 @@
 namespace DevBrain.Api.DTOs;
 
 public record UserResponseDto(
-    Guid UserId,
+    Guid Id,
     string Email,
     string DisplayName,
     DateTime CreatedAt

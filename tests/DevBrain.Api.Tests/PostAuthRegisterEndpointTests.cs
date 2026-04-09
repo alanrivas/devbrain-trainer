@@ -74,7 +74,7 @@ public class PostAuthRegisterEndpointTests : IAsyncLifetime
         Assert.NotNull(response);
         var userResponse = response as UserResponseDto;
         Assert.NotNull(userResponse);
-        Assert.NotEqual(Guid.Empty, userResponse!.UserId);
+        Assert.NotEqual(Guid.Empty, userResponse!.Id);
         Assert.Equal("newuser@example.com", userResponse.Email);
         Assert.Equal("John Developer", userResponse.DisplayName);
         Assert.NotEqual(default(DateTime), userResponse.CreatedAt);

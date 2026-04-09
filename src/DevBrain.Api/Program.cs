@@ -30,6 +30,7 @@ builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 
 // Register services
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddOpenApi(options =>
 {

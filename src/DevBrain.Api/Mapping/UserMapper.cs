@@ -8,7 +8,7 @@ public static class UserMapper
     public static UserResponseDto ToResponseDto(this User user)
     {
         return new UserResponseDto(
-            UserId: user.Id,
+            Id: user.Id,
             Email: user.Email,
             DisplayName: user.DisplayName,
             CreatedAt: user.CreatedAt.UtcDateTime
