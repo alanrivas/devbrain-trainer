@@ -35,48 +35,54 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |-------|-------|--------|---------|
 | Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
 | Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config, EFChallengeRepository, EFAttemptRepository, EFUserRepository |
-| Api.Tests | 39 | ✅ 39/39 | GET /challenges (13), POST /attempt (26), POST /auth/register (13) |
-| **TOTAL** | **108** | **✅ 108/108** | 100% pass rate, all scenarios covered |
+| Api.Tests | 50 | ✅ 50/50 | GET /challenges (13), POST /attempt (26), POST /auth/register (13), POST /auth/login (11) |
+| **TOTAL** | **119** | **✅ 119/119** | 100% pass rate, all scenarios covered — JWT authentication now live |
 
 ## Último paso completado
-> **PostgreSQL 18 local setup complete — port 5433, migrations applied, 108/108 tests passing** ✅
+> ✅ **POST /auth/login endpoint implemented with JWT authentication** — 11 comprehensive tests passing
 >
-> **Setup Summary**:
-> - PostgreSQL 18 running on port 5433 (port 5432 had conflict with PG 16)
-> - Database: `devbrain_local`, User: `devbrain` with limited permissions
-> - Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0 installed + EF Core 10.0.4 aligned
-> - Connection string: stored securely in User Secrets (credentials never hardcoded)
-> - Trust authentication enabled for localhost (development only) via `pg_hba.conf`
-> - Initial migration created with **deterministic seed data** (fixed GUIDs + dates, not dynamic)
->   - 10 challenges pre-seeded with cross-domain coverage (SQL, C#, Architecture, Docker, Memory)
-> - Database schema fully created: `users`, `challenges`, `attempts`, `__EFMigrationsHistory`
-> - Indexes: category, difficulty filters on challenges; userId + timestamps on attempts
+> **Implementation Details**:
+> - Created `LoginRequestDto` (Email, Password) with automatic validation
+> - Created `LoginResponseDto` (Token, User) following registration pattern
+> - Implemented `IJwtTokenService` interface for token generation/validation
+> - Implemented `JwtTokenService` with HS256 algorithm, 24h expiration, claims: `sub` (userId), `email`
+> - JWT Secret stored in `appsettings.json` (24-character minimum for production)
+> - Endpoint: `POST /api/v1/auth/login` — accepts email + password, returns JWT + user data
+> - Fixed `UserResponseDto` property from `UserId` → `Id` for consistency across APIs
+> - Updated `UserMapper.ToResponseDto()` to map `Id` (was `UserId`)
+>
+> **Test Coverage (11/11 passing)**:
+> - Validation: missing email (1), missing password (1), invalid format (1), empty both (1) = 4 tests
+> - Authentication: nonexistent email (1), wrong password (1), correct credentials (1), case-insensitive (1) = 4 tests
+> - Token validation: 24h expiration (1), JWT claims present (1), auth header compatible (1) = 3 tests
+>
+> **Total Test Count**: 119/119 (30 Domain + 39 Infrastructure + 50 API)
+>   - Domain: User + Attempt + Challenge logic (unchanged: 30/30)
+> - Infrastructure: DbContext + 3 repositories (unchanged: 39/39)
+>   - API: GET /challenges (13) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) = 50/50
 >
 > **Code Changes**:
-> - `Challenge.CreateForSeeding()` — new public factory for deterministic migration seeding
-> - `DevBrainDbContext.OnModelCreating()` — seed data now uses fixed IDs & dates (not Guid.NewGuid())
-> - `Program.cs` — conditional Npgsql registration (skipped if `DOTNET_RUNNING_IN_TEST` env var set)
-> - `CustomWebApplicationFactory` — sets `DOTNET_RUNNING_IN_TEST` to avoid provider conflicts
-> - `EF Core Migration InitialCreate` — deterministic model snapshot (no more dynamic values error)
+> - Created: `LoginRequestDto.cs`, `LoginResponseDto.cs`, `IJwtTokenService.cs`, `JwtTokenService.cs`
+> - Created: `PostAuthLoginEndpointTests.cs` (11 test methods, 270+ lines)
+> - Created: `specs/api/post-auth-login.spec.md` (comprehensive spec, 269 lines)
+> - Updated: `UserResponseDto.cs` (property `Id` instead of `UserId`)
+> - Updated: `UserMapper.cs` (maps to `Id` property)
+> - Updated: `AuthEndpoints.cs` (added PostLogin handler, registered MapPost route)
+> - Updated: `Program.cs` (registered `IJwtTokenService` in DI)
+> - Updated: `appsettings.json` (added Jwt section with Secret + ExpirationHours)
 >
-> **Test Impact** (All 108/108 Passing):
-> - Domain tests: **30/30** — unaffected (no domain changes)
-> - Infrastructure tests: **39/39** — DbContext w/ In-Memory, no PostgreSQL access
-> - API tests: **39/39** — WebApplicationFactory injects In-Memory for all test scenarios
-> - Production app: uses PostgreSQL on port 5433 when connection string exists
-> - Tests: use In-Memory isolated DBs per factory instance (no cross-contamination)
+> **Security**:
+> - Password verification uses existing `IPasswordHashService` (PBKDF2)
+> - JWT uses HS256 symmetric signing (suitable for single API)
+> - Token claims include `sub` (userId as string), `email`, `iat`, `exp`
+> - 24-hour token expiration (configurable via `Jwt:ExpirationHours` in appsettings.json)
+> - Email lookup is case-insensitive (normalized to lowercase in repository)
 >
-> **Deployment Path**:
-> - Local dev: PostgreSQL 18 on 5433 (this setup)
-> - Production (Railway): PostgreSQL via Railway addon + connection string from env
-> - Tests: In-Memory (no DB dependency)
-> - Migration rollback: `Connection string not found → Program.cs skips Npgsql → EF uses In-Memory`
->
-> **Next step**: Choose next feature to implement:
-> - Option A: User login endpoint (POST /auth/login)
-> - Option B: GET /challenges/{id} (single challenge detail)
-> - Option C: Gamification layer (streak, ELO, rating)
-> - Option D: Leaderboard (GET /users/stats or similar)
+> **Next Step Options**:
+> - Option A: `GET /challenges/{id}` — retrieve single challenge detail (blocks: none)
+> - Option B: Gamification layer — streak + ELO calculations (blocks: needs user stats storage)
+> - Option C: `GET /users/me/stats` — user statistics endpoint (blocks: needs ELO service)
+> - Option D: Token validation middleware — verify JWT on protected endpoints (quick win)
 
 ---
 
@@ -136,7 +142,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
 ### Fase C — Auth
-- [ ] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT/token (ADDING THIS NEXT)
+- [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT/token (11 tests, HS256, 24h expiration)
 - [ ] `supabase-auth.spec.md` — validación de JWT Supabase
 
 ### Fase D — Servicios de aplicación
