@@ -22,16 +22,21 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec + implementación de `DevBrainDbContext` (9 tests en verde) — DbContext EF Core con tablas, índices, seed data
 - [x] Spec + implementación de `EFChallengeRepository` (13 tests en verde) — GetByIdAsync, GetAllAsync (con filtros), AddAsync
 - [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
-- [ ] Endpoint GET /challenges
+- [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Spec + implementación de `EFAttemptRepository` — repositorio EF Core que implementa `IAttemptRepository`.  
-> Métodos: AddAsync (persiste intentos), GetByUserAsync (lista intentos DESC por fecha), GetLastByUserAsync (obtiene último intento), CountCorrectByUserAsync (cuenta intentos correctos).  
-> 17 tests en verde, cubriendo casos con/sin intentos, filtrado por usuario, ordenamiento y conteos.  
-> Total: 69 tests en verde (30 Domain + 39 Infrastructure).  
-> Próximo paso: **Endpoints de API** — Comenzar Fase C (GET /challenges, POST /challenges/{id}/attempt — usar los repositorios).
+> **Implementación de GET /challenges endpoint** — Endpoint completamente funcional con:
+> - DTOs: `ChallengeResponseDto`, `PaginatedResponseDto<T>`  
+> - Mapper: `ChallengeMapper` con extensiones para conversión de entidades a DTOs
+> - Endpoint: Validación enum (categoría/dificultad), paginación (1-50), filtrado opcional  
+> - Respuesta: JSON de `PaginatedResponseDto` sin campos sensibles (sin correctAnswer)
+> - DI: Registración de `IChallengeRepository`, `IAttemptRepository` como Scoped  
+> - Tests: **82 tests en verde totales** (30 Domain + 39 Infrastructure + 13 Api)
+> - CustomWebApplicationFactory: Seed de 10 challenges para testing
+> 
+> Próximo paso: **POST /challenges/{id}/attempt endpoint** — Guardar intento y devolver corrección.
 
 ---
 
@@ -97,7 +102,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO
 
 ### Fase E — API endpoints
-- [ ] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad
+- [x] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad (13 tests en verde)
 - [ ] `get-challenge.spec.md` — GET /challenges/{id} — detalle de un challenge
 - [ ] `post-attempt.spec.md` — POST /challenges/{id}/attempt — enviar respuesta, devolver resultado + nuevo ELO
 - [ ] `get-user-stats.spec.md` — GET /users/me/stats — streak actual, ELO por categoría, totales
@@ -131,7 +136,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `IChallengeRepository` — interfaz de persistencia en Domain
 - [x] `Dockerfile` multi-stage + `docker-compose.yml` (API + PostgreSQL 17 + Redis 7)
 - [x] Colección Postman con todos los endpoints MVP y ejemplos por status code
-- [ ] Endpoint GET /challenges
+- [x] Endpoint GET /challenges (13 tests) — validación filtros, paginación, DTOs
 - [ ] Endpoint POST /challenges/:id/attempt
 - [ ] Conectar PostgreSQL con EF Core
 
