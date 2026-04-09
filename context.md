@@ -27,9 +27,10 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> Infraestructura de desarrollo completa: Scalar (Swagger UI), Docker (Dockerfile + docker-compose con PostgreSQL 17 + Redis 7), colección Postman con todos los endpoints MVP y ejemplos de 200/400/401/404. Skills `spec-implement` y `write-spec` actualizados para incluir actualización de Postman al terminar specs de API. context.md sincronizado con el estado real del proyecto.  
-> Total: 30 tests en verde (10 Challenge + 9 Attempt + 11 User).  
-> Próximo paso: `iattempt-repository.spec.md`.
+> Spec + implementación de `IAttemptRepository` — interfaz de persistencia de attempts en Domain (AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync).  
+> Sin tests en este paso (los tests vienen con `ef-attempt-repository.spec.md`).  
+> Total: 30 tests en verde (sin cambios).  
+> Próximo paso: `devbrain-dbcontext.spec.md` (Fase B — Infraestructura).
 
 ---
 
@@ -80,7 +81,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `attempt.spec.md` — actualizado con `UserId` (SupabaseId del usuario) — 9 tests en verde
 - [x] `user.spec.md` — entidad User básica (SupabaseId, displayName, email) — 11 tests en verde
 - [x] `ichallenge-repository.spec.md` — interfaz de persistencia de challenges (en Domain, sin EF)
-- [ ] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
+- [x] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
 
 ### Fase B — Infraestructura
 - [ ] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones)
