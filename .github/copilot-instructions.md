@@ -35,9 +35,9 @@ Los skills están en `.github/skills/` siguiendo el estándar Agent Skills (agen
 
 | Skill | Cuándo usarlo |
 |-------|--------------|
-| `update-context` | Al terminar cualquier iteración — actualiza `C:\dev\brain\context.md` |
+| `update-context` | Al terminar cualquier iteración — actualiza `context.md` en la raíz del repo |
 | `write-spec` | Antes de implementar cualquier entidad o endpoint nuevo |
-| `spec-implement` | Después de crear una spec — genera tests + implementación completa |
+| `spec-implement` | Después de crear una spec — genera tests + implementación + commit + push |
 
 Leé los SKILL.md en `.github/skills/{nombre}/SKILL.md` antes de ejecutar cada workflow.
 

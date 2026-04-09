@@ -19,7 +19,7 @@ Mantener `context.md` (en la raíz del repo) actualizado al final de cada iterac
 ## Pasos
 
 1. **Leer el contexto actual**
-   - Lee `C:\dev\brain\context.md` completo
+   - Lee `context.md` en la raíz del repo
 
 2. **Determinar qué se completó**
    - Revisá el historial de la conversación actual

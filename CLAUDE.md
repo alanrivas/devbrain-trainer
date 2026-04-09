@@ -35,9 +35,9 @@ Los skills están en `.github/skills/` y funcionan como comandos estructurados:
 
 | Skill | Cuándo usarlo |
 |-------|--------------|
-| `update-context` | Al terminar cualquier iteración — actualiza `C:\dev\brain\context.md` |
+| `update-context` | Al terminar cualquier iteración — actualiza `context.md` en la raíz del repo |
 | `write-spec` | Antes de implementar cualquier entidad o endpoint nuevo |
-| `spec-to-test` | Después de crear una spec — genera stubs de xUnit |
+| `spec-implement` | Después de crear una spec — genera tests + implementación + commit + push |
 
 Leé siempre los SKILL.md correspondientes antes de ejecutar el workflow.
 
