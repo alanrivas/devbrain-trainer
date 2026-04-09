@@ -23,21 +23,26 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec + implementación de `EFChallengeRepository` (13 tests en verde) — GetByIdAsync, GetAllAsync (con filtros), AddAsync
 - [x] Spec + implementación de `EFAttemptRepository` (17 tests en verde) — AddAsync, GetByUserAsync, GetLastByUserAsync, CountCorrectByUserAsync
 - [x] Endpoint GET /challenges (13 tests en verde) — con DTOs, mapper, validación de filtros, paginación
-- [x] Endpoint POST /challenges/:id/attempt (22 tests en verde) — DTOs, mapper, validación, creación de Attempt
+- [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate
 - [ ] Conectar PostgreSQL con EF Core
 
 ## Último paso completado
-> **Implementación de POST /challenges/{id}/attempt endpoint** — Endpoint completamente funcional con:
+> **Resolved: POST /challenges/{id}/attempt endpoint — 100% tests passing (95/95)** ✅
+>
+> **Endpoint Status:**
 > - DTOs: `CreateAttemptRequestDto` (userAnswer, elapsedSeconds), `AttemptResponseDto` (9 campos)  
 > - Mapper: `AttemptMapper` con extensión `ToResponseDto(challenge)` 
-> - Endpoint: Validación userAnswer (no-empty, trimmed), elapsedSeconds (0-3600), challenge existence, userId extraction via X-User-Id header
-> - Domain logic: `Attempt.Create()` permite elapsedSeconds >= 0 y exceeding time limits (per spec)
-> - Response: 201 Created con AttemptResponseDto incluyendo correctAnswer para aprendizaje
-> - Error handling: 400 (validation), 404 (challenge not found), correcta generación de isCorrect
-> - Tests: **91 tests en verde totales** (30 Domain + 39 Infrastructure + 22 Api)  
->   *Nota: 4 API tests fallan debido a data seed mismatch con expectativas — requiere debug de seed data vs test data*
-> 
-> Próximo paso: **Resolver seed data mismatch** — Alinear desafíos de seed con test expectations O crear factory method independiente para tests.
+> - Endpoint: POST /challenges/{id}/attempt con validación completa (userAnswer, elapsedSeconds 0-3600, challenge existence)
+> - Response: 201 Created con AttemptResponseDto incluyendo correctAnswer para feedback del usuario
+> - Error handling: 400 (validation), 401 (auth), 404 (not found)
+>
+> **Problemas Resueltos:**
+> 1. ✅ Seed data mismatch: CustomWebApplicationFactory ahora limpia production seed data y usa test challenges
+> 2. ✅ Database bleeding: Cada factory instancia ahora tiene Guid.NewGuid() de DbName único
+> 3. ✅ Test initialization: PostAttemptEndpointTests.InitializeAsync ahora valida matching con errores claros
+> 4. ✅ All 95 tests passing: 30 Domain + 39 Infrastructure + 26 API (100% pass rate)
+>
+> Próximo paso: **Conectar PostgreSQL** — Reemplazar in-memory database con PostgreSQL para persistencia real.
 
 ---
 
