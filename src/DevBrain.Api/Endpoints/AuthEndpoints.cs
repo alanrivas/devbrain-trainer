@@ -3,6 +3,7 @@ using DevBrain.Api.Mapping;
 using DevBrain.Api.Services;
 using DevBrain.Api.Validation;
 using DevBrain.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace DevBrain.Api.Endpoints;
 
@@ -25,9 +26,13 @@ public static class AuthEndpoints
     private static async Task<IResult> PostRegister(
         RegisterRequestDto request,
         IUserRepository userRepository,
-        IPasswordHashService passwordHashService
+        IPasswordHashService passwordHashService,
+        ILogger logger
     )
     {
+        logger.LogInformation("Register called: Email={Email}, DisplayName={DisplayName}", 
+            request.Email.Split('@')[0] + "@...", request.DisplayName);
+        
         // Validate email
         var (emailValid, emailError) = RegistrationValidator.ValidateEmail(request.Email);
         if (!emailValid)
@@ -61,12 +66,16 @@ public static class AuthEndpoints
         // Check for duplicate email (case-insensitive)
         var existingUser = await userRepository.GetByEmailAsync(request.Email.ToLower());
         if (existingUser != null)
+        {
+            logger.LogWarning("Register failed: duplicate email {EmailPrefix}", 
+                request.Email.Split('@')[0] + "@...");
             return Results.Conflict(new
             {
                 status = 409,
                 title = "Conflict",
                 detail = "Email is already registered."
             });
+        }
 
         // Hash password
         var passwordHash = passwordHashService.HashPassword(request.Password);
@@ -83,12 +92,16 @@ public static class AuthEndpoints
             // Persist user
             await userRepository.AddAsync(user);
 
+            logger.LogInformation("Register successful: UserId={UserId}, Email={EmailPrefix}", 
+                user.Id, request.Email.Split('@')[0] + "@...");
+
             // Return 201 Created with user data
             var response = user.ToResponseDto();
             return Results.Created($"/api/v1/users/{user.Id}", response);
         }
         catch (Domain.Exceptions.DomainException ex)
         {
+            logger.LogWarning("Register failed with DomainException: {Message}", ex.Message);
             return Results.BadRequest(new
             {
                 status = 400,
@@ -102,9 +115,13 @@ public static class AuthEndpoints
         LoginRequestDto request,
         IUserRepository userRepository,
         IPasswordHashService passwordHashService,
-        IJwtTokenService jwtTokenService
+        IJwtTokenService jwtTokenService,
+        ILogger logger
     )
     {
+        logger.LogInformation("Login attempted: Email={EmailPrefix}", 
+            request.Email.Split('@')[0] + "@...");
+        
         // Validate email
         var (emailValid, emailError) = RegistrationValidator.ValidateEmail(request.Email);
         if (!emailValid)
@@ -127,15 +144,25 @@ public static class AuthEndpoints
         // Find user by email (case-insensitive)
         var user = await userRepository.GetByEmailAsync(request.Email.ToLower());
         if (user == null)
+        {
+            logger.LogWarning("Login failed: user not found {EmailPrefix}", 
+                request.Email.Split('@')[0] + "@...");
             return Results.Unauthorized();
+        }
 
         // Verify password
         var passwordMatch = passwordHashService.VerifyPassword(request.Password, user.PasswordHash);
         if (!passwordMatch)
+        {
+            logger.LogWarning("Login failed: authentication failed for {EmailPrefix}", 
+                request.Email.Split('@')[0] + "@...");
             return Results.Unauthorized();
+        }
 
         // Generate JWT token
         var token = jwtTokenService.GenerateToken(user.Id, user.Email);
+        logger.LogInformation("Login successful: UserId={UserId}, Email={EmailPrefix}", 
+            user.Id, request.Email.Split('@')[0] + "@...");
 
         // Return 200 OK with token and user data
         var response = new LoginResponseDto

@@ -67,6 +67,31 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 ---
 
+> ✅ **Phase 3.3: Endpoint Logging Integration — EN PROGRESO**
+>
+> **Resumen de la sesión**:
+> - Spec completada: `specs/api/endpoint-logging.spec.md` (390+ líneas, full SDD)
+>   - Define 8 endpoints + 2 middleware para logging
+>   - Estructura: request entry, business logic events, response, error handling
+>   - Invariantes: sin passwords/emails, structured logging, LogContext limpio
+> - Tests creados: `EndpointLoggingTests.cs` (9 nuevos test methods)
+>   - GetChallenges, GetChallenge (valid/invalid), PostRegister (new/duplicate), PostLogin (valid/wrong password)
+>   - GetUserStats, GetUserBadges, PostAttempt
+> - Endpoints refactorizados con ILogger injection:
+>   - `ChallengeEndpoints.cs`: GetChallenges, GetChallenge, PostAttempt → agregado logging
+>   - `AuthEndpoints.cs`: PostRegister, PostLogin → agregado logging
+>   - `UserEndpoints.cs`: GetUserStats, GetUserBadges → agregado logging + LogContext.PushProperty
+> - Logging agregado:
+>   - Entry logs: "GetChallenges called with filters: {...}"
+>   - Business logic: "Attempt recorded: IsCorrect={IsCorrect}, NewELO={NewELO}, ..."
+>   - Warning logs: "Challenge not found", "duplicate email", "authentication failed"
+>   - Structured logging con Serilog.Context.LogContext
+> - Build: ✅ OK (0 errores)
+> - Tests: ✅ 125/125 pasando (todos los test nuevos + existentes)
+> - Próximo: Hacer commit + push a GitHub
+
+---
+
 > ✅ **Deploy a Azure App Service completado y validado en producción**
 >
 > **Resumen**:
