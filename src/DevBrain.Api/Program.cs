@@ -44,10 +44,16 @@ builder.Services.AddScoped<IAttemptService, AttemptService>();
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
 if (!isTestEnvironment)
 {
-    builder.Services.AddSingleton<IConnectionMultiplexer>(
-        ConnectionMultiplexer.Connect(redisConnectionString)
-    );
-    builder.Services.AddScoped<IStreakService, RedisStreakService>();
+    try
+    {
+        var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+        builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+        builder.Services.AddScoped<IStreakService, RedisStreakService>();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[STARTUP] Redis connection failed: {ex.Message}. Streak service disabled.");
+    }
 }
 
 // JWT Authentication
@@ -85,10 +91,21 @@ var app = builder.Build();
 // Auto-migrate on startup (production + local, not in tests)
 if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
-    await db.Database.MigrateAsync();
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
+        await db.Database.MigrateAsync();
+        Console.WriteLine("[STARTUP] Database migration completed.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[STARTUP] Database migration failed: {ex.Message}");
+    }
 }
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTimeOffset.UtcNow }));
 
 if (app.Environment.IsDevelopment())
 {
