@@ -6,11 +6,15 @@ Complete documentation of all available endpoints.
 
 ## Base URL
 
+**Development**:
 ```
 http://localhost:5000/api/v1
 ```
 
-For production: Update to your railway deployment URL.
+**Production (Azure)**:
+```
+https://devbrain-trainer.azurewebsites.net/api/v1
+```
 
 ---
 

@@ -47,10 +47,11 @@ dotnet test tests/DevBrain.Api.Tests/
 dotnet test tests/DevBrain.Infrastructure.Tests/
 ```
 
-**Test Coverage**: 95/95 tests passing (100% green)
-- Domain: 30 tests
-- Infrastructure: 39 tests
-- API: 26 tests
+**Test Coverage**: **207/207 tests passing** (100% green) ✅
+- Domain.Tests: 69 tests
+- Infrastructure.Tests: 53 tests
+- Api.Tests: 83 tests
+- Integration.Tests: 2 tests (E2E with TestContainers)
 
 ---
 
@@ -166,7 +167,7 @@ Response: `201 Created`
 | Testing | xUnit 2.9.3 |
 | ORM | EF Core 10 |
 | Frontend | Next.js + Tailwind (próximo) |
-| Deploy | Railway (backend) + GitHub Pages (frontend) |
+| Deploy | **Azure App Service** (backend) + GitHub Pages (frontend) |
 | Auth | Supabase Auth (JWT) |
 
 ---

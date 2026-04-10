@@ -12,11 +12,12 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |------|-----------|
 | Backend | ASP.NET Core 10 (API REST) |
 | Frontend | Next.js + Tailwind |
-| DB principal | PostgreSQL |
-| Cache / streak | Redis |
-| Deploy backend | Railway |
+| DB principal | PostgreSQL (Neon en prod) |
+| Cache / streak | Redis (Redis Cloud en prod) |
+| Deploy backend | **Azure App Service** |
 | Deploy frontend | GitHub Pages / Vercel |
-| Auth | Supabase Auth |
+| Logging estructurado | Serilog + Application Insights |
+| Auth | JWT propio (plans: Supabase) |
 | Generación dinámica | Claude API |
 
 ## Metodología: SDD + TDD
