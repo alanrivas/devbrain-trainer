@@ -82,6 +82,14 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
+// Auto-migrate on startup (production + local, not in tests)
+if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -90,9 +98,8 @@ if (app.Environment.IsDevelopment())
         options.Title = "DevBrain Trainer";
         options.Theme = ScalarTheme.DeepSpace;
     });
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

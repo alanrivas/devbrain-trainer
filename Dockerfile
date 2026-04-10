@@ -18,6 +18,9 @@ RUN dotnet publish "DevBrain.Api.csproj" -c Release -o /app/publish /p:UseAppHos
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
+
+ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DevBrain.Api.dll"]
