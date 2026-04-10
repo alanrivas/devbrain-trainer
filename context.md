@@ -36,25 +36,28 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
 | Infrastructure.Tests | 53 | ✅ 53/53 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6) |
 | Api.Tests | 83 | ✅ 83/83 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (28 — +2 badge tests), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10), GET /users/me/badges (4) |
-| **TOTAL** | **205** | **✅ 205/205** | 100% pass rate |
+| Integration.Tests | 2 | ✅ 2/2 | E2E happy path, multi-user isolation (TestContainers + real PostgreSQL/Redis) |
+| **TOTAL** | **207** | **✅ 207/207** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **Plan de Testing estructurado — Fase 3 (Robustez) antes del Frontend**
+> ✅ **Phase 3.1: E2E Integration Tests — COMPLETADO**
 >
 > **Resumen de la sesión**:
-> - Backend completado: 205/205 tests en verde (Domain + Infrastructure + API)
-> - Build exitoso, API corriendo en localhost:5118, `/health` OK
-> - Context.md alineado con estado real del proyecto
-> - **NEW**: Planificado roadmap de 3 fases de testing ANTES del Frontend:
->   - **Fase 3.1**: E2E Integration Tests (TestContainers + real DB/Redis)
->   - **Fase 3.2**: Concurrency Tests (Task.WhenAll, race conditions)
->   - **Fase 3.3**: Resiliencia Tests (Redis down, DB slow, JWT rotation)
-> - Benchmarks y Contract Tests ➜ Después del Frontend (Fase 5)
->
-> **Próximo paso**: **Comenzar Fase 3.1 — E2E Integration Tests**
-> - Crear proyecto `DevBrain.Integration.Tests`
-> - Agregar TestContainers NuGet para PostgreSQL + Redis
-> - Spec: Flujo Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
+> - 207/207 tests en verde (205 unit tests + 2 integration tests)
+> - E2E Integration Test project created: `tests/DevBrain.Integration.Tests/`
+> - TestContainers setup: PostgreSQL v17-alpine + Redis v7-alpine
+> - Full user journey validated: Register → Login → Challenges → Attempt → Stats → Badges
+> - Multi-user isolation verified (no cross-contamination)
+> - Key fixes applied:
+>   - AccuracyRate calculation (now 0-100%, was 0-1)
+>   - DbContext concurrency (sequential calls vs parallel)
+>   - MockStreakService registration (Singleton for shared state)
+> - Both tests passing (2/2):
+>   - ✅ E2E_Register_Login_Challenges_Attempt_Stats_Badges_HappyPath
+>   - ✅ E2E_MultipleAttempts_SameChallengeByDifferentUsers_NoConflict
+> - Commit: `c5a5d6e` — "feat: E2E Integration Tests with TestContainers — Phase 3.1"
+> 
+> **Próximo paso**: **Phase 3.2 — Concurrency Tests** (simultaneous users, race conditions)
 
 ---
 
@@ -126,13 +129,18 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 ### Phase 3 — Robustez (ANTES del Frontend)
 **Objetivo**: Validar que el backend es robusto antes de integrar UI
 
-#### 3.1 — E2E Integration Tests (`DevBrain.Integration.Tests`)
-- Real PostgreSQL (TestContainers)
-- Real Redis (TestContainers)
+#### 3.1 — E2E Integration Tests ✅ COMPLETADO
+- Real PostgreSQL (TestContainers v3.9.0)
+- Real Redis (TestContainers v3.9.0)
 - Flujos completos de usuario
-  - Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
-  - Validar persistencia de datos end-to-end
-  - Validar relaciones entre entidades
+  - Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges ✅
+  - Validar persistencia de datos end-to-end ✅
+  - Validar relaciones entre entidades ✅
+- Spec: `specs/integration/e2e-happy-path.spec.md` (329 lines, 7-step flow + multi-user test)
+- Tests: 2/2 passing
+  - ✅ E2E_Register_Login_Challenges_Attempt_Stats_Badges_HappyPath
+  - ✅ E2E_MultipleAttempts_SameChallengeByDifferentUsers_NoConflict
+- Infrastructure: IntegrationTestFactory, MockStreakService (singleton for shared state)
 
 #### 3.2 — Concurrency/Race Condition Tests
 - Dos usuarios simultáneos en POST /attempt
@@ -196,8 +204,10 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ---
 
 ## Próximas prioridades (antes de Frontend)
-1. **E2E Integration Tests** — flujo completo con real DB/Redis
-2. **Concurrency Tests** — validar no hay race conditions
+1. **✅ E2E Integration Tests** — 2/2 tests passing, real DB/Redis with TestContainers
+2. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
+3. **Resiliencia/Chaos Tests (Phase 3.3)** — Redis down, slow DB, JWT rotation
+4. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
 3. **Resiliencia Tests** — componentes externos fallando gracefully
 
 ---
