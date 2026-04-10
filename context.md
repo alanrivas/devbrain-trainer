@@ -39,79 +39,20 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **TOTAL** | **166** | **✅ 166/166** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **AttemptService implemented** — orquesta ELO + streak, **166/166 total** (sin tests nuevos, todos los existentes siguen pasando)
+> ✅ **Deploy a Azure App Service completado y validado en producción**
 >
-> **Implementation Details**:
-> - `IAttemptService` + `AttemptService` en `DevBrain.Api.Services` — orquesta: Attempt.Create → AddAsync → ELO.Calculate → User.UpdateEloRating → UserRepo.UpdateAsync → Streak.RecordAttemptAsync
-> - `AttemptResponseDto` extendido con `NewEloRating` + `NewStreak`
-> - `POST /challenges/{id}/attempt` delegado a `IAttemptService` (endpoint simplificado)
-> - `GET /users/me/stats` reemplaza placeholders con `user.EloRating` + `streakService.GetStreakAsync`
-> - `User` extendido con `EloRating` (int, default 1000) + `UpdateEloRating()`
-> - `IUserRepository` extendido con `UpdateAsync`; `EFUserRepository` implementa `UpdateAsync`
-> - Migración EF: `AddEloRatingToUser` aplicada a `devbrain_local` en port 5433
-> - `CustomWebApplicationFactory` registra Redis + `IStreakService` para tests API
-> - `IEloRatingService` registrado como Singleton en Program.cs
+> **Resumen**:
+> - Causa raíz del crash resuelto: Npgsql no soporta formato URI de Neon → migrado a formato ADO.NET (`Host=...;Database=...;Username=...;SSL Mode=Require;Trust Server Certificate=true`)
+> - Migraciones aplicadas a Neon (`InitialCreate` + `AddEloRatingToUser`) — 10 challenges seeded
+> - `ConnectionStrings__DefaultConnection` actualizado en Azure App Service (resource group: `devbrain-rg`)
+> - Flujo completo validado en `https://devbrain-trainer.azurewebsites.net`:
+>   - `GET /api/v1/challenges` → 10 challenges ✅
+>   - `POST /api/v1/auth/register` → usuario creado en Neon ✅
+>   - `POST /api/v1/auth/login` → JWT generado ✅
+>   - `POST /api/v1/challenges/{id}/attempt` → ELO actualizado, streak=1 (Redis Cloud) ✅
+> - Nota: `/health` devuelve 404 en Azure (posiblemente interceptado por Azure App Service), no bloqueante
 >
-> **Previous step — RedisStreakService**:
-> - `IStreakService` + `RedisStreakService` en `DevBrain.Infrastructure.Services`
-> - Claves Redis: `streak:{userId}:count` + `streak:{userId}:last_date` (TTL 48h)
-> - Lógica: mismo día → no cambia, día siguiente → +1, gap >1 día → reset a 1
-> - 8 tests de integración contra Redis real (`localhost:6379`), cada test con userId único
-> - `IConnectionMultiplexer` registrado como Singleton en Program.cs (solo en non-test)
-> - `IStreakService` registrado como Scoped en Program.cs
-> - `StackExchange.Redis` v2.12.14 agregado a `DevBrain.Infrastructure`
->
-> **Previous step — EloRatingService**:
-> - Servicio puro de dominio: `IEloRatingService` + `EloRatingService` en `DevBrain.Domain.Services`
-> - Fórmula: ELO adaptado — expected probability + score + time modifier (1.0–1.25) + floor 100
-> - Constantes: K=32, Easy=800, Medium=1200, Hard=1600, initial=1000
-> - Time modifier solo aplica en respuestas correctas; incorrecto siempre modifier=1.0
-> - 12 tests: correctness por dificultad, time modifier, floor de rating, valores exactos anclados
-> - Registrar como Singleton en Program.cs (próximo paso al integrar con AttemptService)
->
-> **Previous step — GET /users/me/stats**:
-> - Endpoint: `GET /api/v1/users/me/stats` — requiere JWT, lee userId desde claims
-> - Stats: totalAttempts, correctAttempts, accuracyRate calculados desde `IAttemptRepository`
-> - displayName obtenido desde `IUserRepository.GetByIdAsync`
-> - Placeholders: `currentStreak = 0`, `eloRating = 1000` (hasta Fase F)
-> - Parallel fetch: `GetByUserAsync` + `CountCorrectByUserAsync` + `GetLastByUserAsync` con `Task.WhenAll`
->
-> **Test Coverage (10/10 passing)**:
-> - Sin token → 401
-> - Sin attempts → 200 con zeros y null lastAttemptAt
-> - userId y displayName coinciden con el token/DB
-> - TotalAttempts incluye todos (correctos e incorrectos)
-> - CorrectAttempts solo cuenta los correctos
-> - AccuracyRate = correctAttempts / totalAttempts (0.5 en test)
-> - AllCorrect → accuracyRate = 1.0
-> - Placeholder streak = 0
-> - Placeholder ELO = 1000
-> - lastAttemptAt refleja el attempt más reciente
->
-> **Total Test Count**: 146/146 (30 Domain + 39 Infrastructure + 77 API)
-> - Domain: User + Attempt + Challenge logic (unchanged: 30/30)
-> - Infrastructure: DbContext + 3 repositories (unchanged: 39/39)
-> - API: GET /challenges (13) + GET /challenges/{id} (8) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) + JWT middleware (9) + GET /users/me/stats (10) = 77/77
->
-> **Code Changes**:
-> - Created: `specs/api/get-user-stats.spec.md`
-> - Created: `src/DevBrain.Api/DTOs/UserStatsResponseDto.cs`
-> - Created: `src/DevBrain.Api/Endpoints/UserEndpoints.cs`
-> - Created: `tests/DevBrain.Api.Tests/GetUserStatsTests.cs` (10 test methods)
-> - Updated: `Program.cs` (agregado `app.MapUserEndpoints()`)
->
-> **API Endpoints Summary**:
-> - ✅ `GET /api/v1/challenges` — list with pagination + filtering (public)
-> - ✅ `GET /api/v1/challenges/{id}` — single challenge detail (public)
-> - ✅ `POST /api/v1/challenges/{id}/attempt` — submit answer **(requires JWT)**
-> - ✅ `POST /api/v1/auth/register` — user registration + password hashing
-> - ✅ `POST /api/v1/auth/login` — JWT token generation (24h expiration)
-> - ✅ `GET /api/v1/users/me/stats` — user stats **(requires JWT)**
->
-> **Next Step**:
-> - MVP Backend completado — todos los endpoints funcionando con ELO y streak reales
-> - `seed-challenges.spec.md` — datos iniciales de producción (al menos 10 challenges variados)
-> - Deploy a Railway
+> **Próximo paso**: Frontend Next.js (Fase 3) o generación dinámica con Claude API (Fase 4)
 
 ---
 
