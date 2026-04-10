@@ -157,35 +157,36 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 El orden respeta dependencias estrictas. No se puede implementar un paso sin tener el anterior completo.
 
-### Fase A — Dominio
+### Fase A — Dominio (`specs/domain/`)
 - [x] `challenge.spec.md` — entidad Challenge con validaciones
 - [x] `attempt.spec.md` — actualizado con `UserId` (Guid del usuario) — 9 tests en verde
 - [x] `user.spec.md` — entidad User básica (Guid Id, displayName, email, password hash) — 11 tests en verde
 - [x] `ichallenge-repository.spec.md` — interfaz de persistencia de challenges (en Domain, sin EF)
 - [x] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
 - [x] `iuser-repository.spec.md` — interfaz de persistencia de usuarios (en Domain, sin EF)
+- [x] `attempt-service.spec.md` — orquesta: Attempt.Create + ELO.Calculate + User.UpdateEloRating + Streak.RecordAttemptAsync
+- [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
-### Fase B — Infraestructura
+### Fase B — Infraestructura (`specs/infrastructure/`)
 - [x] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones, seed data)
 - [x] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
 - [x] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
 - [x] `ef-user-repository.spec.md` — implementación EF de IUserRepository (AddAsync, GetByEmailAsync, GetByIdAsync) — sin test file dedicado, cubierto por API tests
-- [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
 
-### Fase C — Auth
+### Fase C — Auth (`specs/api/`)
 - [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT propio (11 tests, HS256, 24h expiration)
 - [x] `jwt-middleware.spec.md` — JWT Bearer middleware + `.RequireAuthorization()` en POST /attempt (9 tests en verde)
 
-### Fase D — Servicios de aplicación
+### Fase D — Servicios de aplicación (`specs/domain/`)
 - [x] `attempt-service.spec.md` — orquesta: Attempt.Create + ELO.Calculate + User.UpdateEloRating + Streak.RecordAttemptAsync
 
-### Fase E — API endpoints
+### Fase E — API endpoints (`specs/api/`)
 - [x] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad (13 tests en verde)
 - [x] `get-challenge.spec.md` — GET /challenges/{id} — detalle de un challenge (8 tests en verde)
-- [ ] `post-attempt.spec.md` — POST /challenges/{id}/attempt — enviar respuesta, devolver resultado + nuevo ELO
+- [x] `post-attempt.spec.md` — POST /challenges/{id}/attempt — enviar respuesta, devolver resultado + nuevo ELO
 - [x] `get-user-stats.spec.md` — GET /users/me/stats — totalAttempts, correctAttempts, accuracyRate, streak/ELO placeholders (10 tests)
 
-### Fase F — Gamificación
+### Fase F — Gamificación (`specs/gamification/`)
 - [x] `streak.spec.md` — streak diario con Redis (8 tests integración, TTL 48h, reset si gap >1 día)
 - [x] `elo-rating.spec.md` — cálculo de rating ELO global tras cada attempt (12 tests, fórmula ELO adaptada con time modifier)
 
@@ -223,9 +224,9 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433
 
 ### Fase 2 — Gamificación
-- [ ] Sistema de streak
-- [ ] Rating ELO por categoría
-- [ ] Logros
+- [x] Sistema de streak — RedisStreakService (8 tests integración, TTL 48h)
+- [x] Rating ELO global — EloRatingService (12 tests, fórmula adaptada con time modifier)
+- [ ] Logros / badges
 
 ### Fase 3 — Frontend
 - [ ] Next.js + Tailwind
