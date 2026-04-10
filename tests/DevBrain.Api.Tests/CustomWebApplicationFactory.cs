@@ -1,6 +1,7 @@
 using DevBrain.Api.Services;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
+using DevBrain.Domain.Services;
 using DevBrain.Infrastructure.Persistence;
 using DevBrain.Infrastructure.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -63,6 +64,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IPasswordHashService, PasswordHashService>();
             services.AddScoped<IChallengeRepository, EFChallengeRepository>();
             services.AddScoped<IAttemptRepository, EFAttemptRepository>();
+            services.AddScoped<IBadgeRepository, EFBadgeRepository>();
+            services.AddSingleton<IBadgeAwardService, BadgeAwardService>();
 
             // Redis + Streak (real Redis at localhost:6379 — needed for AttemptService + GetUserStats)
             services.AddSingleton<IConnectionMultiplexer>(

@@ -13,6 +13,7 @@ public class DevBrainDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Challenge> Challenges => Set<Challenge>();
     public DbSet<Attempt> Attempts => Set<Attempt>();
+    public DbSet<UserBadge> UserBadges => Set<UserBadge>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -157,6 +158,42 @@ public class DevBrainDbContext : DbContext
 
         modelBuilder.Entity<Attempt>()
             .HasIndex(new[] { nameof(Attempt.UserId), nameof(Attempt.ChallengeId), nameof(Attempt.IsCorrect) });
+
+        // Configure UserBadges table
+        modelBuilder.Entity<UserBadge>()
+            .ToTable("user_badges")
+            .HasKey(b => b.Id);
+
+        modelBuilder.Entity<UserBadge>()
+            .Property(b => b.Id)
+            .ValueGeneratedNever();
+
+        modelBuilder.Entity<UserBadge>()
+            .Property(b => b.UserId)
+            .IsRequired();
+
+        modelBuilder.Entity<UserBadge>()
+            .Property(b => b.Type)
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
+
+        modelBuilder.Entity<UserBadge>()
+            .Property(b => b.EarnedAt)
+            .IsRequired();
+
+        modelBuilder.Entity<UserBadge>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserBadge>()
+            .HasIndex(b => b.UserId);
+
+        modelBuilder.Entity<UserBadge>()
+            .HasIndex(new[] { nameof(UserBadge.UserId), nameof(UserBadge.Type) })
+            .IsUnique();
 
         // Seed data - 10 challenges with mix of categories and difficulties
         // Note: DisableAutoTraitoryGenerationSeeding() in test factory should prevent double seeding

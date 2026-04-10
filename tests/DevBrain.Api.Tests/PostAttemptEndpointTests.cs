@@ -8,6 +8,7 @@ using DevBrain.Api.Services;
 using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevBrain.Api.Tests;
 
@@ -321,6 +322,72 @@ public class PostAttemptEndpointTests : IAsyncLifetime
         );
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PostAttempt_FirstCorrectAnswer_ShouldReturnFirstBloodInNewBadges()
+    {
+        // Create a fresh user to guarantee this is their first attempt ever
+        var db = await _factory.GetDbContextAsync();
+        var passwordHashService = new PasswordHashService();
+        var passwordHash = passwordHashService.HashPassword("FirstBlood123!");
+        var freshUser = User.CreateFromRegistration("firstblood-tester@example.com", passwordHash, "FirstBlood Tester");
+        db.Users.Add(freshUser);
+        await db.SaveChangesAsync();
+
+        var loginContent = new StringContent(
+            JsonSerializer.Serialize(new { email = "firstblood-tester@example.com", password = "FirstBlood123!" }),
+            Encoding.UTF8, "application/json"
+        );
+        var loginResponse = await _client.PostAsync("/api/v1/auth/login", loginContent);
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        var freshClient = _factory.CreateClient();
+        freshClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", loginBody!.Token);
+
+        var request = new CreateAttemptRequestDto(UserAnswer: _firstChallengeAnswer, ElapsedSeconds: 30);
+        var response = await freshClient.PostAsync(
+            $"/api/v1/challenges/{_firstChallengeId}/attempt",
+            CreateRequestContent(request)
+        );
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var result = await DeserializeResponse<AttemptResponseDto>(response);
+        Assert.NotNull(result);
+        Assert.Contains("FirstBlood", result.NewBadges);
+    }
+
+    [Fact]
+    public async Task PostAttempt_IncorrectAnswer_ShouldReturnEmptyNewBadges()
+    {
+        // Create a fresh user with no prior attempts to get a clean state
+        var db = await _factory.GetDbContextAsync();
+        var passwordHashService = new PasswordHashService();
+        var passwordHash = passwordHashService.HashPassword("NoBadge123!");
+        var freshUser = User.CreateFromRegistration("nobadge-tester@example.com", passwordHash, "NoBadge Tester");
+        db.Users.Add(freshUser);
+        await db.SaveChangesAsync();
+
+        var loginContent = new StringContent(
+            JsonSerializer.Serialize(new { email = "nobadge-tester@example.com", password = "NoBadge123!" }),
+            Encoding.UTF8, "application/json"
+        );
+        var loginResponse = await _client.PostAsync("/api/v1/auth/login", loginContent);
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        var freshClient = _factory.CreateClient();
+        freshClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", loginBody!.Token);
+
+        var request = new CreateAttemptRequestDto(UserAnswer: "DEFINITELY_WRONG_ANSWER_12345", ElapsedSeconds: 30);
+        var response = await freshClient.PostAsync(
+            $"/api/v1/challenges/{_firstChallengeId}/attempt",
+            CreateRequestContent(request)
+        );
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var result = await DeserializeResponse<AttemptResponseDto>(response);
+        Assert.NotNull(result);
+        Assert.Empty(result.NewBadges);
     }
 
     [Fact]

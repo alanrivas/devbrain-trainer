@@ -33,11 +33,13 @@ if (!string.IsNullOrEmpty(connectionString) && !isTestEnvironment)
 builder.Services.AddScoped<IChallengeRepository, EFChallengeRepository>();
 builder.Services.AddScoped<IAttemptRepository, EFAttemptRepository>();
 builder.Services.AddScoped<IUserRepository, EFUserRepository>();
+builder.Services.AddScoped<IBadgeRepository, EFBadgeRepository>();
 
 // Register services
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddSingleton<IEloRatingService, EloRatingService>();
+builder.Services.AddSingleton<IBadgeAwardService, BadgeAwardService>();
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 
 // Redis + Streak

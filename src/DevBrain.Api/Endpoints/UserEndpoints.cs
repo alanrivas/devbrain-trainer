@@ -16,6 +16,11 @@ public static class UserEndpoints
             .WithName("GetUserStats")
             .WithDescription("Obtiene estadísticas del usuario autenticado")
             .RequireAuthorization();
+
+        group.MapGet("/me/badges", GetUserBadges)
+            .WithName("GetUserBadges")
+            .WithDescription("Obtiene los badges del usuario autenticado")
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> GetUserStats(
@@ -70,5 +75,29 @@ public static class UserEndpoints
         );
 
         return Results.Ok(response);
+    }
+
+    private static async Task<IResult> GetUserBadges(
+        HttpContext httpContext,
+        IUserRepository userRepository,
+        IBadgeRepository badgeRepository
+    )
+    {
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        var user = await userRepository.GetByIdAsync(userId);
+        if (user == null)
+            return Results.NotFound(new
+            {
+                type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                title = "Not Found",
+                status = 404,
+                detail = "User not found"
+            });
+
+        var badges = await badgeRepository.GetByUserAsync(userId);
+        return Results.Ok(badges.Select(b => new UserBadgeResponseDto(b.Type.ToString(), b.EarnedAt)));
     }
 }

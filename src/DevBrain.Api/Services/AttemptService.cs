@@ -1,3 +1,4 @@
+using DevBrain.Domain.Entities;
 using DevBrain.Domain.Interfaces;
 using DevBrain.Domain.Services;
 using DevBrain.Infrastructure.Services;
@@ -11,19 +12,25 @@ public sealed class AttemptService : IAttemptService
     private readonly IUserRepository _userRepository;
     private readonly IEloRatingService _eloRatingService;
     private readonly IStreakService _streakService;
+    private readonly IBadgeRepository _badgeRepository;
+    private readonly IBadgeAwardService _badgeAwardService;
 
     public AttemptService(
         IChallengeRepository challengeRepository,
         IAttemptRepository attemptRepository,
         IUserRepository userRepository,
         IEloRatingService eloRatingService,
-        IStreakService streakService)
+        IStreakService streakService,
+        IBadgeRepository badgeRepository,
+        IBadgeAwardService badgeAwardService)
     {
         _challengeRepository = challengeRepository;
         _attemptRepository = attemptRepository;
         _userRepository = userRepository;
         _eloRatingService = eloRatingService;
         _streakService = streakService;
+        _badgeRepository = badgeRepository;
+        _badgeAwardService = badgeAwardService;
     }
 
     public async Task<AttemptResult> SubmitAsync(Guid challengeId, Guid userId, string userAnswer, int elapsedSecs)
@@ -57,6 +64,46 @@ public sealed class AttemptService : IAttemptService
 
         var newStreak = await _streakService.RecordAttemptAsync(userId, attempt.OccurredAt);
 
+        // Badge evaluation — get all attempts (desc by OccurredAt) to compute consecutiveCorrect
+        var allAttempts = await _attemptRepository.GetByUserAsync(userId);
+        var totalAttempts = allAttempts.Count;
+
+        int consecutiveCorrect;
+        if (!attempt.IsCorrect)
+        {
+            consecutiveCorrect = 0;
+        }
+        else
+        {
+            var count = 0;
+            foreach (var a in allAttempts)   // ordered desc by OccurredAt
+            {
+                if (a.IsCorrect) count++;
+                else break;
+            }
+            consecutiveCorrect = count;
+        }
+
+        var alreadyEarned = (await _badgeRepository.GetByUserAsync(userId))
+            .Select(b => b.Type)
+            .ToList();
+
+        var badgeContext = new BadgeAwardContext(
+            IsCorrect: attempt.IsCorrect,
+            Difficulty: challenge.Difficulty,
+            TotalAttempts: totalAttempts,
+            ConsecutiveCorrect: consecutiveCorrect,
+            CurrentStreak: newStreak,
+            NewEloRating: newEloRating
+        );
+
+        var newBadgeTypes = _badgeAwardService.EvaluateNewBadges(badgeContext, alreadyEarned);
+
+        foreach (var badgeType in newBadgeTypes)
+        {
+            await _badgeRepository.AddAsync(UserBadge.Create(userId, badgeType));
+        }
+
         return new AttemptResult(
             AttemptId: attempt.Id,
             ChallengeId: attempt.ChallengeId,
@@ -68,7 +115,8 @@ public sealed class AttemptService : IAttemptService
             ChallengeTitle: challenge.Title,
             OccurredAt: attempt.OccurredAt,
             NewEloRating: newEloRating,
-            NewStreak: newStreak
+            NewStreak: newStreak,
+            NewBadges: newBadgeTypes.Select(b => b.ToString()).ToList()
         );
     }
 }

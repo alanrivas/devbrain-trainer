@@ -16,5 +16,6 @@ public sealed record AttemptResult(
     string ChallengeTitle,
     DateTimeOffset OccurredAt,
     int NewEloRating,
-    int NewStreak
+    int NewStreak,
+    IReadOnlyList<string> NewBadges
 );

@@ -34,23 +34,26 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
-| Infrastructure.Tests | 47 | ✅ 47/47 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8) — EFUserRepository cubierto por API tests |
-| Api.Tests | 77 | ✅ 77/77 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10) |
-| **TOTAL** | **193** | **✅ 193/193** | 100% pass rate |
+| Infrastructure.Tests | 53 | ✅ 53/53 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6) |
+| Api.Tests | 83 | ✅ 83/83 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (28 — +2 badge tests), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10), GET /users/me/badges (4) |
+| **TOTAL** | **205** | **✅ 205/205** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **Badge system (Domain) — 27 tests en verde (193/193 total)**
+> ✅ **EFBadgeRepository + integración completa del sistema de badges — 12 tests en verde (205/205 total)**
 >
 > **Resumen**:
-> - `BadgeType` enum — 8 badges: FirstBlood, OnFire, WeekWarrior, RisingStar, SharpMind, Centurion, Perfectionist, Brave
-> - `UserBadge` entity — factory method con validación de UserId
-> - `IBadgeRepository` — AddAsync, GetByUserAsync, HasBadgeAsync
-> - `BadgeAwardContext` record — encapsula estado post-attempt para evaluar condiciones
-> - `IBadgeAwardService` + `BadgeAwardService` — lógica pura, evalúa badges nuevos dados contexto y ya ganados
-> - `IAttemptRepository.CountAllByUserAsync` — nuevo método, implementado en EFAttemptRepository
-> - 27 tests en verde (Domain.Tests), todos los badges cubiertos individualmente y en combinación
+> - `EFBadgeRepository` — implementación EF de `IBadgeRepository` (AddAsync, GetByUserAsync, HasBadgeAsync)
+> - Tabla `user_badges` en `DevBrainDbContext` — índices y FK configurados
+> - Migración EF Core: `AddUserBadgesTable` — aplicada a schema local
+> - `AttemptService` integrado — evalúa y persiste badges tras cada attempt (lógica de `BadgeAwardService`)
+> - `AttemptResult` + `AttemptResponseDto` — incluyen `NewBadges: string[]`
+> - Endpoint `GET /users/me/badges` — lista autenticada de badges del usuario
+> - Tests:
+>   - `EFBadgeRepositoryTests` (6 tests) — AddAsync, GetByUserAsync, HasBadgeAsync con múltiples usuarios
+>   - `GetUserBadgesTests` (4 tests) — 401 sin token, 200 con array vacío, array con badges, formato ISO8601
+>   - `PostAttemptEndpointTests` (+2 tests) — FirstBlood en primer intento correcto, empty array en intento fallido
 >
-> **Próximo paso**: `specs/infrastructure/ef-badge-repository.spec.md` — tabla UserBadges, EFBadgeRepository, migración EF Core, integración en AttemptService, endpoint GET /users/me/badges
+> **Próximo paso**: Frontend Next.js (Fase 3) o generación dinámica de challenges con Claude API (Fase 4)
 
 ---
 
@@ -130,6 +133,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `ef-challenge-repository.spec.md` — implementación EF de IChallengeRepository
 - [x] `ef-attempt-repository.spec.md` — implementación EF de IAttemptRepository
 - [x] `ef-user-repository.spec.md` — implementación EF de IUserRepository (AddAsync, GetByEmailAsync, GetByIdAsync) — sin test file dedicado, cubierto por API tests
+- [x] `ef-badge-repository.spec.md` — tabla UserBadges, EFBadgeRepository, integración en AttemptService, endpoint GET /users/me/badges (12 tests en verde)
 
 ### Fase C — Auth (`specs/api/`)
 - [x] `post-auth-login.spec.md` — POST /auth/login — email + password → JWT propio (11 tests, HS256, 24h expiration)
@@ -185,7 +189,8 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### Fase 2 — Gamificación
 - [x] Sistema de streak — RedisStreakService (8 tests integración, TTL 48h)
 - [x] Rating ELO global — EloRatingService (12 tests, fórmula adaptada con time modifier)
-- [x] Logros / badges — BadgeAwardService Domain (27 tests) + EFBadgeRepository pendiente
+- [x] Logros / badges — BadgeAwardService Domain (27 tests) + EFBadgeRepository (6 tests) + Endpoint GET /users/me/badges (4 tests)
+- [x] **TOTAL: 205/205 tests passing (100% pass rate)**
 
 ### Fase 3 — Frontend
 - [ ] Next.js + Tailwind

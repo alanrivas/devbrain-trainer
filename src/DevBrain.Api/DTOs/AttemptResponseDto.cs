@@ -11,5 +11,6 @@ public record AttemptResponseDto(
     string ChallengeTitle,
     DateTime OccurredAt,
     int NewEloRating,
-    int NewStreak
+    int NewStreak,
+    string[] NewBadges
 );

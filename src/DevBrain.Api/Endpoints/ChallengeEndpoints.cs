@@ -205,7 +205,8 @@ public static class ChallengeEndpoints
             ChallengeTitle: result.ChallengeTitle,
             OccurredAt: result.OccurredAt.UtcDateTime,
             NewEloRating: result.NewEloRating,
-            NewStreak: result.NewStreak
+            NewStreak: result.NewStreak,
+            NewBadges: result.NewBadges.ToArray()
         );
 
         return Results.Created($"/api/v1/challenges/{id}/attempt/{result.AttemptId}", responseDto);

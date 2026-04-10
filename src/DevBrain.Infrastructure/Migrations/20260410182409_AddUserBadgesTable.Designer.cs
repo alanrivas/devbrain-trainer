@@ -3,6 +3,7 @@ using System;
 using DevBrain.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DevBrain.Infrastructure.Migrations
 {
     [DbContext(typeof(DevBrainDbContext))]
-    partial class DevBrainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260410182409_AddUserBadgesTable")]
+    partial class AddUserBadgesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
