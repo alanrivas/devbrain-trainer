@@ -33,24 +33,41 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
-| Domain.Tests | 42 | ✅ 42/42 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12) |
+| Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
 | Infrastructure.Tests | 47 | ✅ 47/47 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8) — EFUserRepository cubierto por API tests |
 | Api.Tests | 77 | ✅ 77/77 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10) |
-| **TOTAL** | **166** | **✅ 166/166** | 100% pass rate |
+| **TOTAL** | **193** | **✅ 193/193** | 100% pass rate |
 
 ## Último paso completado
+> ✅ **Badge system (Domain) — 27 tests en verde (193/193 total)**
+>
+> **Resumen**:
+> - `BadgeType` enum — 8 badges: FirstBlood, OnFire, WeekWarrior, RisingStar, SharpMind, Centurion, Perfectionist, Brave
+> - `UserBadge` entity — factory method con validación de UserId
+> - `IBadgeRepository` — AddAsync, GetByUserAsync, HasBadgeAsync
+> - `BadgeAwardContext` record — encapsula estado post-attempt para evaluar condiciones
+> - `IBadgeAwardService` + `BadgeAwardService` — lógica pura, evalúa badges nuevos dados contexto y ya ganados
+> - `IAttemptRepository.CountAllByUserAsync` — nuevo método, implementado en EFAttemptRepository
+> - 27 tests en verde (Domain.Tests), todos los badges cubiertos individualmente y en combinación
+>
+> **Próximo paso**: `specs/infrastructure/ef-badge-repository.spec.md` — tabla UserBadges, EFBadgeRepository, migración EF Core, integración en AttemptService, endpoint GET /users/me/badges
+
+---
+
 > ✅ **Deploy a Azure App Service completado y validado en producción**
 >
 > **Resumen**:
 > - Causa raíz del crash resuelto: Npgsql no soporta formato URI de Neon → migrado a formato ADO.NET (`Host=...;Database=...;Username=...;SSL Mode=Require;Trust Server Certificate=true`)
 > - Migraciones aplicadas a Neon (`InitialCreate` + `AddEloRatingToUser`) — 10 challenges seeded
 > - `ConnectionStrings__DefaultConnection` actualizado en Azure App Service (resource group: `devbrain-rg`)
+> - CI: deploy via GitHub Actions con native .NET publish (no Docker — Azure App Service F1 no soporta Docker)
+> - Startup resiliente: Redis/DB errors no crashean la app (fallan silenciosamente al arrancar)
+> - `/health` y `/scalar` expuestos en producción ✅
 > - Flujo completo validado en `https://devbrain-trainer.azurewebsites.net`:
 >   - `GET /api/v1/challenges` → 10 challenges ✅
 >   - `POST /api/v1/auth/register` → usuario creado en Neon ✅
 >   - `POST /api/v1/auth/login` → JWT generado ✅
 >   - `POST /api/v1/challenges/{id}/attempt` → ELO actualizado, streak=1 (Redis Cloud) ✅
-> - Nota: `/health` devuelve 404 en Azure (posiblemente interceptado por Azure App Service), no bloqueante
 >
 > **Próximo paso**: Frontend Next.js (Fase 3) o generación dinámica con Claude API (Fase 4)
 
@@ -64,7 +81,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Frontend | Next.js + Tailwind |
 | DB principal | PostgreSQL |
 | Cache / streak | Redis |
-| Deploy backend | Railway |
+| Deploy backend | Azure App Service (devbrain-trainer.azurewebsites.net) |
 | Deploy frontend | GitHub Pages / Vercel |
 | Auth | JWT propio (HS256, 24h expiration) |
 | Generación dinámica | Claude API |
@@ -130,6 +147,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### Fase F — Gamificación (`specs/gamification/`)
 - [x] `streak.spec.md` — streak diario con Redis (8 tests integración, TTL 48h, reset si gap >1 día)
 - [x] `elo-rating.spec.md` — cálculo de rating ELO global tras cada attempt (12 tests, fórmula ELO adaptada con time modifier)
+- [x] `badges.spec.md` — sistema de badges: BadgeType (8), UserBadge entity, IBadgeRepository, BadgeAwardService (27 tests en verde)
 
 ### Post-MVP (no bloquean el MVP)
 - Badges / logros
@@ -167,7 +185,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### Fase 2 — Gamificación
 - [x] Sistema de streak — RedisStreakService (8 tests integración, TTL 48h)
 - [x] Rating ELO global — EloRatingService (12 tests, fórmula adaptada con time modifier)
-- [ ] Logros / badges
+- [x] Logros / badges — BadgeAwardService Domain (27 tests) + EFBadgeRepository pendiente
 
 ### Fase 3 — Frontend
 - [ ] Next.js + Tailwind

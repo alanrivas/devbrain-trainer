@@ -52,4 +52,14 @@ public sealed class EFAttemptRepository : IAttemptRepository
             .Where(a => a.UserId == userId && a.IsCorrect)
             .CountAsync();
     }
+
+    public async Task<int> CountAllByUserAsync(Guid userId)
+    {
+        if (userId == Guid.Empty)
+            return 0;
+
+        return await _context.Attempts
+            .Where(a => a.UserId == userId)
+            .CountAsync();
+    }
 }

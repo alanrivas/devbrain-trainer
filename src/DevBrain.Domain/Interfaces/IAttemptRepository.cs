@@ -8,4 +8,5 @@ public interface IAttemptRepository
     Task<IReadOnlyList<Attempt>> GetByUserAsync(Guid userId);
     Task<Attempt?> GetLastByUserAsync(Guid userId);
     Task<int> CountCorrectByUserAsync(Guid userId);
+    Task<int> CountAllByUserAsync(Guid userId);
 }
