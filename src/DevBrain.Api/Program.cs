@@ -3,10 +3,12 @@ using DevBrain.Api.Endpoints;
 using DevBrain.Api.Services;
 using DevBrain.Domain.Interfaces;
 using DevBrain.Infrastructure.Persistence;
+using DevBrain.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,16 @@ builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 // Register services
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// Redis + Streak
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
+if (!isTestEnvironment)
+{
+    builder.Services.AddSingleton<IConnectionMultiplexer>(
+        ConnectionMultiplexer.Connect(redisConnectionString)
+    );
+    builder.Services.AddScoped<IStreakService, RedisStreakService>();
+}
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"]

@@ -34,14 +34,23 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
 | Domain.Tests | 42 | ✅ 42/42 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12) |
-| Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17) — EFUserRepository cubierto por API tests |
+| Infrastructure.Tests | 47 | ✅ 47/47 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8) — EFUserRepository cubierto por API tests |
 | Api.Tests | 77 | ✅ 77/77 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10) |
-| **TOTAL** | **158** | **✅ 158/158** | 100% pass rate |
+| **TOTAL** | **166** | **✅ 166/166** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **EloRatingService implemented** — 12 tests passing, **158/158 total**
+> ✅ **RedisStreakService implemented** — 8 tests passing contra Redis real, **166/166 total**
 >
 > **Implementation Details**:
+> - `IStreakService` + `RedisStreakService` en `DevBrain.Infrastructure.Services`
+> - Claves Redis: `streak:{userId}:count` + `streak:{userId}:last_date` (TTL 48h)
+> - Lógica: mismo día → no cambia, día siguiente → +1, gap >1 día → reset a 1
+> - 8 tests de integración contra Redis real (`localhost:6379`), cada test con userId único
+> - `IConnectionMultiplexer` registrado como Singleton en Program.cs (solo en non-test)
+> - `IStreakService` registrado como Scoped en Program.cs
+> - `StackExchange.Redis` v2.12.14 agregado a `DevBrain.Infrastructure`
+>
+> **Previous step — EloRatingService**:
 > - Servicio puro de dominio: `IEloRatingService` + `EloRatingService` en `DevBrain.Domain.Services`
 > - Fórmula: ELO adaptado — expected probability + score + time modifier (1.0–1.25) + floor 100
 > - Constantes: K=32, Easy=800, Medium=1200, Hard=1600, initial=1000
@@ -89,8 +98,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - ✅ `GET /api/v1/users/me/stats` — user stats **(requires JWT)**
 >
 > **Next Step**:
-> - `streak.spec.md` (Fase F) — requiere instalar y configurar Redis primero
-> - `attempt-service.spec.md` (Fase D) — orquestar: guardar attempt + recalcular ELO + actualizar streak (depende de streak)
+> - `attempt-service.spec.md` (Fase D) — orquestar: guardar attempt + recalcular ELO + actualizar streak
+> - Actualizar `GET /users/me/stats` para leer streak real desde Redis (reemplazar placeholder)
 
 ---
 
@@ -165,7 +174,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `get-user-stats.spec.md` — GET /users/me/stats — totalAttempts, correctAttempts, accuracyRate, streak/ELO placeholders (10 tests)
 
 ### Fase F — Gamificación
-- [ ] `streak.spec.md` — regla de streak diario (Redis, se rompe si no hay attempt en 24h)
+- [x] `streak.spec.md` — streak diario con Redis (8 tests integración, TTL 48h, reset si gap >1 día)
 - [x] `elo-rating.spec.md` — cálculo de rating ELO global tras cada attempt (12 tests, fórmula ELO adaptada con time modifier)
 
 ### Post-MVP (no bloquean el MVP)
