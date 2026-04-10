@@ -165,7 +165,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `iattempt-repository.spec.md` — interfaz de persistencia de attempts (en Domain, sin EF)
 - [x] `iuser-repository.spec.md` — interfaz de persistencia de usuarios (en Domain, sin EF)
 - [x] `attempt-service.spec.md` — orquesta: Attempt.Create + ELO.Calculate + User.UpdateEloRating + Streak.RecordAttemptAsync
-- [ ] `seed-challenges.spec.md` — datos iniciales para poder probar el MVP (al menos 10 challenges)
+- [x] `seed-challenges.spec.md` — 10 challenges con GUIDs fijos via EF Core HasData, incluidos en `InitialCreate`
 
 ### Fase B — Infraestructura (`specs/infrastructure/`)
 - [x] `devbrain-dbcontext.spec.md` — DbContext EF Core (tablas, configuraciones, migraciones, seed data)
