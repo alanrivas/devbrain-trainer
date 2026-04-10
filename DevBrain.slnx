@@ -8,5 +8,6 @@
     <Project Path="tests/DevBrain.Api.Tests/DevBrain.Api.Tests.csproj" />
     <Project Path="tests/DevBrain.Domain.Tests/DevBrain.Domain.Tests.csproj" />
     <Project Path="tests/DevBrain.Infrastructure.Tests/DevBrain.Infrastructure.Tests.csproj" />
+    <Project Path="tests/DevBrain.Integration.Tests/DevBrain.Integration.Tests.csproj" />
   </Folder>
 </Solution>

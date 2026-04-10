@@ -51,6 +51,7 @@ public sealed class AttemptService : IAttemptService
 
         await _attemptRepository.AddAsync(attempt);
 
+
         var newEloRating = _eloRatingService.Calculate(
             userRating: user.EloRating,
             difficulty: challenge.Difficulty,

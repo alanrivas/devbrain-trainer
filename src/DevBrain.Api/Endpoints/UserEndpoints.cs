@@ -46,19 +46,13 @@ public static class UserEndpoints
                 detail = "User not found"
             });
 
-        // Fetch attempt stats in parallel
-        var attemptsTask = attemptRepository.GetByUserAsync(userId);
-        var correctCountTask = attemptRepository.CountCorrectByUserAsync(userId);
-        var lastAttemptTask = attemptRepository.GetLastByUserAsync(userId);
-
-        await Task.WhenAll(attemptsTask, correctCountTask, lastAttemptTask);
-
-        var totalAttempts = attemptsTask.Result.Count;
-        var correctAttempts = correctCountTask.Result;
-        var lastAttempt = lastAttemptTask.Result;
+        // Fetch attempt stats sequentially to avoid DbContext concurrency issues
+        var totalAttempts = (await attemptRepository.GetByUserAsync(userId)).Count;
+        var correctAttempts = await attemptRepository.CountCorrectByUserAsync(userId);
+        var lastAttempt = await attemptRepository.GetLastByUserAsync(userId);
 
         var accuracyRate = totalAttempts > 0
-            ? (float)correctAttempts / totalAttempts
+            ? (float)correctAttempts / totalAttempts * 100f
             : 0.0f;
 
         var currentStreak = await streakService.GetStreakAsync(userId);
