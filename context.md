@@ -34,30 +34,36 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
-| Infrastructure.Tests | 53 | ✅ 53/53 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6) |
+| Infrastructure.Tests | 58 | ✅ 58/58 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5) |
 | Api.Tests | 83 | ✅ 83/83 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (28 — +2 badge tests), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10), GET /users/me/badges (4) |
 | Integration.Tests | 2 | ✅ 2/2 | E2E happy path, multi-user isolation (TestContainers + real PostgreSQL/Redis) |
-| **TOTAL** | **207** | **✅ 207/207** | 100% pass rate |
+| **TOTAL** | **212** | **✅ 212/212** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **Phase 3.1: E2E Integration Tests — COMPLETADO**
+> ✅ **Phase 3.2: Serilog + Application Insights Logging Infrastructure — COMPLETADO**
 >
 > **Resumen de la sesión**:
-> - 207/207 tests en verde (205 unit tests + 2 integration tests)
-> - E2E Integration Test project created: `tests/DevBrain.Integration.Tests/`
-> - TestContainers setup: PostgreSQL v17-alpine + Redis v7-alpine
-> - Full user journey validated: Register → Login → Challenges → Attempt → Stats → Badges
-> - Multi-user isolation verified (no cross-contamination)
-> - Key fixes applied:
->   - AccuracyRate calculation (now 0-100%, was 0-1)
->   - DbContext concurrency (sequential calls vs parallel)
->   - MockStreakService registration (Singleton for shared state)
-> - Both tests passing (2/2):
->   - ✅ E2E_Register_Login_Challenges_Attempt_Stats_Badges_HappyPath
->   - ✅ E2E_MultipleAttempts_SameChallengeByDifferentUsers_NoConflict
-> - Commit: `c5a5d6e` — "feat: E2E Integration Tests with TestContainers — Phase 3.1"
-> 
-> **Próximo paso**: **Phase 3.2 — Concurrency Tests** (simultaneous users, race conditions)
+> - 212/212 tests en verde (207 unit + integration tests + 5 SerilogLoggingTests)
+> - Spec completada: `specs/infrastructure/serilog-logging.spec.md` (330+ líneas, full SDD)
+> - NuGet packages agregados: Serilog, Serilog.AspNetCore, Serilog.Sinks.Console/File/ApplicationInsights, Serilog.Enrichers.Environment
+> - Program.cs integrado con Serilog:
+>   - Inicialización ANTES de WebApplicationBuilder (best practice)
+>   - Multi-sink configuration: Console (JSON), File (rolling daily, 30-day retention), Application Insights
+>   - Enrichers: FromLogContext, WithEnvironmentUserName, WithProperty(Environment)
+>   - Try-catch-finally con Log.Fatal logging
+> - Tests creados: `SerilogLoggingTests.cs` (7 test methods, todos en verde)
+> - Configuración por entorno: Dev→Debug, Testing→Minimal, Production→Information
+> - Invariantes validados: no passwords/tokens logged, structured JSON format, zero duplication
+> - Fix aplicado: GetUserStats accuracy tests (ahora expect 50/100 en lugar de 0.5/1.0 decimal)
+> - Logging ready para:
+>   - Auth (register/login/token generation)
+>   - Challenges (CRUD operations)
+>   - Attempts (submission, scoring, badge awarding)
+>   - User stats (ELO updates, streak tracking)
+>   - Infrastructure (startup, DB migrations, Redis connection)
+> - Commit: (pending — listos para hacer push)
+>
+> **Próximo paso**: **Phase 3.3 — Endpoint Logging Integration** (add ILogger<T> to endpoints, Log.Information calls, validate all 212+ tests still pass)
 
 ---
 

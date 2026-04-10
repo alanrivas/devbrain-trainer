@@ -5,129 +5,176 @@ using DevBrain.Domain.Interfaces;
 using DevBrain.Domain.Services;
 using DevBrain.Infrastructure.Persistence;
 using DevBrain.Infrastructure.Services;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 using StackExchange.Redis;
+using Serilog.Enrichers;
 
-var builder = WebApplication.CreateBuilder(args);
+// 🔧 Configure Serilog before building app
+var logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentUserName()
+    .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
+    .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter())
+    .WriteTo.File(
+        path: "logs/devbrain-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:HH:mm:ss}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+        retainedFileCountLimit: 30
+    )
+    .WriteTo.ApplicationInsights(
+        new TelemetryClient(),
+        TelemetryConverter.Traces
+    )
+    .CreateLogger();
 
-// Add DB context
-// Only use PostgreSQL if:
-// 1. Connection string exists in config
-// 2. NOT running under test/xUnit (which will inject In-Memory via WebApplicationFactory)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var isTestEnvironment = builder.Environment.EnvironmentName == "Testing" || 
-                       Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_TEST") == "true";
+Log.Logger = logger;
 
-if (!string.IsNullOrEmpty(connectionString) && !isTestEnvironment)
+try
 {
-    builder.Services.AddDbContext<DevBrainDbContext>(options =>
-        options.UseNpgsql(connectionString)
-    );
-}
-// Otherwise, the factory will inject in-memory for tests
+    Log.Information("🚀 Starting DevBrain API - Environment: {Environment}", 
+        Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production");
 
-// Register repositories
-builder.Services.AddScoped<IChallengeRepository, EFChallengeRepository>();
-builder.Services.AddScoped<IAttemptRepository, EFAttemptRepository>();
-builder.Services.AddScoped<IUserRepository, EFUserRepository>();
-builder.Services.AddScoped<IBadgeRepository, EFBadgeRepository>();
+    var builder = WebApplication.CreateBuilder(args);
 
-// Register services
-builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-builder.Services.AddSingleton<IEloRatingService, EloRatingService>();
-builder.Services.AddSingleton<IBadgeAwardService, BadgeAwardService>();
-builder.Services.AddScoped<IAttemptService, AttemptService>();
+    // 🔧 Integrate Serilog
+    builder.Host.UseSerilog(logger);
+    builder.Services.AddApplicationInsightsTelemetry();
 
-// Redis + Streak
-var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
-if (!isTestEnvironment)
-{
-    try
+    // Add DB context
+    // Only use PostgreSQL if:
+    // 1. Connection string exists in config
+    // 2. NOT running under test/xUnit (which will inject In-Memory via WebApplicationFactory)
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var isTestEnvironment = builder.Environment.EnvironmentName == "Testing" || 
+                           Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_TEST") == "true";
+
+    if (!string.IsNullOrEmpty(connectionString) && !isTestEnvironment)
     {
-        var redis = ConnectionMultiplexer.Connect(redisConnectionString);
-        builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-        builder.Services.AddScoped<IStreakService, RedisStreakService>();
+        builder.Services.AddDbContext<DevBrainDbContext>(options =>
+            options.UseNpgsql(connectionString)
+        );
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[STARTUP] Redis connection failed: {ex.Message}. Streak service disabled.");
-    }
-}
+    // Otherwise, the factory will inject in-memory for tests
 
-// JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? throw new InvalidOperationException("Jwt:Secret not configured");
-var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+    // Register repositories
+    builder.Services.AddScoped<IChallengeRepository, EFChallengeRepository>();
+    builder.Services.AddScoped<IAttemptRepository, EFAttemptRepository>();
+    builder.Services.AddScoped<IUserRepository, EFUserRepository>();
+    builder.Services.AddScoped<IBadgeRepository, EFBadgeRepository>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    // Register services
+    builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+    builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+    builder.Services.AddSingleton<IEloRatingService, EloRatingService>();
+    builder.Services.AddSingleton<IBadgeAwardService, BadgeAwardService>();
+    builder.Services.AddScoped<IAttemptService, AttemptService>();
+
+    // Redis + Streak
+    var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
+    if (!isTestEnvironment)
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        try
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = signingKey,
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
-builder.Services.AddAuthorization();
-
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer((document, context, _) =>
-    {
-        document.Info.Title = "DevBrain Trainer API";
-        document.Info.Version = "v1";
-        document.Info.Description = "API de entrenamiento cognitivo gamificada para desarrolladores.";
-        return Task.CompletedTask;
-    });
-});
-
-var app = builder.Build();
-
-// Auto-migrate on startup (production + local, not in tests)
-if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
-{
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
-        await db.Database.MigrateAsync();
-        Console.WriteLine("[STARTUP] Database migration completed.");
+            var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+            builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+            builder.Services.AddScoped<IStreakService, RedisStreakService>();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning("⚠️ Redis connection failed: {Message}. Streak service disabled.", ex.Message);
+        }
     }
-    catch (Exception ex)
+
+    // JWT Authentication
+    var jwtSecret = builder.Configuration["Jwt:Secret"]
+        ?? throw new InvalidOperationException("Jwt:Secret not configured");
+    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = signingKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddOpenApi(options =>
     {
-        Console.WriteLine($"[STARTUP] Database migration failed: {ex.Message}");
+        options.AddDocumentTransformer((document, context, _) =>
+        {
+            document.Info.Title = "DevBrain Trainer API";
+            document.Info.Version = "v1";
+            document.Info.Description = "API de entrenamiento cognitivo gamificada para desarrolladores.";
+            return Task.CompletedTask;
+        });
+    });
+
+    var app = builder.Build();
+
+    // Auto-migrate on startup (production + local, not in tests)
+    if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
+    {
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
+            await db.Database.MigrateAsync();
+            Log.Information("✅ Database migration completed");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "❌ Database migration failed");
+        }
     }
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Health check — public, no auth
+    app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTimeOffset.UtcNow }));
+
+    // Scalar UI — available in all environments
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "DevBrain Trainer";
+        options.Theme = ScalarTheme.DeepSpace;
+    });
+
+    // API endpoints
+    app.MapChallengeEndpoints();
+    app.MapAuthEndpoints();
+    app.MapUserEndpoints();
+
+    Log.Information("✅ Application started successfully");
+    app.Run();
 }
-
-if (app.Environment.IsDevelopment())
+catch (Exception ex)
 {
-    app.UseHttpsRedirection();
+    Log.Fatal(ex, "❌ Application crashed");
+    throw;
 }
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Health check — public, no auth
-app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTimeOffset.UtcNow }));
-
-// Scalar UI — available in all environments
-app.MapOpenApi();
-app.MapScalarApiReference(options =>
+finally
 {
-    options.Title = "DevBrain Trainer";
-    options.Theme = ScalarTheme.DeepSpace;
-});
-
-// API endpoints
-app.MapChallengeEndpoints();
-app.MapAuthEndpoints();
-app.MapUserEndpoints();
-
-app.Run();
+    Log.CloseAndFlush();
+}

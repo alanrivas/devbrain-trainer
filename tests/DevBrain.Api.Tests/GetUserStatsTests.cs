@@ -184,7 +184,7 @@ public class GetUserStatsTests : IAsyncLifetime
 
         var result = await Deserialize<UserStatsResponse>(response);
         Assert.NotNull(result);
-        Assert.Equal(0.5f, result.AccuracyRate);
+        Assert.Equal(50f, result.AccuracyRate);
     }
 
     [Fact]
@@ -202,7 +202,7 @@ public class GetUserStatsTests : IAsyncLifetime
 
         var result = await Deserialize<UserStatsResponse>(response);
         Assert.NotNull(result);
-        Assert.Equal(1.0f, result.AccuracyRate);
+        Assert.Equal(100f, result.AccuracyRate);
     }
 
     [Fact]
