@@ -7,6 +7,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora tu lógic
 **Docs**: 
 - [`context.md`](./context.md) — Estado del proyecto y roadmap detallado
 - [`STACK.md`](./STACK.md) — Tech stack completo con setup guides
+- [`docs/AGENTS-SKILLS-REFERENCE.md`](./docs/AGENTS-SKILLS-REFERENCE.md) — **Todos los agentes y skills disponibles con ejemplos**
 - [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Metodología SDD+TDD
 - [`docs/API-ENDPOINTS.md`](./docs/API-ENDPOINTS.md) — Referencia completa de endpoints
 - [`CLAUDE.md`](./CLAUDE.md) — Instrucciones para Claude Code

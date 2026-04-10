@@ -30,6 +30,21 @@ El flujo obligatorio por cada iteración es:
 
 **Nunca escribir implementación sin spec previa. Nunca escribir spec sin actualizar el contexto al terminar.**
 
+## Protocolo: Validación de Sesión Inicial
+
+**SIEMPRE que inicies una sesión nueva** (después que la anterior cerró por token limit):
+
+1. Ejecuta agente `session-validator`:
+   - Valida estado real vs context.md
+   - Reporta sincronización
+   - Sugiere próximo paso
+
+2. Espera resultado del agente
+
+3. Una vez validado, continúa con trabajo según contexto reportado
+
+**Referencia**: Ver `docs/AGENTS-SKILLS-REFERENCE.md` para detalles completos de todos los agentes y skills disponibles.
+
 ## Skills disponibles
 
 Los skills están en `.github/skills/` y funcionan como comandos estructurados:
