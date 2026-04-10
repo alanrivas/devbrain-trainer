@@ -202,10 +202,17 @@ jobs:
 
 ---
 
-## Próximo Relacionado: `update-context`
+## Próximo Relacionado: `update-context` Skill
 
-Después de validar todo, usa el skill [`update-context`](../.../../update-context/SKILL.md) para:
+Después de validar todo, usa el skill [`update-context`](../update-context/SKILL.md) para:
 - Actualizar test counts si cambiaron
 - Marcar features como completadas
 - Documentar próximo paso
 - Crear commit automático
+
+## Agente Relacionado: `session-validator`
+
+Para automatizar cada paso de este skill, usa el agente:
+- Ubicación: `.github/agents/session-validator/AGENT.md`
+- Invocación: `runSubagent(agentName="session-validator", ...)`
+- Toma todo lo de arriba pero lo ejecuta automáticamente en 2-3 min

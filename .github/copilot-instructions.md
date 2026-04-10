@@ -34,7 +34,7 @@ El flujo obligatorio por cada iteración es:
 
 **SIEMPRE que inicies una sesión nueva** (después que la anterior cerró por token limit):
 
-1. Ejecuta agente `session-validator`:
+1. Ejecuta agente `session-validator` (ver `.github/agents/session-validator/AGENT.md`):
    - Valida estado real vs context.md
    - Reporta sincronización
    - Sugiere próximo paso

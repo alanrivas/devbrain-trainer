@@ -30,7 +30,8 @@ Ejemplos de agentes:
 
 ### 1. `session-startup` — Validar Estado de Sesión
 
-**Archivo**: `.github/skills/session-startup/SKILL.md`
+**Skill**: `.github/skills/session-startup/SKILL.md`
+**Agente**: `.github/agents/session-validator/AGENT.md`
 
 **Propósito**: Validar que el proyecto está en estado consistente al iniciar nueva sesión.
 
@@ -264,7 +265,22 @@ spec-implement automatiza esto:
 
 ## 🤖 Agentes del Proyecto DevBrain
 
-### 1. `Explore` — Búsqueda y Análisis de Código
+### 1. `session-validator` — Validación de Estado Inicial
+
+**Ubicación**: `.github/agents/session-validator/AGENT.md`
+
+**Propósito**: Validación automática de proyecto al iniciar sesión.
+
+**Invocación**:
+```
+runSubagent(agentName="session-validator", description="Validar estado del proyecto")
+```
+
+**Output**: Reporte de Git status, tests passing, context.md sincronización + próximo paso.
+
+---
+
+### 2. `Explore` — Búsqueda y Análisis de Código
 
 **Ubicación**: Agente built-in de Copilot
 
@@ -296,7 +312,7 @@ Explore busca y reporta:
 
 ---
 
-### 2. Agentes de Deployment
+### 3. Agentes de Deployment
 
 #### `static-site-deployer` — Desplegar Sitio Estático a GitHub Pages
 
