@@ -35,35 +35,42 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |-------|-------|--------|---------|
 | Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
 | Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17) — EFUserRepository cubierto por API tests |
-| Api.Tests | 67 | ✅ 67/67 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9) — attempt endpoint protected |
-| **TOTAL** | **136** | **✅ 136/136** | 100% pass rate, JWT middleware live, POST /attempt now protected |
+| Api.Tests | 77 | ✅ 77/77 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10) |
+| **TOTAL** | **146** | **✅ 146/146** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **JWT Authentication Middleware implemented** — 9 tests passing, **136/136 total**
+> ✅ **GET /users/me/stats implemented** — 10 tests passing, **146/146 total**
 >
 > **Implementation Details**:
-> - Middleware: `AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(...)` + `UseAuthentication()` + `UseAuthorization()`
-> - Same `TokenValidationParameters` que `JwtTokenService.ValidateToken` (consistencia garantizada)
-> - `POST /api/v1/challenges/{id}/attempt` protegido con `.RequireAuthorization()`
-> - `PostAttempt` handler ahora lee `userId` desde `HttpContext.User` (claims del JWT) en vez de `X-User-Id` header
+> - Endpoint: `GET /api/v1/users/me/stats` — requiere JWT, lee userId desde claims
+> - Stats: totalAttempts, correctAttempts, accuracyRate calculados desde `IAttemptRepository`
+> - displayName obtenido desde `IUserRepository.GetByIdAsync`
+> - Placeholders: `currentStreak = 0`, `eloRating = 1000` (hasta Fase F)
+> - Parallel fetch: `GetByUserAsync` + `CountCorrectByUserAsync` + `GetLastByUserAsync` con `Task.WhenAll`
 >
-> **Test Coverage (9/9 passing)**:
-> - Public endpoints sin token: GET /challenges → 200, GET /challenges/{id} → 200 (2 tests)
-> - Endpoint protegido sin token: sin header → 401, Bearer vacío → 401 (2 tests)
-> - Token inválido: malformado → 401, firma incorrecta → 401, expirado → 401 (3 tests)
-> - Token válido: handler ejecutado → 201, claims disponibles en handler (userId correcto) (2 tests)
+> **Test Coverage (10/10 passing)**:
+> - Sin token → 401
+> - Sin attempts → 200 con zeros y null lastAttemptAt
+> - userId y displayName coinciden con el token/DB
+> - TotalAttempts incluye todos (correctos e incorrectos)
+> - CorrectAttempts solo cuenta los correctos
+> - AccuracyRate = correctAttempts / totalAttempts (0.5 en test)
+> - AllCorrect → accuracyRate = 1.0
+> - Placeholder streak = 0
+> - Placeholder ELO = 1000
+> - lastAttemptAt refleja el attempt más reciente
 >
-> **Total Test Count**: 136/136 (30 Domain + 39 Infrastructure + 67 API)
+> **Total Test Count**: 146/146 (30 Domain + 39 Infrastructure + 77 API)
 > - Domain: User + Attempt + Challenge logic (unchanged: 30/30)
 > - Infrastructure: DbContext + 3 repositories (unchanged: 39/39)
-> - API: GET /challenges (13) + GET /challenges/{id} (8) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) + JWT middleware (9) = 67/67
+> - API: GET /challenges (13) + GET /challenges/{id} (8) + POST /attempt (26) + POST /auth/register (13) + POST /auth/login (11) + JWT middleware (9) + GET /users/me/stats (10) = 77/77
 >
 > **Code Changes**:
-> - Created: `JwtMiddlewareTests.cs` (9 test methods)
-> - Updated: `Program.cs` (AddAuthentication/JwtBearer, AddAuthorization, UseAuthentication, UseAuthorization)
-> - Updated: `ChallengeEndpoints.cs` (RequireAuthorization + userId desde claims)
-> - Updated: `PostAttemptEndpointTests.cs` (reemplazado X-User-Id por JWT real desde login)
-> - Updated: `postman/devbrain-trainer.postman_collection.json` (descripción de auth actualizada)
+> - Created: `specs/api/get-user-stats.spec.md`
+> - Created: `src/DevBrain.Api/DTOs/UserStatsResponseDto.cs`
+> - Created: `src/DevBrain.Api/Endpoints/UserEndpoints.cs`
+> - Created: `tests/DevBrain.Api.Tests/GetUserStatsTests.cs` (10 test methods)
+> - Updated: `Program.cs` (agregado `app.MapUserEndpoints()`)
 >
 > **API Endpoints Summary**:
 > - ✅ `GET /api/v1/challenges` — list with pagination + filtering (public)
@@ -71,10 +78,11 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - ✅ `POST /api/v1/challenges/{id}/attempt` — submit answer **(requires JWT)**
 > - ✅ `POST /api/v1/auth/register` — user registration + password hashing
 > - ✅ `POST /api/v1/auth/login` — JWT token generation (24h expiration)
+> - ✅ `GET /api/v1/users/me/stats` — user stats **(requires JWT)**
 >
 > **Next Step**:
 > - Fase D: `attempt-service.spec.md` — orquestar: guardar attempt + actualizar streak + recalcular ELO
-> - O: `GET /users/me/stats` — estadísticas del usuario autenticado
+> - Fase F: `streak.spec.md` → reemplazar placeholder currentStreak con lógica real (Redis)
 
 ---
 
@@ -146,7 +154,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad (13 tests en verde)
 - [x] `get-challenge.spec.md` — GET /challenges/{id} — detalle de un challenge (8 tests en verde)
 - [ ] `post-attempt.spec.md` — POST /challenges/{id}/attempt — enviar respuesta, devolver resultado + nuevo ELO
-- [ ] `get-user-stats.spec.md` — GET /users/me/stats — streak actual, ELO por categoría, totales
+- [x] `get-user-stats.spec.md` — GET /users/me/stats — totalAttempts, correctAttempts, accuracyRate, streak/ELO placeholders (10 tests)
 
 ### Fase F — Gamificación
 - [ ] `streak.spec.md` — regla de streak diario (Redis, se rompe si no hay attempt en 24h)
