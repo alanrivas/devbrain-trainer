@@ -33,15 +33,23 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
-| Domain.Tests | 30 | ✅ 30/30 | User factory + validation, Attempt entity, Challenge logic |
+| Domain.Tests | 42 | ✅ 42/42 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12) |
 | Infrastructure.Tests | 39 | ✅ 39/39 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17) — EFUserRepository cubierto por API tests |
 | Api.Tests | 77 | ✅ 77/77 | GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10) |
-| **TOTAL** | **146** | **✅ 146/146** | 100% pass rate |
+| **TOTAL** | **158** | **✅ 158/158** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **GET /users/me/stats implemented** — 10 tests passing, **146/146 total**
+> ✅ **EloRatingService implemented** — 12 tests passing, **158/158 total**
 >
 > **Implementation Details**:
+> - Servicio puro de dominio: `IEloRatingService` + `EloRatingService` en `DevBrain.Domain.Services`
+> - Fórmula: ELO adaptado — expected probability + score + time modifier (1.0–1.25) + floor 100
+> - Constantes: K=32, Easy=800, Medium=1200, Hard=1600, initial=1000
+> - Time modifier solo aplica en respuestas correctas; incorrecto siempre modifier=1.0
+> - 12 tests: correctness por dificultad, time modifier, floor de rating, valores exactos anclados
+> - Registrar como Singleton en Program.cs (próximo paso al integrar con AttemptService)
+>
+> **Previous step — GET /users/me/stats**:
 > - Endpoint: `GET /api/v1/users/me/stats` — requiere JWT, lee userId desde claims
 > - Stats: totalAttempts, correctAttempts, accuracyRate calculados desde `IAttemptRepository`
 > - displayName obtenido desde `IUserRepository.GetByIdAsync`
@@ -81,8 +89,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - ✅ `GET /api/v1/users/me/stats` — user stats **(requires JWT)**
 >
 > **Next Step**:
-> - Fase D: `attempt-service.spec.md` — orquestar: guardar attempt + actualizar streak + recalcular ELO
-> - Fase F: `streak.spec.md` → reemplazar placeholder currentStreak con lógica real (Redis)
+> - `streak.spec.md` (Fase F) — requiere instalar y configurar Redis primero
+> - `attempt-service.spec.md` (Fase D) — orquestar: guardar attempt + recalcular ELO + actualizar streak (depende de streak)
 
 ---
 
@@ -158,7 +166,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ### Fase F — Gamificación
 - [ ] `streak.spec.md` — regla de streak diario (Redis, se rompe si no hay attempt en 24h)
-- [ ] `elo-rating.spec.md` — cálculo de rating ELO por categoría tras cada attempt
+- [x] `elo-rating.spec.md` — cálculo de rating ELO global tras cada attempt (12 tests, fórmula ELO adaptada con time modifier)
 
 ### Post-MVP (no bloquean el MVP)
 - Badges / logros
