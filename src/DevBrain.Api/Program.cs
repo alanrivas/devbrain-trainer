@@ -104,23 +104,26 @@ if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
     }
 }
 
-// Health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTimeOffset.UtcNow }));
-
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.Title = "DevBrain Trainer";
-        options.Theme = ScalarTheme.DeepSpace;
-    });
     app.UseHttpsRedirection();
 }
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map endpoints
+// Health check — public, no auth
+app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTimeOffset.UtcNow }));
+
+// Scalar UI — available in all environments
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+{
+    options.Title = "DevBrain Trainer";
+    options.Theme = ScalarTheme.DeepSpace;
+});
+
+// API endpoints
 app.MapChallengeEndpoints();
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
