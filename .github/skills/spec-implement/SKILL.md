@@ -108,15 +108,46 @@ Si el proyecto de tests no referencia el proyecto de dominio:
 dotnet add tests/DevBrain.Domain.Tests/DevBrain.Domain.Tests.csproj reference src/DevBrain.Domain/DevBrain.Domain.csproj
 ```
 
-## Paso 6 — Verificar en verde
+## Paso 6 — Compilar y verificar tests (TODOS, no solo la suite nueva)
+
+### 6a — Compilar la solución completa
 
 ```bash
-dotnet test tests/DevBrain.Domain.Tests/
+dotnet build
 ```
 
-- Si algún test falla: leer el error, corregir la implementación, volver a correr
-- No avanzar al siguiente paso hasta que todos estén en verde
-- No modificar los tests para que pasen — modificar la implementación
+- Debe terminar con `0 Errores`
+- Las advertencias preexistentes (ej: SYSLIB0060 en PasswordHashService) son aceptables
+- Si hay errores de compilación: corregir antes de continuar
+
+### 6b — Correr TODOS los tests
+
+```bash
+dotnet test --no-build -q
+```
+
+- Verificar que las **tres suites** estén en verde: `Domain.Tests`, `Infrastructure.Tests`, `Api.Tests`
+- El total acumulado debe coincidir con el nuevo conteo esperado
+- Si algún test falla: leer el error, corregir la implementación, volver a correr desde 6a
+- **Nunca modificar los tests para que pasen — modificar la implementación**
+
+### 6c — Verificar que la API levanta en localhost
+
+El puerto local está definido en `src/DevBrain.Api/Properties/launchSettings.json` — perfil `http`: **`http://localhost:5118`**.
+
+```bash
+dotnet run --project src/DevBrain.Api/ --no-build &
+sleep 5
+curl -s -o /dev/null -w "%{http_code}" http://localhost:5118/health
+kill %1 2>/dev/null
+```
+
+- Debe retornar `200`
+- Si retorna `000` (connection refused): la API no levantó — revisar logs de startup
+- Si retorna `404`: revisar que `/health` esté registrado en `Program.cs`
+- Matar el proceso con `kill %1` o `taskkill /F /IM dotnet.exe /T` antes de continuar
+
+**No avanzar al commit si alguno de los tres pasos falla.**
 
 ## Paso 7 — Actualizar la colección Postman (solo specs de API)
 
