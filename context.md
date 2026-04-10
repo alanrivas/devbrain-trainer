@@ -39,21 +39,22 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **TOTAL** | **205** | **✅ 205/205** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **EFBadgeRepository + integración completa del sistema de badges — 12 tests en verde (205/205 total)**
+> ✅ **Plan de Testing estructurado — Fase 3 (Robustez) antes del Frontend**
 >
-> **Resumen**:
-> - `EFBadgeRepository` — implementación EF de `IBadgeRepository` (AddAsync, GetByUserAsync, HasBadgeAsync)
-> - Tabla `user_badges` en `DevBrainDbContext` — índices y FK configurados
-> - Migración EF Core: `AddUserBadgesTable` — aplicada a schema local
-> - `AttemptService` integrado — evalúa y persiste badges tras cada attempt (lógica de `BadgeAwardService`)
-> - `AttemptResult` + `AttemptResponseDto` — incluyen `NewBadges: string[]`
-> - Endpoint `GET /users/me/badges` — lista autenticada de badges del usuario
-> - Tests:
->   - `EFBadgeRepositoryTests` (6 tests) — AddAsync, GetByUserAsync, HasBadgeAsync con múltiples usuarios
->   - `GetUserBadgesTests` (4 tests) — 401 sin token, 200 con array vacío, array con badges, formato ISO8601
->   - `PostAttemptEndpointTests` (+2 tests) — FirstBlood en primer intento correcto, empty array en intento fallido
+> **Resumen de la sesión**:
+> - Backend completado: 205/205 tests en verde (Domain + Infrastructure + API)
+> - Build exitoso, API corriendo en localhost:5118, `/health` OK
+> - Context.md alineado con estado real del proyecto
+> - **NEW**: Planificado roadmap de 3 fases de testing ANTES del Frontend:
+>   - **Fase 3.1**: E2E Integration Tests (TestContainers + real DB/Redis)
+>   - **Fase 3.2**: Concurrency Tests (Task.WhenAll, race conditions)
+>   - **Fase 3.3**: Resiliencia Tests (Redis down, DB slow, JWT rotation)
+> - Benchmarks y Contract Tests ➜ Después del Frontend (Fase 5)
 >
-> **Próximo paso**: Frontend Next.js (Fase 3) o generación dinámica de challenges con Claude API (Fase 4)
+> **Próximo paso**: **Comenzar Fase 3.1 — E2E Integration Tests**
+> - Crear proyecto `DevBrain.Integration.Tests`
+> - Agregar TestContainers NuGet para PostgreSQL + Redis
+> - Spec: Flujo Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
 
 ---
 
@@ -114,6 +115,45 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 ---
 
+## Test Strategy (MVP Completion + Pre-Frontend Testing)
+
+### Current State (205/205 tests ✅)
+- Unit tests: Entidades, repositorios, servicios, endpoints
+- In-memory DB para tests (no real PostgreSQL)
+- Mocks de Redis en algunos tests
+- No concurrencia, no E2E, sin resiliencia
+
+### Phase 3 — Robustez (ANTES del Frontend)
+**Objetivo**: Validar que el backend es robusto antes de integrar UI
+
+#### 3.1 — E2E Integration Tests (`DevBrain.Integration.Tests`)
+- Real PostgreSQL (TestContainers)
+- Real Redis (TestContainers)
+- Flujos completos de usuario
+  - Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
+  - Validar persistencia de datos end-to-end
+  - Validar relaciones entre entidades
+
+#### 3.2 — Concurrency/Race Condition Tests
+- Dos usuarios simultáneos en POST /attempt
+- Streak service con requests paralelas
+- Badge evaluation con intentos concurrentes
+- ELO recalculation sin colisiones
+
+#### 3.3 — Resiliencia/Chaos Tests
+- Redis no disponible → POST /attempt falla gracefully
+- PostgreSQL lento (latencia artificial)
+- JWT secret rotation between requests
+- Out of memory scenarios
+
+### Phase 4 — Frontend (Next.js + Tailwind)
+
+### Phase 5 — Post-Frontend Testing
+- **Benchmarks** (BenchmarkDotNet) — GET /challenges, POST /attempt, ELO calculation
+- **Contract Tests** — DTOs no cambian sin aviso
+
+---
+
 ## Roadmap de specs (MVP)
 
 El orden respeta dependencias estrictas. No se puede implementar un paso sin tener el anterior completo.
@@ -153,11 +193,12 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `elo-rating.spec.md` — cálculo de rating ELO global tras cada attempt (12 tests, fórmula ELO adaptada con time modifier)
 - [x] `badges.spec.md` — sistema de badges: BadgeType (8), UserBadge entity, IBadgeRepository, BadgeAwardService (27 tests en verde)
 
-### Post-MVP (no bloquean el MVP)
-- Badges / logros
-- Modo sprint (5 problemas en 3 min)
-- Generación dinámica con Claude API
-- Frontend Next.js
+---
+
+## Próximas prioridades (antes de Frontend)
+1. **E2E Integration Tests** — flujo completo con real DB/Redis
+2. **Concurrency Tests** — validar no hay race conditions
+3. **Resiliencia Tests** — componentes externos fallando gracefully
 
 ---
 
@@ -192,10 +233,46 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] Logros / badges — BadgeAwardService Domain (27 tests) + EFBadgeRepository (6 tests) + Endpoint GET /users/me/badges (4 tests)
 - [x] **TOTAL: 205/205 tests passing (100% pass rate)**
 
-### Fase 3 — Frontend
+### Fase 3 — Robustez Backend (ANTES del Frontend)
+
+#### 3.1 — E2E Integration Tests
+- [ ] Crear proyecto `DevBrain.Integration.Tests`
+- [ ] Agregar TestContainers (PostgreSQL + Redis)
+- [ ] Spec: Flujo completo Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
+- [ ] Validar persistencia de datos end-to-end
+- [ ] Validar relaciones entre entidades en real DB
+
+#### 3.2 — Concurrency/Race Condition Tests
+- [ ] Spec: Dos usuarios simultáneos en POST /attempt
+- [ ] Spec: Streak service con requests paralelas (`Task.WhenAll`)
+- [ ] Spec: Badge evaluation sin race conditions
+- [ ] Spec: ELO recalculation sin colisiones
+- [ ] Agregar tests al proyecto correspondiente (Integration o Api.Tests)
+
+#### 3.3 — Resiliencia/Chaos Tests
+- [ ] Spec: Redis no disponible → POST /attempt falla gracefully (no crash)
+- [ ] Spec: PostgreSQL lento (latencia artificial) → timeout handling
+- [ ] Spec: JWT secret rotation entre requests → rechazo correcto
+- [ ] Spec: Out of memory en AttemptService → logueo y error handling
+
+### Fase 4 — Frontend
 - [ ] Next.js + Tailwind
 - [ ] UI de desafío con timer
 - [ ] Dashboard de progreso
 
-### Fase 4 — Generación dinámica
+### Fase 5 — Post-Frontend Testing
+
+#### 5.1 — Benchmarks
+- [ ] Crear proyecto `DevBrain.Benchmarks` (BenchmarkDotNet)
+- [ ] Benchmark: GET /challenges con 1000 challenges → <100ms
+- [ ] Benchmark: GET /users/me/stats con 10K attempts → <200ms
+- [ ] Benchmark: POST /attempt (ELO + Badge) → <300ms
+- [ ] Baseline para futuras optimizaciones
+
+#### 5.2 — Contract Tests
+- [ ] DTOs no cambian sin aviso
+- [ ] API versioning consistency
+- [ ] Response schema validation
+
+### Fase 6 — Generación dinámica
 - [ ] Integrar Claude API para generar problemas nuevos
