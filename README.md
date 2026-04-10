@@ -2,10 +2,13 @@
 
 App de entrenamiento cognitivo gamificada para desarrolladores. Mejora tu lógica, memoria y razonamiento con problemas del mundo tech real.
 
-**Estado**: MVP en desarrollo — 95 tests (100% passing) ✅ | Backend API completo | Frontend próximo
+**Estado**: Backend API completo — **212 tests (100% passing)** ✅ | Phase 3.2: Serilog logging infrastructure | Frontend próximo
 
 **Docs**: 
-- [`context.md`](./context.md) — Estado del proyecto y checklist de features
+- [`context.md`](./context.md) — Estado del proyecto y roadmap detallado
+- [`STACK.md`](./STACK.md) — Tech stack completo con setup guides
+- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Metodología SDD+TDD
+- [`docs/API-ENDPOINTS.md`](./docs/API-ENDPOINTS.md) — Referencia completa de endpoints
 - [`CLAUDE.md`](./CLAUDE.md) — Instrucciones para Claude Code
 - [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) — Instrucciones para GitHub Copilot
 
@@ -47,9 +50,9 @@ dotnet test tests/DevBrain.Api.Tests/
 dotnet test tests/DevBrain.Infrastructure.Tests/
 ```
 
-**Test Coverage**: **207/207 tests passing** (100% green) ✅
+**Test Coverage**: **212/212 tests passing** (100% green) ✅
 - Domain.Tests: 69 tests
-- Infrastructure.Tests: 53 tests
+- Infrastructure.Tests: 58 tests (+5 Serilog logging tests)
 - Api.Tests: 83 tests
 - Integration.Tests: 2 tests (E2E with TestContainers)
 
@@ -186,18 +189,29 @@ All feature specs are in `specs/` directory. See `context.md` for current roadma
 
 ---
 
-## Next Steps (Roadmap)
+## Completed Features ✅
 
-- [x] Domain entities (Challenge, Attempt, User)
-- [x] Repositories (EFChallengeRepository, EFAttemptRepository)
-- [x] DbContext with seed data
-- [x] GET /challenges endpoint
-- [x] POST /challenges/{id}/attempt endpoint
-- [ ] **Connect PostgreSQL** — Migrate from in-memory to real DB
-- [ ] User registration & JWT auth
-- [ ] Attempt history & stats
+- [x] Domain entities (Challenge, Attempt, User, Badge)
+- [x] EF Core repositories + DbContext with seed data
+- [x] GET /challenges (with filtering & pagination)
+- [x] POST /challenges/{id}/attempt (with ELO & badge awarding)
+- [x] POST /auth/register (with PBKDF2 hashing)
+- [x] POST /auth/login (JWT generation)
+- [x] GET /users/me/stats (accuracy, streak, ELO)
+- [x] PostgreSQL integration (Neon in production)
+- [x] Redis integration (streaks, caching)
+- [x] Azure App Service deployment (production)
+- [x] Serilog + Application Insights logging
+- [x] E2E Integration Tests with TestContainers
+
+## Next Steps (Phase 3.3+)
+
+- [ ] **Endpoint logging integration** — Add ILogger<T> injection to all endpoints
 - [ ] Frontend (Next.js) with challenge UI
-- [ ] Leaderboards & streaks
+- [ ] Dynamic challenge generation via Claude API
+- [ ] Advanced leaderboards & filtering
+- [ ] User analytics dashboard
+- [ ] Mobile app (Flutter or React Native)
 - [ ] Redis integration for performance
 
 See [`context.md`](./context.md) for details and current progress.
