@@ -206,7 +206,7 @@ public class GetUserStatsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetUserStats_PlaceholderStreak_AlwaysReturnsZero()
+    public async Task GetUserStats_WithNoAttempts_StreakIsZero()
     {
         SetAuthHeader();
 
@@ -218,7 +218,7 @@ public class GetUserStatsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetUserStats_PlaceholderEloRating_AlwaysReturns1000()
+    public async Task GetUserStats_WithNoAttempts_EloRatingIsInitial()
     {
         SetAuthHeader();
 

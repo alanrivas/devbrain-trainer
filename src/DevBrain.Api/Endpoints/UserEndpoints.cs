@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using DevBrain.Api.DTOs;
 using DevBrain.Domain.Interfaces;
+using DevBrain.Infrastructure.Services;
 
 namespace DevBrain.Api.Endpoints;
 
@@ -20,7 +21,8 @@ public static class UserEndpoints
     private static async Task<IResult> GetUserStats(
         HttpContext httpContext,
         IUserRepository userRepository,
-        IAttemptRepository attemptRepository
+        IAttemptRepository attemptRepository,
+        IStreakService streakService
     )
     {
         // Extract userId from JWT claims (guaranteed present by RequireAuthorization)
@@ -54,14 +56,16 @@ public static class UserEndpoints
             ? (float)correctAttempts / totalAttempts
             : 0.0f;
 
+        var currentStreak = await streakService.GetStreakAsync(userId);
+
         var response = new UserStatsResponseDto(
             UserId: userId,
             DisplayName: user.DisplayName,
             TotalAttempts: totalAttempts,
             CorrectAttempts: correctAttempts,
             AccuracyRate: accuracyRate,
-            CurrentStreak: 0,    // Placeholder — Fase F (Redis)
-            EloRating: 1000,     // Placeholder — Fase F (ELO calc)
+            CurrentStreak: currentStreak,
+            EloRating: user.EloRating,
             LastAttemptAt: lastAttempt?.OccurredAt
         );
 

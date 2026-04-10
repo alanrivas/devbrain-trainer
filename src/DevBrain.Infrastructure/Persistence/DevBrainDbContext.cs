@@ -43,6 +43,11 @@ public class DevBrainDbContext : DbContext
             .IsRequired();
 
         modelBuilder.Entity<User>()
+            .Property(u => u.EloRating)
+            .IsRequired()
+            .HasDefaultValue(1000);
+
+        modelBuilder.Entity<User>()
             .Property(u => u.CreatedAt)
             .IsRequired();
 

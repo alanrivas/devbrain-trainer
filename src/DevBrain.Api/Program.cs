@@ -2,6 +2,7 @@ using System.Text;
 using DevBrain.Api.Endpoints;
 using DevBrain.Api.Services;
 using DevBrain.Domain.Interfaces;
+using DevBrain.Domain.Services;
 using DevBrain.Infrastructure.Persistence;
 using DevBrain.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -36,6 +37,8 @@ builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 // Register services
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IEloRatingService, EloRatingService>();
+builder.Services.AddScoped<IAttemptService, AttemptService>();
 
 // Redis + Streak
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";

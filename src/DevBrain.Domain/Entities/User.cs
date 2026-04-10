@@ -9,6 +9,7 @@ public sealed class User
     public string Email { get; }
     public string PasswordHash { get; }  // Added for registration
     public string DisplayName { get; private set; }
+    public int EloRating { get; private set; } = 1000;
     public DateTimeOffset CreatedAt { get; }
 
     private User(Guid id, string email, string passwordHash, string displayName, DateTimeOffset createdAt)
@@ -18,6 +19,13 @@ public sealed class User
         PasswordHash = passwordHash;
         DisplayName = displayName;
         CreatedAt = createdAt;
+    }
+
+    public void UpdateEloRating(int newRating)
+    {
+        if (newRating < 100)
+            throw new DomainException("ELO rating cannot be lower than 100.");
+        EloRating = newRating;
     }
 
     /// <summary>

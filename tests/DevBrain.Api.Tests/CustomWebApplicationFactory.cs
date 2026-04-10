@@ -2,10 +2,12 @@ using DevBrain.Api.Services;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
 using DevBrain.Infrastructure.Persistence;
+using DevBrain.Infrastructure.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace DevBrain.Api.Tests;
 
@@ -61,6 +63,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IPasswordHashService, PasswordHashService>();
             services.AddScoped<IChallengeRepository, EFChallengeRepository>();
             services.AddScoped<IAttemptRepository, EFAttemptRepository>();
+
+            // Redis + Streak (real Redis at localhost:6379 — needed for AttemptService + GetUserStats)
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect("localhost:6379")
+            );
+            services.AddScoped<IStreakService, RedisStreakService>();
         });
 
         // Seed data after app is built

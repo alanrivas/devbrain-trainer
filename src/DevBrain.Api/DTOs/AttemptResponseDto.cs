@@ -9,5 +9,7 @@ public record AttemptResponseDto(
     string CorrectAnswer,
     int ElapsedSeconds,
     string ChallengeTitle,
-    DateTime OccurredAt
+    DateTime OccurredAt,
+    int NewEloRating,
+    int NewStreak
 );

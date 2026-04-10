@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using DevBrain.Api.DTOs;
 using DevBrain.Api.Mapping;
+using DevBrain.Api.Services;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
 
@@ -137,8 +138,7 @@ public static class ChallengeEndpoints
     private static async Task<IResult> PostAttempt(
         Guid id,
         CreateAttemptRequestDto request,
-        IChallengeRepository challengeRepository,
-        IAttemptRepository attemptRepository,
+        IAttemptService attemptService,
         HttpContext httpContext
     )
     {
@@ -172,40 +172,42 @@ public static class ChallengeEndpoints
             });
         }
 
-        // Get challenge
-        var challenge = await challengeRepository.GetByIdAsync(id);
-        if (challenge == null)
+        // Extract userId from JWT claims (guaranteed present by RequireAuthorization)
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        // Delegate to AttemptService
+        AttemptResult result;
+        try
+        {
+            result = await attemptService.SubmitAsync(id, userId, request.UserAnswer.Trim(), request.ElapsedSeconds);
+        }
+        catch (ApplicationException ex) when (ex.Message.Contains("not found"))
         {
             return Results.NotFound(new
             {
                 type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                 title = "Not Found",
                 status = 404,
-                detail = $"Challenge with ID '{id}' not found"
+                detail = ex.Message
             });
         }
 
-        // Extract userId from JWT claims (guaranteed present by RequireAuthorization)
-        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        // Create attempt
-        var attempt = Domain.Entities.Attempt.Create(
-            challengeId: id,
-            userId: userId,
-            userAnswer: request.UserAnswer.Trim(),
-            elapsedSecs: request.ElapsedSeconds,
-            challenge: challenge
+        var responseDto = new AttemptResponseDto(
+            AttemptId: result.AttemptId,
+            ChallengeId: result.ChallengeId,
+            UserId: result.UserId,
+            UserAnswer: result.UserAnswer,
+            IsCorrect: result.IsCorrect,
+            CorrectAnswer: result.CorrectAnswer,
+            ElapsedSeconds: result.ElapsedSeconds,
+            ChallengeTitle: result.ChallengeTitle,
+            OccurredAt: result.OccurredAt.UtcDateTime,
+            NewEloRating: result.NewEloRating,
+            NewStreak: result.NewStreak
         );
 
-        // Save attempt
-        await attemptRepository.AddAsync(attempt);
-
-        // Return response
-        var responseDto = attempt.ToResponseDto(challenge);
-        return Results.Created($"/api/v1/challenges/{id}/attempt/{attempt.Id}", responseDto);
+        return Results.Created($"/api/v1/challenges/{id}/attempt/{result.AttemptId}", responseDto);
     }
 }

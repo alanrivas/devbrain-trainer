@@ -39,9 +39,20 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **TOTAL** | **166** | **✅ 166/166** | 100% pass rate |
 
 ## Último paso completado
-> ✅ **RedisStreakService implemented** — 8 tests passing contra Redis real, **166/166 total**
+> ✅ **AttemptService implemented** — orquesta ELO + streak, **166/166 total** (sin tests nuevos, todos los existentes siguen pasando)
 >
 > **Implementation Details**:
+> - `IAttemptService` + `AttemptService` en `DevBrain.Api.Services` — orquesta: Attempt.Create → AddAsync → ELO.Calculate → User.UpdateEloRating → UserRepo.UpdateAsync → Streak.RecordAttemptAsync
+> - `AttemptResponseDto` extendido con `NewEloRating` + `NewStreak`
+> - `POST /challenges/{id}/attempt` delegado a `IAttemptService` (endpoint simplificado)
+> - `GET /users/me/stats` reemplaza placeholders con `user.EloRating` + `streakService.GetStreakAsync`
+> - `User` extendido con `EloRating` (int, default 1000) + `UpdateEloRating()`
+> - `IUserRepository` extendido con `UpdateAsync`; `EFUserRepository` implementa `UpdateAsync`
+> - Migración EF: `AddEloRatingToUser` aplicada a `devbrain_local` en port 5433
+> - `CustomWebApplicationFactory` registra Redis + `IStreakService` para tests API
+> - `IEloRatingService` registrado como Singleton en Program.cs
+>
+> **Previous step — RedisStreakService**:
 > - `IStreakService` + `RedisStreakService` en `DevBrain.Infrastructure.Services`
 > - Claves Redis: `streak:{userId}:count` + `streak:{userId}:last_date` (TTL 48h)
 > - Lógica: mismo día → no cambia, día siguiente → +1, gap >1 día → reset a 1
@@ -98,8 +109,9 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - ✅ `GET /api/v1/users/me/stats` — user stats **(requires JWT)**
 >
 > **Next Step**:
-> - `attempt-service.spec.md` (Fase D) — orquestar: guardar attempt + recalcular ELO + actualizar streak
-> - Actualizar `GET /users/me/stats` para leer streak real desde Redis (reemplazar placeholder)
+> - MVP Backend completado — todos los endpoints funcionando con ELO y streak reales
+> - `seed-challenges.spec.md` — datos iniciales de producción (al menos 10 challenges variados)
+> - Deploy a Railway
 
 ---
 
@@ -165,7 +177,7 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [x] `jwt-middleware.spec.md` — JWT Bearer middleware + `.RequireAuthorization()` en POST /attempt (9 tests en verde)
 
 ### Fase D — Servicios de aplicación
-- [ ] `attempt-service.spec.md` — orquesta: guardar attempt + actualizar streak + recalcular ELO
+- [x] `attempt-service.spec.md` — orquesta: Attempt.Create + ELO.Calculate + User.UpdateEloRating + Streak.RecordAttemptAsync
 
 ### Fase E — API endpoints
 - [x] `get-challenges.spec.md` — GET /challenges — lista paginada con filtros por categoría y dificultad (13 tests en verde)
