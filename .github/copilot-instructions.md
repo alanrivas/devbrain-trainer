@@ -1,5 +1,9 @@
 # DevBrain Trainer — Instrucciones para GitHub Copilot
 
+## 🌐 Idioma
+
+**Siempre responder en español.** Todas las respuestas, reportes, mensajes y comunicación deben ser en español, a menos que el usuario solicite explícitamente otro idioma.
+
 ## Proyecto
 
 App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, memoria y razonamiento con problemas del mundo tech real.
