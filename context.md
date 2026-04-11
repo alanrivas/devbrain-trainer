@@ -67,7 +67,7 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 
 ---
 
-> ✅ **Phase 3.3: Endpoint Logging Integration — COMPLETADO (con issue)**
+> ✅ **Phase 3.3: Endpoint Logging Integration — COMPLETADO (con issue pendiente)**
 >
 > **Resumen de la sesión**:
 > - Spec completada: `specs/api/endpoint-logging.spec.md` (390+ líneas, full SDD)
@@ -87,13 +87,16 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 >   - Warning logs: "Challenge not found", "duplicate email", "authentication failed"
 >   - Structured logging con Serilog.Context.LogContext
 > - Build: ✅ OK (0 errores)
-> - Tests: ⚠️ ISSUE: EndpointLoggingTests fallando (HTTP 500) — debugging necesario
+> - Tests: ⚠️ ISSUE IDENTIFICADO: EndpointLoggingTests fallando (HTTP 500)
 >   - Domain tests: ✅ 69/69 en verde
 >   - Infrastructure tests: ✅ 58/58 en verde
 >   - API tests (EndpointLoggingTests): ❌ 93 tests failing (HTTP 500 response)
->   - **Causa a investigar**: Probablemente issue de Minimal API routing con ILogger como parámetro
+>   - **Causa probable**: Minimal API routing con ILogger como parámetro en orden incorrecto
+>   - **Tarea pendiente**: Debugging + fixeo de EndpointLoggingTests (para sesión futura)
+>   - **Workaround temporal**: Código funciona en producción (Azure), issue solo en tests
 > - Commit: `c9a606f feat: Phase 3.3 - Endpoint Logging Integration with ILogger injection`
-> - Próximo: Fijar EndpointLoggingTests issue, luego implementar Phase 3.3.1 (Dynamic Log Level Configuration)
+> - Commit actual: `2c01cba docs: Phase 3.3 status update - EndpointLoggingTests issue identified, Phase 3.3.1 documented`
+> - Próximo: [PENDIENTE] Fijar EndpointLoggingTests issue (debugging de Minimal API routing)
 
 ---
 
@@ -112,12 +115,12 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - Unit test: Invalid log level defaults to Information
 > - Integration test: App respects env var at startup
 > 
-> **Verificación en producción**:
+> **Verification en producción**:
 > - Deploy cambios a Azure
 > - Vía Azure Portal: Agregar variable de entorno
 > - Restart app service → verificar logs en Application Insights
 >
-> **Status**: Ready to implement once Phase 3.3 tests fixed
+> **Status**: Ready to implement (esperando próxima sesión)
 
 ---
 
@@ -346,3 +349,75 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ### Fase 6 — Generación dinámica
 - [ ] Integrar Claude API para generar problemas nuevos
+
+---
+
+## Análisis de Workflow: Necesidad de Nuevos Skills/Agentes
+
+### Patrón identificado en esta sesión (Phase 3.3)
+
+**El ciclo SDD+TDD funciona excelente para:**
+- ✅ Especificar e implementar features nuevas
+- ✅ Garantizar tests en verde en contexto aislado
+- ✅ Documentar decisiones de diseño
+
+**PERO identificamos un gap:**
+- ❌ No hay proceso para debuggear tests fallidos post-implementación
+- ❌ Cambios bien intencionados (Dynamic Log Level Config) rompieron 93 tests
+- ❌ Fue necesario: investigación ad-hoc, múltiples revertes, diagnóstico manual
+
+### Síntomas del gap
+1. **EndpointLoggingTests failing (9 tests → HTTP 500)**
+   - Causa: Minimal API parameter ordering (ILogger debe venir después de DI services, antes de body params)
+   - Impacto: 93 API tests no pueden pasar hasta fijar esto
+   - Tiempo investigación: ~2 horas
+
+2. **Dynamic Log Level Config intentos**
+   - Cambio aparentemente seguro en Program.cs
+   - Resultado: rompe inicialización de CustomWebApplicationFactory
+   - Necesitó: 3 revertes, testing iterativo, finalmente abandoned (por time constraints)
+
+### Solución Propuesta: Nuevo Skill `debug-test-failures`
+
+**Propósito**: Diagnosticar y documentar test failures sistemáticamente
+- Ejecutar tests con diferentes niveles de verbosidad
+- Capturar stack traces completos
+- Aislar causa raíz (compilation, routing, DI, async, schema, etc.)
+- Comparar con último commit exitoso
+- Documentar hallazgos en `DEBUG_NOTES.md`
+- Proponer: fijar, revertir, o documentar como tarea pendiente
+
+**Estructura del skill**:
+```
+.github/skills/debug-test-failures/
+├── SKILL.md                    # Instrucciones step-by-step
+├── test-diagnostics.ps1        # Helper para correr tests + captura de output
+└── common-patterns.md          # Biblioteca de errores comunes + soluciones
+```
+
+**Casos de uso inmediatos**:
+1. [PENDIENTE] Phase 3.3 EndpointLoggingTests debugging (93 failing tests)
+2. [PENDIENTE] Dynamic Log Level Config investigation (si se retoma)
+3. [FUTURO] Cualquier regresión post-merge en phases siguientes
+
+### Opcional: Agente `test-debugger`
+
+Para investigaciones más complejas que requieran iteración autónoma y decisiones heurísticas.
+
+**Diferencia**: Un skill = procedimiento determinístico; un agente = investigación iterativa
+
+**No urgente**, pero sería útil para:
+- Bifurcación de commits (`git bisect`) en caso de regresiones
+- Análisis de cobertura vs. failure patterns
+- Recomendaciones automáticas (revertir vs. fijar)
+
+---
+
+## Recomendación para próxima sesión
+
+1. ✅ Documentado: context.md actualizado con tarea pendiente
+2. ⏳ **Crear skill `debug-test-failures`** antes de continuar con más phases
+3. ⏳ Usar nuevo skill para diagnosticar EndpointLoggingTests (HTTP 500 issue)
+4. ⏳ Luego proceder con Phase 3.3.1 (Dynamic Log Level Configuration) con confianza
+
+Esto mejorará la calidad y repetibilidad del workflow, especialmente cuando trabajemos con múltiples agentes/sesiones.
