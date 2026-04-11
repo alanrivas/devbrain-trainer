@@ -421,3 +421,66 @@ Para investigaciones más complejas que requieran iteración autónoma y decisio
 4. ⏳ Luego proceder con Phase 3.3.1 (Dynamic Log Level Configuration) con confianza
 
 Esto mejorará la calidad y repetibilidad del workflow, especialmente cuando trabajemos con múltiples agentes/sesiones.
+
+---
+
+## Gestión de Archivos Auxiliares (Cleanup Strategy)
+
+### Problema identificado
+Durante debugging y testing, se generan archivos auxiliares que:
+- NO son parte del proyecto (son artifacts de ejecución)
+- Contaminan el workspace
+- Pueden causar confusión/distracciones
+- NO deberían commitearse a GitHub
+
+**Ejemplos**: `api_test_error.txt`, `tests_output.txt`, `debug_notes.txt`
+
+### Solución Implementada
+
+#### 1. Actualizado `.gitignore` ✅
+Agregadas líneas para excluir automáticamente:
+```
+# Debug/Testing artifacts (created during troubleshooting, not part of source)
+*_test_error.txt
+*_test_output.txt
+api_test_error.txt
+tests_output.txt
+debug_notes.txt
+*.dump
+*.trace
+```
+
+#### 2. Cleanup Manual Realizado ✅
+- Borrados: `api_test_error.txt`, `tests_output.txt`
+- Working directory limpio
+- `git status` = "nothing to commit"
+
+#### 3. Integración Futura: Skill `debug-test-failures` ⏳
+
+Cuando se implemente el nuevo skill, debería:
+
+**Al inicio de diagnostics:**
+```powershell
+# Cleanup previos artifacts
+Remove-Item -Force @(
+    "*_test_error.txt",
+    "*_test_output.txt", 
+    "debug_notes.txt"
+) -ErrorAction SilentlyContinue
+```
+
+**Durante ejecución:**
+- Guardar test output con timestamp (ej: `test_output_20260410-1430.txt`)
+- Permisos para redirecciones temporales
+
+**Al finalizar:**
+- Generar `DEBUG_NOTES.md` final con hallazgos
+- Limpiar archivos .txt temporales
+- Deixar proyecto limpio para próximo paso
+
+**Beneficio**: Workspace siempre limpio, documentación centralizada en `DEBUG_NOTES.md`
+
+### Estado Actual
+✅ `.gitignore` actualizado (artifacts serán ignorados)
+✅ Archivos auxiliares borrados (workspace limpio)
+⏳ Integración en skill (cuando se implemente `debug-test-failures`)
