@@ -60,6 +60,7 @@ try
     // 1. Connection string exists in config
     // 2. NOT running under test/xUnit (which will inject In-Memory via WebApplicationFactory)
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Log.Information("🔍 Connection string from config: {ConnectionString}", connectionString);
     var isTestEnvironment = builder.Environment.EnvironmentName == "Testing" || 
                            Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_TEST") == "true";
 
@@ -133,8 +134,9 @@ try
 
     var app = builder.Build();
 
-    // Auto-migrate on startup (production + local, not in tests)
-    if (!isTestEnvironment && !string.IsNullOrEmpty(connectionString))
+    // Auto-migrate on startup (only in production, not in tests or local development)
+    // In local dev, run manually: dotnet ef database update --project src/DevBrain.Infrastructure --startup-project src/DevBrain.Api
+    if (app.Environment.IsProduction() && !isTestEnvironment && !string.IsNullOrEmpty(connectionString))
     {
         try
         {
