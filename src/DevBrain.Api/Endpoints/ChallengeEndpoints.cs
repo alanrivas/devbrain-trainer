@@ -32,13 +32,14 @@ public static class ChallengeEndpoints
 
     private static async Task<IResult> GetChallenges(
         IChallengeRepository repository,
-        ILogger logger,
+        ILoggerFactory loggerFactory,
         string? category = null,
         string? difficulty = null,
         int pageNumber = 1,
         int pageSize = 10
     )
     {
+        var logger = loggerFactory.CreateLogger(typeof(ChallengeEndpoints));
         logger.LogInformation("GetChallenges called with filters: Category={Category}, Difficulty={Difficulty}, PageNumber={PageNumber}, PageSize={PageSize}",
             category ?? "null", difficulty ?? "null", pageNumber, pageSize);
         
@@ -114,9 +115,10 @@ public static class ChallengeEndpoints
     private static async Task<IResult> GetChallenge(
         Guid id,
         IChallengeRepository repository,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
+        var logger = loggerFactory.CreateLogger(typeof(ChallengeEndpoints));
         logger.LogInformation("GetChallenge called with ID: {ChallengeId}", id);
         
         // Validate GUID format (though ASP.NET handles this automatically)
@@ -155,9 +157,10 @@ public static class ChallengeEndpoints
         CreateAttemptRequestDto request,
         IAttemptService attemptService,
         HttpContext httpContext,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
+        var logger = loggerFactory.CreateLogger(typeof(ChallengeEndpoints));
         // Extract userId from JWT claims early for logging context
         var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdClaim, out var userId))

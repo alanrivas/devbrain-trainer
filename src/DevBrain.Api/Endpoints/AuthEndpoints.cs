@@ -27,10 +27,11 @@ public static class AuthEndpoints
         RegisterRequestDto request,
         IUserRepository userRepository,
         IPasswordHashService passwordHashService,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
-        logger.LogInformation("Register called: Email={Email}, DisplayName={DisplayName}", 
+        var logger = loggerFactory.CreateLogger(typeof(AuthEndpoints));
+        logger.LogInformation("Register called: Email={Email}, DisplayName={DisplayName}",
             request.Email.Split('@')[0] + "@...", request.DisplayName);
         
         // Validate email
@@ -116,10 +117,11 @@ public static class AuthEndpoints
         IUserRepository userRepository,
         IPasswordHashService passwordHashService,
         IJwtTokenService jwtTokenService,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
-        logger.LogInformation("Login attempted: Email={EmailPrefix}", 
+        var logger = loggerFactory.CreateLogger(typeof(AuthEndpoints));
+        logger.LogInformation("Login attempted: Email={EmailPrefix}",
             request.Email.Split('@')[0] + "@...");
         
         // Validate email

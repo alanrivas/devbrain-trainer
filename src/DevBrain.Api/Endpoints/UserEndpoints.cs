@@ -30,14 +30,15 @@ public static class UserEndpoints
         IUserRepository userRepository,
         IAttemptRepository attemptRepository,
         IStreakService streakService,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
+        var logger = loggerFactory.CreateLogger(typeof(UserEndpoints));
         // Extract userId from JWT claims (guaranteed present by RequireAuthorization)
         var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdClaim, out var userId))
             return Results.Unauthorized();
-        
+
         using (LogContext.PushProperty("UserId", userId))
         {
             logger.LogInformation("GetUserStats called");
@@ -89,9 +90,10 @@ public static class UserEndpoints
         HttpContext httpContext,
         IUserRepository userRepository,
         IBadgeRepository badgeRepository,
-        ILogger logger
+        ILoggerFactory loggerFactory
     )
     {
+        var logger = loggerFactory.CreateLogger(typeof(UserEndpoints));
         var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdClaim, out var userId))
             return Results.Unauthorized();

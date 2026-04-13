@@ -1,10 +1,8 @@
 using System.Net.Http.Json;
+using DevBrain.Api.DTOs;
 using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
-using DevBrain.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -16,23 +14,19 @@ namespace DevBrain.Api.Tests;
 /// </summary>
 public class EndpointLoggingTests : IAsyncLifetime
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
 
     public EndpointLoggingTests()
     {
-        _factory = new WebApplicationFactory<Program>();
+        _factory = new CustomWebApplicationFactory();
     }
 
-    public async Task InitializeAsync()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<DevBrainDbContext>();
-        await dbContext.Database.MigrateAsync();
-    }
+    public Task InitializeAsync() => Task.CompletedTask;
 
     public async Task DisposeAsync()
     {
         _factory.Dispose();
+        await Task.CompletedTask;
     }
 
     [Fact]
@@ -153,10 +147,10 @@ public class EndpointLoggingTests : IAsyncLifetime
 
         var loginReq = new { email = email, password = "Pass123!" };
         var loginResp = await client.PostAsJsonAsync("/api/v1/auth/login", loginReq);
-        var content = await loginResp.Content.ReadFromJsonAsync<dynamic>();
-        var token = (string)(content?.token ?? content?.data?.token ?? "");
+        var loginBody = await loginResp.Content.ReadFromJsonAsync<LoginResponseDto>();
+        var token = loginBody!.Token;
 
-        client.DefaultRequestHeaders.Authorization = 
+        client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.GetAsync("/api/v1/users/me/stats");
@@ -174,10 +168,10 @@ public class EndpointLoggingTests : IAsyncLifetime
 
         var loginReq = new { email = email, password = "Pass123!" };
         var loginResp = await client.PostAsJsonAsync("/api/v1/auth/login", loginReq);
-        var content = await loginResp.Content.ReadFromJsonAsync<dynamic>();
-        var token = (string)(content?.token ?? content?.data?.token ?? "");
+        var loginBody = await loginResp.Content.ReadFromJsonAsync<LoginResponseDto>();
+        var token = loginBody!.Token;
 
-        client.DefaultRequestHeaders.Authorization = 
+        client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.GetAsync("/api/v1/users/me/badges");
@@ -195,10 +189,10 @@ public class EndpointLoggingTests : IAsyncLifetime
 
         var loginReq = new { email = email, password = "Pass123!" };
         var loginResp = await client.PostAsJsonAsync("/api/v1/auth/login", loginReq);
-        var content = await loginResp.Content.ReadFromJsonAsync<dynamic>();
-        var token = (string)(content?.token ?? content?.data?.token ?? "");
+        var loginBody = await loginResp.Content.ReadFromJsonAsync<LoginResponseDto>();
+        var token = loginBody!.Token;
 
-        client.DefaultRequestHeaders.Authorization = 
+        client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         using var scope = _factory.Services.CreateScope();
