@@ -442,3 +442,8 @@ FodyWeavers.xsd
 
 # Claude Code local settings
 .claude/
+
+# Environment-specific appsettings (local development only)
+src/DevBrain.Api/appsettings.Local.json
+src/DevBrain.Api/appsettings.Docker.json
+src/DevBrain.Api/appsettings.Production.json
