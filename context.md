@@ -233,9 +233,9 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ## Próximas prioridades (antes de Frontend)
 1. **✅ E2E Integration Tests** — 2/2 tests passing, real DB/Redis with TestContainers
 2. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
-3. **Resiliencia/Chaos Tests (Phase 3.3)** — Redis down, slow DB, JWT rotation
-4. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
-3. **Resiliencia Tests** — componentes externos fallando gracefully
+3. **✅ Resiliencia/Logging - Dynamic Log Level (Phase 3.3.1)** — Redis down, slow DB, JWT rotation, and SERILOG__MINIMUMLEVEL env var
+4. **🚀 Resiliencia/Chaos Tests (Phase 3.4)** — advanced resilience scenarios, full error handling coverage
+5. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
 
 ---
 
