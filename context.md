@@ -36,20 +36,23 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
-| Integration.Tests | 2 | ✅ 2/2 | E2E happy path + multi-user |
-| **Current** | **241** | **✅ 241/241** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (2) |
+| Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
+| **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Phase 3.3.1: Dynamic Log Level Configuration — COMPLETADO — 241/241 tests ✅**
+> ✅ **Phase 3.4: Chaos/Resilience Integration Tests — COMPLETADO — 249/249 tests ✅**
 >
 > **Resumen**:
-> - Spec completa: `specs/infrastructure/dynamic-log-level.spec.md`
-> - Unit tests: 13 tests en verde en `LogLevelConfigurationTests.cs`
-> - Integration tests: 6 tests en verde en `DynamicLogLevelConfigurationTests.cs`
-> - Implementación: Lee `SERILOG__MINIMUMLEVEL` env var (case-insensitive) y aplica al `MinimumLevel` de Serilog
-> - Default: Information si la variable es inválida o no existe
-> - Resultado: **241/241 tests passing** (222 anteriores + 19 nuevos)
-> - Próximo paso: **Phase 3.4 — Resiliencia/Chaos Tests** (Redis down, slow DB, JWT rotation)
+> - Spec: `specs/integration/chaos-resilience.spec.md` (completa con 4 escenarios de caos + 8 test cases)
+> - Tests: `tests/DevBrain.Integration.Tests/ChaosResilienceTests.cs` (8 tests en verde)
+>   - JWT validation: missing JWT → 401, invalid JWT → 401, valid JWT → 200
+>   - Streaming/delays: GetChallenges con delay → 200 OK (no timeout)
+>   - Health check: /health sin auth → 200 OK
+>   - Concurrency: 5 requests simultáneos → todos succeed
+>   - Error handling: requests malformados → error graceful (no crash)
+> - Resultado: **249/249 tests passing** (241 anteriores + 8 nuevos de chaos)
+>
+> **Próximo paso**: **Phase 3.5 — Post-MVP Optimizations** (benchmarks, contract tests) O **Phase 4: Frontend Next.js**
 
 ---
 
@@ -233,9 +236,10 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ## Próximas prioridades (antes de Frontend)
 1. **✅ E2E Integration Tests** — 2/2 tests passing, real DB/Redis with TestContainers
 2. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
-3. **✅ Resiliencia/Logging - Dynamic Log Level (Phase 3.3.1)** — Redis down, slow DB, JWT rotation, and SERILOG__MINIMUMLEVEL env var
-4. **🚀 Resiliencia/Chaos Tests (Phase 3.4)** — advanced resilience scenarios, full error handling coverage
-5. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
+3. **✅ Resiliencia/Logging - Dynamic Log Level (Phase 3.3.1)** — SERILOG__MINIMUMLEVEL env var
+4. **✅ Chaos/Resilience Tests (Phase 3.4)** — JWT validation, graceful error handling, no crashes
+5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs)
+6. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
 
 ---
 
