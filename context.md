@@ -40,18 +40,19 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Phase 3.4: Chaos/Resilience Integration Tests — COMPLETADO — 249/249 tests ✅**
+> ✅ **Phase 4.1.1: Next.js Frontend Scaffold — COMPLETADO**
 >
 > **Resumen**:
-> - Spec: `specs/integration/chaos-resilience.spec.md` (4 chaos scenarios)
-> - Tests: 8 nuevos en verde (JWT validation, concurrent requests, error handling)
-> - Resultado: **249/249 tests passing**
+> - Proyecto Next.js 15 creado en `frontend/` subfolder (mismo repo)
+> - TypeScript + Tailwind CSS + App Router
+> - Auth context + JWT management globalizado
+> - API client (axios) con interceptors automáticos para JWT
+> - Header component con nav condicional (login/logout)
+> - Home responsive con CTA diferenciado por auth state
+> - `.env.local` configurado para backend local (`http://localhost:5118/api/v1`)
+> - Ready para correr: `npm run dev` en `frontend/` → puerto 3000
 >
-> **FASES PENDIENTES (dejar para sesiones futuras)**:
-> - Phase 3.2 — Concurrency Tests (simultaneous attempts, race conditions)
-> - Phase 3.5 — Post-MVP Optimizations (benchmarks, contract tests)
->
-> **INICIANDO AHORA**: Phase 4 — Frontend (Next.js + Tailwind + TypeScript)
+> **Próximo paso**: **Phase 4.2 — Auth Pages** (Login, Register components)
 
 ---
 
