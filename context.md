@@ -40,17 +40,23 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Phase 4.2: Auth Pages (Login & Register) — COMPLETADO**
+> ✅ **Phase 4.2 — Auth Pages + Local Stack Setup — COMPLETADO**
 >
 > **Resumen**:
-> - Components: `LoginForm.tsx`, `RegisterForm.tsx` con validación de datos
-> - Pages: `/login`, `/register` con layout profesional
-> - Integration: Conectadas con backend `/api/v1/auth/login` y `/api/v1/auth/register`
-> - Auth flow: Guardar JWT en contexto global, redirigir a `/challenges` tras login exitoso
-> - Header actualizado: Links condicionales (Login/Register vs Logout + user email)
-> - Challenges page: Placeholder lista de challenges (protegida, requiere auth)
+> - Phase 4.2: LoginForm, RegisterForm components + `/login`, `/register` pages (auth flow completo)
+> - **LOCAL STACK LEVANTADO Y CORRIENDO** ✅
+>   - Backend: http://localhost:5118 (ASP.NET Core, PostgreSQL, NoOp Redis fallback)
+>   - Frontend: http://localhost:3000 (Next.js 15)
+>   - PostgreSQL: localhost:5433 (Docker)
+>   - Redis: localhost:6379 (Docker)
+> - **Documentación creada**:
+>   - `docs/TESTING.md` — Guía completa de testing con flujos y troubleshooting
+>   - `docs/TEST-USERS.md` — Usuarios precreados y credenciales
+>   - `docs/LOCAL-SETUP.md` — Estado actual del stack + acceso rápido
+> - **Tests**: 249/249 ✅ (Domain 69 + Infrastructure 71 + Api 99 + Integration 10)
+> - **Infrastructure**: NoOpStreakService implementado (fallback cuando Redis no disponible)
 >
-> **Próximo paso**: **Phase 4.3 — Challenge Pages** (Challenge detail + Attempt form)
+> **Próximo paso**: **Phase 4.3 — Challenge Pages** (detail page + attempt form)
 
 ---
 

@@ -96,7 +96,8 @@ try
         }
         catch (Exception ex)
         {
-            Log.Warning("⚠️ Redis connection failed: {Message}. Streak service disabled.", ex.Message);
+            Log.Warning("⚠️ Redis connection failed: {Message}. Using NoOp Streak Service (streaks not persisted).", ex.Message);
+            builder.Services.AddScoped<IStreakService, NoOpStreakService>();
         }
     }
 

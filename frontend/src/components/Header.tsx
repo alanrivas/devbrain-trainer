@@ -66,27 +66,3 @@ export const Header: React.FC = () => {
     </header>
   );
 };
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-              >
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
-  );
-};
