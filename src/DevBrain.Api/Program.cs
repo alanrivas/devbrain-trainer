@@ -17,8 +17,14 @@ using StackExchange.Redis;
 using Serilog.Enrichers;
 
 // 🔧 Configure Serilog before building app
+// Read dynamic log level from environment variable (Phase 3.3.1)
+var minLevelStr = Environment.GetEnvironmentVariable("SERILOG__MINIMUMLEVEL") ?? "Information";
+var minLevel = Enum.TryParse<LogEventLevel>(minLevelStr, ignoreCase: true, out var parsedLevel)
+    ? parsedLevel
+    : LogEventLevel.Information;
+
 var logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .MinimumLevel.Is(minLevel)
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .Enrich.WithEnvironmentUserName()

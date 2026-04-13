@@ -34,49 +34,57 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
-| Infrastructure.Tests | 58 | ✅ 58/58 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5) |
-| Api.Tests | 93 | ✅ 93/93 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto |
+| Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
+| Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 2 | ✅ 2/2 | E2E happy path + multi-user |
-| **Current** | **222** | **✅ 222/222** | Domain (69) + Infrastructure (58) + Api.Tests (93) + Integration.Tests (2) |
+| **Current** | **241** | **✅ 241/241** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (2) |
 
 ## Último paso completado
-> ✅ **Phase 3.3: Endpoint Logging Integration — FIX COMPLETADO — 222/222 tests ✅**
+> ✅ **Phase 3.3.1: Dynamic Log Level Configuration — COMPLETADO — 241/241 tests ✅**
 >
 > **Resumen**:
-> - Fix aplicado en `AuthEndpoints`, `ChallengeEndpoints`, `UserEndpoints`:
->   - `ILogger` (no-genérico) → `ILoggerFactory` — las clases `static` no pueden ser argumentos de tipo genérico en C#
->   - Se crea el logger con `loggerFactory.CreateLogger(typeof(ClassName))` al inicio de cada handler
-> - Fix en `EndpointLoggingTests.cs`:
->   - `new WebApplicationFactory<Program>()` → `CustomWebApplicationFactory` (que configura DB in-memory + env var `DOTNET_RUNNING_IN_TEST`)
->   - `ReadFromJsonAsync<dynamic>()` → `ReadFromJsonAsync<LoginResponseDto>()` (System.Text.Json no es navegable como dynamic)
-> - Resultado: **222/222 tests passing** (Domain 69 + Infrastructure 58 + Api.Tests 93 + Integration 2)
-> - Commit: `40ad2ae fix: resolve ILogger DI crash in Minimal API endpoints (Phase 3.3)`
->
-> **Próximo paso**: **Phase 3.3.1 — Dynamic Log Level Configuration**
+> - Spec completa: `specs/infrastructure/dynamic-log-level.spec.md`
+> - Unit tests: 13 tests en verde en `LogLevelConfigurationTests.cs`
+> - Integration tests: 6 tests en verde en `DynamicLogLevelConfigurationTests.cs`
+> - Implementación: Lee `SERILOG__MINIMUMLEVEL` env var (case-insensitive) y aplica al `MinimumLevel` de Serilog
+> - Default: Information si la variable es inválida o no existe
+> - Resultado: **241/241 tests passing** (222 anteriores + 19 nuevos)
+> - Próximo paso: **Phase 3.4 — Resiliencia/Chaos Tests** (Redis down, slow DB, JWT rotation)
 
 ---
 
-> 🟡 **Phase 3.3.1: Dynamic Log Level Configuration — PLANIFICADO**  
+> ✅ **Phase 3.3.1: Dynamic Log Level Configuration — COMPLETADO — 241/241 tests ✅**
 >
-> **Objetivo**: Permitir cambiar el nivel de log (Debug/Info/Warning/Error/Fatal) sin redeploy usando variables de entorno o Azure App Service configuration.
+> **Objetivo completado**: Permitir cambiar el nivel de log (Debug/Info/Warning/Error/Fatal) sin redeploy usando variable de entorno `SERILOG__MINIMUMLEVEL`.
 >
-> **Diseño**:
-> - Lee `SERILOG__MINIMUMLEVEL` desde variables de entorno (standard en .NET)
-> - Parsea el valor a `Serilog.Events.LogEventLevel` enum
-> - Lo aplica al `LoggerConfiguration().MinimumLevel.Is(minLevel)` en Program.cs
-> - Example: `SERILOG__MINIMUMLEVEL=Debug` → captura Debug/Info/Warning/Error/Fatal
->
-> **Tests necesarios**:
-> - Unit test: Enum.TryParse<LogEventLevel>() works for all valid values
-> - Unit test: Invalid log level defaults to Information
-> - Integration test: App respects env var at startup
+> **Implementación**:
+> - Spec: `specs/infrastructure/dynamic-log-level.spec.md` (completa con 10 escenarios de test)
+> - Unit tests: `tests/DevBrain.Infrastructure.Tests/LogLevelConfigurationTests.cs` (13 tests)
+>   - Parseo válido para todos los niveles: Debug, Information, Warning, Error, Fatal, Verbose
+>   - Case-insensitive: "debug", "DEBUG", "DeBuG" → todos parsan a LogEventLevel.Debug
+>   - Fallback a Information: valores inválidos, string vacío, null
+> - Integration tests: `tests/DevBrain.Api.Tests/DynamicLogLevelConfigurationTests.cs` (6 tests)
+>   - App arranca correctamente con env var `SERILOG__MINIMUMLEVEL=Debug|Information|Error|etc`
+>   - Fallback a default Information si valor es inválido
+>   - Case-insensitive parsing
+> - Implementación en `Program.cs`:
+>   ```csharp
+>   var minLevelStr = Environment.GetEnvironmentVariable("SERILOG__MINIMUMLEVEL") ?? "Information";
+>   var minLevel = Enum.TryParse<LogEventLevel>(minLevelStr, ignoreCase: true, out var parsedLevel)
+>       ? parsedLevel
+>       : LogEventLevel.Information;
+>   var logger = new LoggerConfiguration()
+>       .MinimumLevel.Is(minLevel)  // ← Dinámico según env var
+>       ...
+>   ```
+> - Resultado: **241/241 tests passing** (222 anteriores + 13 unitarios + 6 integración)
 > 
-> **Verification en producción**:
-> - Deploy cambios a Azure
-> - Vía Azure Portal: Agregar variable de entorno
-> - Restart app service → verificar logs en Application Insights
+> **Verificación en producción**:
+> - Deploy cambios a Azure App Service via GitHub Actions
+> - Vía Azure Portal: Configuration → Add app setting: `SERILOG__MINIMUMLEVEL=Debug`
+> - Restart app service → logs cambian a Debug level en Application Insights
 >
-> **Status**: Ready to implement (esperando próxima sesión)
+> **Próximo paso**: **Phase 3.4 — Resiliencia/Chaos Tests** O **Phase 4: Frontend Next.js**
 
 ---
 
