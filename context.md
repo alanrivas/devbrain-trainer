@@ -40,6 +40,38 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
+> ✅ **Frontend Azure Deployment Configuration — 13 de Abril 2026**
+>
+> **Preparación para Azure App Service**:
+> 
+> **Archivos de Configuración Creados**:
+> - `.env.production` — Backend URL: https://devbrain-trainer.azurewebsites.net/api/v1 ✅
+> - `.env.staging` — Entorno de staging configurado ✅
+> - `web.config` — Configuración IIS para App Service ✅
+> - `.azure/ci-cd.yml` — Pipeline de CI/CD con Azure Pipelines ✅
+> - `docs/AZURE-DEPLOYMENT.md` — Guía completa de deployment ✅
+> 
+> **Build Status**:
+> - ✅ Frontend builds sin errores
+> - ✅ Assets optimizados para producción
+> - ✅ Next.js 16.2.3 listo para Azure
+> 
+> **Próximos Pasos**:
+> 1. Ejecutar: `az login`
+> 2. Seguir guía: `docs/AZURE-DEPLOYMENT.md`
+> 3. Depurar con: `az webapp log tail`
+> 4. Acceder en: https://devbrain-frontend.azurewebsites.net
+> 
+> **Configuración Azure**:
+> - Resource Group: `devbrain-rg`
+> - App Service Plan: `devbrain-plan`
+> - Frontend App: `devbrain-frontend`
+> - Backend App: `devbrain-trainer` (ya existe)
+> - Región: `eastus` (recomendado)
+
+---
+
+## Último paso completado (anterior)
 > ✅ **Session Restart + Full System Verification — 13 de Abril 2026**
 >
 > **Cambios realizados en esta sesión**:
