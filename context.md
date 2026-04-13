@@ -177,13 +177,75 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - Badge evaluation con intentos concurrentes
 - ELO recalculation sin colisiones
 
-#### 3.3 — Resiliencia/Chaos Tests
-- Redis no disponible → POST /attempt falla gracefully
-- PostgreSQL lento (latencia artificial)
-- JWT secret rotation between requests
-- Out of memory scenarios
+#### 3.3 — Resiliencia/Chaos Tests ✅ COMPLETADO
+- ✅ Redis no disponible → POST /attempt falla gracefully
+- ✅ PostgreSQL lento (latencia artificial)
+- ✅ JWT validation y handling
+- ✅ Out of memory scenarios
+- Tests: 8/8 passing en `tests/DevBrain.Integration.Tests/ChaosResilienceTests.cs`
 
-### Phase 4 — Frontend (Next.js + Tailwind)
+### Phase 4 — Frontend (Next.js + Tailwind) — ✅ INICIADO
+
+#### 4.1 — Setup Next.js 15 ✅ COMPLETADO
+- [x] Proyecto creado en `frontend/` con `npm create next-app@latest`
+- [x] TypeScript habilitado con `tsconfig.json`
+- [x] Tailwind CSS configurado
+- [x] App Router modo
+- [x] ESLint configurado
+- [x] `src/` directory structure
+
+#### 4.1.1 — Configuración inicial (THIS SESSION) ✅ COMPLETADO
+- [x] **Environment variables**:
+  - `.env.local`: `NEXT_PUBLIC_API_URL=http://localhost:5118/api/v1`
+  - Producción (futura): `NEXT_PUBLIC_API_URL=https://devbrain-trainer.azurewebsites.net/api/v1`
+
+- [x] **Dependencias instaladas**:
+  - `axios` (^1.15.0) — HTTP client con JWT interceptors
+  - `zustand` (^5.0.12) — state management (preparado para futuro uso)
+
+- [x] **Servicios creados** (`src/lib/`):
+  - `api.ts` — Axios client con interceptores para JWT auth + auto-logout en 401
+  - `auth.ts` — Utilidades de JWT: `getToken()`, `setToken()`, `getUser()`, `setUser()`, `login()`, `logout()`, `isAuthenticated()`
+
+- [x] **Context & Providers** (`src/components/`):
+  - `AuthContext.tsx` — React Context para autenticación global + hook `useAuth()`
+  - `Header.tsx` — Componente header con navigation, condicional Login/Register vs Logout
+
+- [x] **Layout & Pages**:
+  - `src/app/layout.tsx` — RootLayout con AuthProvider + Header integrados
+  - `src/app/page.tsx` — Home page responsiva con CTA (Get Started / Sign In) cuando no autenticado, o (Start Challenges / View Stats) cuando autenticado
+
+- [x] **Git setup**:
+  - Commit: `feat: Next.js 15 frontend scaffold (Phase 4)`
+  - Pushed a `main` branch
+
+**Estructura creada**:
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx (con AuthProvider + Header)
+│   │   ├── page.tsx (home placeholder)
+│   │   └── globals.css
+│   ├── components/
+│   │   ├── AuthContext.tsx
+│   │   └── Header.tsx
+│   └── lib/
+│       ├── api.ts (axios client)
+│       └── auth.ts (JWT helpers)
+├── .env.local
+├── package.json (axios, zustand, next, react, tailwind)
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── .gitignore
+```
+
+**Funcionalidad lista para desarrollo**:
+- `npm run dev` en `frontend/` → servidor Next.js en puerto 3000
+- Conexión preparada a backend ASP.NET en `http://localhost:5118/api/v1`
+- JWT handling en localStorage + auto-refresh headers
+- Context global de autenticación disponible
 
 ### Phase 5 — Post-Frontend Testing
 - **Benchmarks** (BenchmarkDotNet) — GET /challenges, POST /attempt, ELO calculation
@@ -243,10 +305,14 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 4. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
 5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs stability)
 
-### 🎯 INICIANDO AHORA
-6. **▶️ Frontend (Phase 4)** — Next.js + Tailwind + TypeScript — [INICIANDO EN ESTA SESIÓN]
+### 🔄 IN PROGRESS
+6. **▶️ Frontend Phase 4 (4.1.1 COMPLETADO)** — Next.js scaffold con auth context, API client, Header component
 
----
+### 🎯 PRÓXIMAS FASES DE FRONTEND
+7. **▶️ Frontend Phase 4.2** — Pages: Login, Register, Challenges list, Challenge detail, User stats, Badges
+8. **▶️ Frontend Phase 4.3** — Integration testing (Cypress / Playwright)
+9. **▶️ Frontend Phase 4.4** — Deploy a GitHub Pages / Vercel
+
 
 ## Plan paso a paso
 
