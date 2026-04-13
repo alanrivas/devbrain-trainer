@@ -35,68 +35,24 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |-------|-------|--------|---------|
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
 | Infrastructure.Tests | 58 | ✅ 58/58 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5) |
-| Api.Tests | 93 | ⚠️ 0/93 | Phase 3.3 EndpointLoggingTests failing (HTTP 500) — requires debugging |
-| **PRIOR State** | **127** | **✅ 127/127** | Phase 3.2 completed: GET /challenges (13), GET /challenges/{id} (8), POST /attempt (26), POST /auth/register (13), POST /auth/login (11), JWT middleware (9), GET /users/me/stats (10), GET /users/me/badges (4), Serilog logging (5) |
-| **Current** | **127** | **✅ 127/127** | Domain (69) + Infrastructure (58) tests passing — waiting for Phase 3.3 EndpointLoggingTests fix |
+| Api.Tests | 93 | ✅ 93/93 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto |
+| Integration.Tests | 2 | ✅ 2/2 | E2E happy path + multi-user |
+| **Current** | **222** | **✅ 222/222** | Domain (69) + Infrastructure (58) + Api.Tests (93) + Integration.Tests (2) |
 
 ## Último paso completado
-> ✅ **Phase 3.2: Serilog + Application Insights Logging Infrastructure — COMPLETADO**
+> ✅ **Phase 3.3: Endpoint Logging Integration — FIX COMPLETADO — 222/222 tests ✅**
 >
-> **Resumen de la sesión**:
-> - 212/212 tests en verde (207 unit + integration tests + 5 SerilogLoggingTests)
-> - Spec completada: `specs/infrastructure/serilog-logging.spec.md` (330+ líneas, full SDD)
-> - NuGet packages agregados: Serilog, Serilog.AspNetCore, Serilog.Sinks.Console/File/ApplicationInsights, Serilog.Enrichers.Environment
-> - Program.cs integrado con Serilog:
->   - Inicialización ANTES de WebApplicationBuilder (best practice)
->   - Multi-sink configuration: Console (JSON), File (rolling daily, 30-day retention), Application Insights
->   - Enrichers: FromLogContext, WithEnvironmentUserName, WithProperty(Environment)
->   - Try-catch-finally con Log.Fatal logging
-> - Tests creados: `SerilogLoggingTests.cs` (7 test methods, todos en verde)
-> - Configuración por entorno: Dev→Debug, Testing→Minimal, Production→Information
-> - Invariantes validados: no passwords/tokens logged, structured JSON format, zero duplication
-> - Fix aplicado: GetUserStats accuracy tests (ahora expect 50/100 en lugar de 0.5/1.0 decimal)
-> - Logging ready para:
->   - Auth (register/login/token generation)
->   - Challenges (CRUD operations)
->   - Attempts (submission, scoring, badge awarding)
->   - User stats (ELO updates, streak tracking)
->   - Infrastructure (startup, DB migrations, Redis connection)
-> - Commit: (pending — listos para hacer push)
+> **Resumen**:
+> - Fix aplicado en `AuthEndpoints`, `ChallengeEndpoints`, `UserEndpoints`:
+>   - `ILogger` (no-genérico) → `ILoggerFactory` — las clases `static` no pueden ser argumentos de tipo genérico en C#
+>   - Se crea el logger con `loggerFactory.CreateLogger(typeof(ClassName))` al inicio de cada handler
+> - Fix en `EndpointLoggingTests.cs`:
+>   - `new WebApplicationFactory<Program>()` → `CustomWebApplicationFactory` (que configura DB in-memory + env var `DOTNET_RUNNING_IN_TEST`)
+>   - `ReadFromJsonAsync<dynamic>()` → `ReadFromJsonAsync<LoginResponseDto>()` (System.Text.Json no es navegable como dynamic)
+> - Resultado: **222/222 tests passing** (Domain 69 + Infrastructure 58 + Api.Tests 93 + Integration 2)
+> - Commit: `40ad2ae fix: resolve ILogger DI crash in Minimal API endpoints (Phase 3.3)`
 >
-> **Próximo paso**: **Phase 3.3 — Endpoint Logging Integration** (add ILogger<T> to endpoints, Log.Information calls, validate all 212+ tests still pass)
-
----
-
-> ✅ **Phase 3.3: Endpoint Logging Integration — COMPLETADO (con issue pendiente)**
->
-> **Resumen de la sesión**:
-> - Spec completada: `specs/api/endpoint-logging.spec.md` (390+ líneas, full SDD)
->   - Define 8 endpoints + 2 middleware para logging
->   - Estructura: request entry, business logic events, response, error handling
->   - Invariantes: sin passwords/emails, structured logging, LogContext limpio
-> - Tests creados: `EndpointLoggingTests.cs` (9 nuevos test methods)
->   - GetChallenges, GetChallenge (valid/invalid), PostRegister (new/duplicate), PostLogin (valid/wrong password)
->   - GetUserStats, GetUserBadges, PostAttempt
-> - Endpoints refactorizados con ILogger injection:
->   - `ChallengeEndpoints.cs`: GetChallenges, GetChallenge, PostAttempt → agregado logging
->   - `AuthEndpoints.cs`: PostRegister, PostLogin → agregado logging
->   - `UserEndpoints.cs`: GetUserStats, GetUserBadges → agregado logging + LogContext.PushProperty
-> - Logging agregado:
->   - Entry logs: "GetChallenges called with filters: {...}"
->   - Business logic: "Attempt recorded: IsCorrect={IsCorrect}, NewELO={NewELO}, ..."
->   - Warning logs: "Challenge not found", "duplicate email", "authentication failed"
->   - Structured logging con Serilog.Context.LogContext
-> - Build: ✅ OK (0 errores)
-> - Tests: ⚠️ ISSUE IDENTIFICADO: EndpointLoggingTests fallando (HTTP 500)
->   - Domain tests: ✅ 69/69 en verde
->   - Infrastructure tests: ✅ 58/58 en verde
->   - API tests (EndpointLoggingTests): ❌ 93 tests failing (HTTP 500 response)
->   - **Causa probable**: Minimal API routing con ILogger como parámetro en orden incorrecto
->   - **Tarea pendiente**: Debugging + fixeo de EndpointLoggingTests (para sesión futura)
->   - **Workaround temporal**: Código funciona en producción (Azure), issue solo en tests
-> - Commit: `c9a606f feat: Phase 3.3 - Endpoint Logging Integration with ILogger injection`
-> - Commit actual: `2c01cba docs: Phase 3.3 status update - EndpointLoggingTests issue identified, Phase 3.3.1 documented`
-> - Próximo: [PENDIENTE] Fijar EndpointLoggingTests issue (debugging de Minimal API routing)
+> **Próximo paso**: **Phase 3.3.1 — Dynamic Log Level Configuration**
 
 ---
 
@@ -308,12 +264,12 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ### Fase 3 — Robustez Backend (ANTES del Frontend)
 
-#### 3.1 — E2E Integration Tests
-- [ ] Crear proyecto `DevBrain.Integration.Tests`
-- [ ] Agregar TestContainers (PostgreSQL + Redis)
-- [ ] Spec: Flujo completo Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
-- [ ] Validar persistencia de datos end-to-end
-- [ ] Validar relaciones entre entidades en real DB
+#### 3.1 — E2E Integration Tests ✅ COMPLETADO
+- [x] Crear proyecto `DevBrain.Integration.Tests`
+- [x] Agregar TestContainers (PostgreSQL + Redis)
+- [x] Spec: Flujo completo Register → Login → GetChallenges → PostAttempt → GetStats → GetBadges
+- [x] Validar persistencia de datos end-to-end
+- [x] Validar relaciones entre entidades en real DB
 
 #### 3.2 — Concurrency/Race Condition Tests
 - [ ] Spec: Dos usuarios simultáneos en POST /attempt
@@ -415,12 +371,8 @@ Para investigaciones más complejas que requieran iteración autónoma y decisio
 
 ## Recomendación para próxima sesión
 
-1. ✅ Documentado: context.md actualizado con tarea pendiente
-2. ⏳ **Crear skill `debug-test-failures`** antes de continuar con más phases
-3. ⏳ Usar nuevo skill para diagnosticar EndpointLoggingTests (HTTP 500 issue)
-4. ⏳ Luego proceder con Phase 3.3.1 (Dynamic Log Level Configuration) con confianza
-
-Esto mejorará la calidad y repetibilidad del workflow, especialmente cuando trabajemos con múltiples agentes/sesiones.
+1. ✅ Phase 3.3 fix completado — 222/222 tests en verde
+2. ▶️ **Siguiente**: Phase 3.3.1 — Dynamic Log Level Configuration (`SERILOG__MINIMUMLEVEL` desde env var)
 
 ---
 
