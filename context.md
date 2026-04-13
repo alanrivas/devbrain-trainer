@@ -40,19 +40,17 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Phase 4.1.1: Next.js Frontend Scaffold — COMPLETADO**
+> ✅ **Phase 4.2: Auth Pages (Login & Register) — COMPLETADO**
 >
 > **Resumen**:
-> - Proyecto Next.js 15 creado en `frontend/` subfolder (mismo repo)
-> - TypeScript + Tailwind CSS + App Router
-> - Auth context + JWT management globalizado
-> - API client (axios) con interceptors automáticos para JWT
-> - Header component con nav condicional (login/logout)
-> - Home responsive con CTA diferenciado por auth state
-> - `.env.local` configurado para backend local (`http://localhost:5118/api/v1`)
-> - Ready para correr: `npm run dev` en `frontend/` → puerto 3000
+> - Components: `LoginForm.tsx`, `RegisterForm.tsx` con validación de datos
+> - Pages: `/login`, `/register` con layout profesional
+> - Integration: Conectadas con backend `/api/v1/auth/login` y `/api/v1/auth/register`
+> - Auth flow: Guardar JWT en contexto global, redirigir a `/challenges` tras login exitoso
+> - Header actualizado: Links condicionales (Login/Register vs Logout + user email)
+> - Challenges page: Placeholder lista de challenges (protegida, requiere auth)
 >
-> **Próximo paso**: **Phase 4.2 — Auth Pages** (Login, Register components)
+> **Próximo paso**: **Phase 4.3 — Challenge Pages** (Challenge detail + Attempt form)
 
 ---
 
