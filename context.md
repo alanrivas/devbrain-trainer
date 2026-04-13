@@ -43,16 +43,15 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > ✅ **Phase 3.4: Chaos/Resilience Integration Tests — COMPLETADO — 249/249 tests ✅**
 >
 > **Resumen**:
-> - Spec: `specs/integration/chaos-resilience.spec.md` (completa con 4 escenarios de caos + 8 test cases)
-> - Tests: `tests/DevBrain.Integration.Tests/ChaosResilienceTests.cs` (8 tests en verde)
->   - JWT validation: missing JWT → 401, invalid JWT → 401, valid JWT → 200
->   - Streaming/delays: GetChallenges con delay → 200 OK (no timeout)
->   - Health check: /health sin auth → 200 OK
->   - Concurrency: 5 requests simultáneos → todos succeed
->   - Error handling: requests malformados → error graceful (no crash)
-> - Resultado: **249/249 tests passing** (241 anteriores + 8 nuevos de chaos)
+> - Spec: `specs/integration/chaos-resilience.spec.md` (4 chaos scenarios)
+> - Tests: 8 nuevos en verde (JWT validation, concurrent requests, error handling)
+> - Resultado: **249/249 tests passing**
 >
-> **Próximo paso**: **Phase 3.5 — Post-MVP Optimizations** (benchmarks, contract tests) O **Phase 4: Frontend Next.js**
+> **FASES PENDIENTES (dejar para sesiones futuras)**:
+> - Phase 3.2 — Concurrency Tests (simultaneous attempts, race conditions)
+> - Phase 3.5 — Post-MVP Optimizations (benchmarks, contract tests)
+>
+> **INICIANDO AHORA**: Phase 4 — Frontend (Next.js + Tailwind + TypeScript)
 
 ---
 
@@ -233,13 +232,19 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 
 ---
 
-## Próximas prioridades (antes de Frontend)
+## Próximas prioridades (roadmap futuro)
+
+### ✅ COMPLETADAS (Phase 3)
 1. **✅ E2E Integration Tests** — 2/2 tests passing, real DB/Redis with TestContainers
-2. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
-3. **✅ Resiliencia/Logging - Dynamic Log Level (Phase 3.3.1)** — SERILOG__MINIMUMLEVEL env var
-4. **✅ Chaos/Resilience Tests (Phase 3.4)** — JWT validation, graceful error handling, no crashes
-5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs)
-6. **Frontend (Phase 4)** — Next.js implementation after Phase 3 complete
+2. **✅ Resiliencia/Logging - Dynamic Log Level (Phase 3.3.1)** — SERILOG__MINIMUMLEVEL env var
+3. **✅ Chaos/Resilience Tests (Phase 3.4)** — JWT validation, graceful error handling, no crashes
+
+### 📋 PENDING (Dejar para sesiones futuras si es necesario)
+4. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
+5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs stability)
+
+### 🎯 INICIANDO AHORA
+6. **▶️ Frontend (Phase 4)** — Next.js + Tailwind + TypeScript — [INICIANDO EN ESTA SESIÓN]
 
 ---
 
