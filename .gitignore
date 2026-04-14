@@ -59,6 +59,7 @@ debug_notes.txt
 *.trace
 test_output.txt
 test_results.txt
+test_results*.txt
 
 # Build results on 'Bin' directories
 **/[Bb]in/*
