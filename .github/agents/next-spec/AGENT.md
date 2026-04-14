@@ -70,6 +70,51 @@ PASO 1: Leer `context.md`
   → Identificar primera línea con "▶️" (en progreso)
   → Extraer número de fase (4.2.1, 4.2.2, etc.)
 
+PASO 1.5: VERIFICAR SI LA FUNCIONALIDAD YA EXISTE (NUEVO)
+  → Buscar en el código si la funcionalidad está implementada
+  
+  === FRONTEND ===
+  IF Phase 4.2.1 (Login):
+    → Buscar: `frontend/src/app/login/page.tsx`
+    → Buscar: `frontend/src/components/LoginForm.tsx`
+    
+  IF Phase 4.2.2 (Register):
+    → Buscar: `frontend/src/app/register/page.tsx`
+    → Buscar: `frontend/src/components/RegisterForm.tsx`
+    
+  IF Phase 4.2.3 (Challenges List):
+    → Buscar: `frontend/src/app/challenges/page.tsx`
+    → Buscar: `frontend/src/components/ChallengeCard.tsx` o `ChallengesList.tsx`
+    
+  IF Phase 4.2.4 (Challenge Detail):
+    → Buscar: `frontend/src/app/challenges/[id]/page.tsx`
+    → Buscar: `frontend/src/components/ChallengeDetail.tsx`
+    → Buscar: `frontend/src/components/AttemptForm.tsx`
+    
+  IF Phase 4.2.5 (User Stats):
+    → Buscar: `frontend/src/app/stats/page.tsx`
+    → Buscar: `frontend/src/components/StatsCard.tsx`
+    
+  IF Phase 4.2.6 (Badges):
+    → Buscar: `frontend/src/app/badges/page.tsx`
+    → Buscar: `frontend/src/components/BadgeCard.tsx`
+    
+  === BACKEND ===
+  IF Phase 3.X:
+    → Buscar en `src/DevBrain.Api/` por controlador o endpoint
+    → Buscar en `src/DevBrain.Domain/` por entidad
+    → Buscar en `src/DevBrain.Infrastructure/` por repositorio/servicio
+  
+  IF funcionalidad EXISTS:
+    → Report: ✅ Phase X.X ya implementada
+    → Cambiar context.md: marcar como ✅ (COMPLETADA)
+    → Mark siguiente phase como ▶️ (EN PROGRESO)
+    → Commit context.md
+    → STOP y pasar a siguiente phase recursivamente
+  
+  IF funcionalidad NO exists:
+    → Continuar a PASO 2
+
 PASO 2: Determinar tipo de spec
   IF fase contiene "frontend" OR "React" OR "Next.js":
     → Tipo = FRONTEND
@@ -138,13 +183,24 @@ usuario: (runSubagent agentName="next-spec" ...)
 
 ## Errores a manejar
 
-1. **Todos los specs completados**
+1. **Funcionalidad ya existe** (NUEVO)
+   ```
+   ✅ Phase 4.2.1 (Login Page) ya implementada
+      Found: frontend/src/app/login/page.tsx
+      Found: frontend/src/components/LoginForm.tsx
+      Found: frontend/src/components/LoginForm.test.tsx
+   
+   → Marcando como ✅ COMPLETADA en context.md
+   → Moviendo a siguiente: Phase 4.2.2 (Register Page)
+   ```
+
+2. **Todos los specs completados**
    ```
    ❌ Todos los specs de la fase están completos.
    → Próximas fases: Phase 4.3 (Integration Testing)
    ```
 
-2. **Tests no pasan**
+3. **Tests no pasan**
    ```
    ❌ Tests fallidos después de spec-implement
    ✅ Spec creada: specs/frontend/...
@@ -156,12 +212,132 @@ usuario: (runSubagent agentName="next-spec" ...)
    → Usuario debe revisar e intentar fijar
    ```
 
-3. **Especificación ambigua**
+4. **Especificación ambigua**
    ```
    ❌ No se pudo inferir tipo de spec de context.md
    → Las fases están mal formateadas
    → Contacta a Alan para sincronizar
    ```
+
+## Checklist de Verificación de Funcionalidad Existente
+
+Antes de crear una spec, el agente debe verificar estos archivos **archivo por archivo**:
+
+### Phase 4.2.1 — Login Page
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/login/page.tsx
+  ✓ frontend/src/components/LoginForm.tsx
+  ✓ frontend/src/components/LoginForm.test.tsx
+  ✓ frontend/src/app/login/page.test.tsx
+
+Verificar contenido:
+  → LoginForm.tsx debe tener: import useAuth, handleSubmit, email/password inputs, error handling
+  → login/page.tsx debe tener: useRouter redirect si isAuthenticated, imports LoginForm
+  → Tests deben cubrir: rendering, validation, submission, errors, accessibility
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Phase 4.2.2 — Register Page
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/register/page.tsx
+  ✓ frontend/src/components/RegisterForm.tsx
+  ✓ frontend/src/components/RegisterForm.test.tsx
+  ✓ frontend/src/app/register/page.test.tsx
+
+Verificar contenido:
+  → RegisterForm.tsx debe tener: import useAuth, handleSubmit, email/password/displayName inputs
+  → register/page.tsx debe tener: useRouter redirect si isAuthenticated, imports RegisterForm
+  → Tests deben cubrir: rendering, validation, password matching, submission, errors
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Phase 4.2.3 — Challenges List Page
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/challenges/page.tsx
+  ✓ frontend/src/components/ChallengeCard.tsx OR ChallengesList.tsx
+  ✓ frontend/src/app/challenges/page.test.tsx
+
+Verificar contenido:
+  → challenges/page.tsx debe tener: GET /api/v1/challenges call, pagination, filtersby category/difficulty
+  → ChallengeCard debe mostrar: title, category, difficulty, description preview, stats
+  → Tests deben cubrir: rendering lista, pagination, filters, empty state
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Phase 4.2.4 — Challenge Detail + Attempt Form
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/challenges/[id]/page.tsx
+  ✓ frontend/src/components/ChallengeDetail.tsx
+  ✓ frontend/src/components/AttemptForm.tsx
+  ✓ frontend/src/app/challenges/[id]/page.test.tsx
+
+Verificar contenido:
+  → [id]/page.tsx debe tener: useRouter params, useAuth check, GET /api/v1/challenges/:id
+  → ChallengeDetail debe mostrar: title, description, category, difficulty, instructions
+  → AttemptForm debe tener: text input, submit, POST /api/v1/challenges/:id/attempt, resultado (correcto/incorrecto)
+  → Tests deben cubrir: rendering, form submission, error handling, success response
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Phase 4.2.5 — User Stats Dashboard
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/stats/page.tsx
+  ✓ frontend/src/components/StatsCard.tsx
+  ✓ frontend/src/app/stats/page.test.tsx
+
+Verificar contenido:
+  → stats/page.tsx debe tener: GET /api/v1/users/me/stats, DisplayStats
+  → StatsCard debe mostrar: elo rating, total attempts, accuracy %, streaks
+  → Tests deben cubrir: rendering stats, loading state, empty state
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Phase 4.2.6 — Badges Page
+```
+Buscar (TODOS estos deben existir para marcar como COMPLETO):
+  ✓ frontend/src/app/badges/page.tsx
+  ✓ frontend/src/components/BadgeCard.tsx
+  ✓ frontend/src/app/badges/page.test.tsx
+
+Verificar contenido:
+  → badges/page.tsx debe tener: GET /api/v1/users/me/badges, DisplayBadges
+  → BadgeCard debe mostrar: badge name, icon/image, description, unlockedAt date
+  → Badge gris si no desbloqueado
+  → Tests deben cubrir: rendering badges, empty state, locked/unlocked states
+
+Si TODOS existen + tienen contenido → Marcar como ✅ COMPLETADA
+```
+
+### Procedimiento de Verificación (Paso 1.5)
+```bash
+# Para cada archivo esperado:
+if [ -f "path/to/file.tsx" ]; then
+  if grep -q "importantKeyword" "path/to/file.tsx"; then
+    echo "✅ $file exists and has expected content"
+  else
+    echo "❌ $file exists but missing key implementation"
+    echo "   → Create spec para refactorizar/completar"
+  fi
+else
+  echo "❌ $file NOT FOUND"
+  echo "   → Create spec para implementar"
+fi
+```
+
+**IMPORTANTE**: 
+- Si **todos** los archivos existen + tienen contenido → Marcar phase como ✅
+- Si **algunos** faltan o incompletos → Crear spec para completar
+- Reportar al usuario qué archivos se encontraron y cuáles faltan
 
 ## Dependencias
 
