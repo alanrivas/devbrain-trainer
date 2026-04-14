@@ -55,11 +55,10 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Phase 4.2.1 (Login Page) COMPLETADO — 13 de Abril 2026**
+> ✅ **Phase 4.2.1 (Login Page) COMPLETADO + Phase 4.2.2 Spec Created — 13 de Abril 2026**
 >
-> **Implementación de Frontend - Phase 4.2.1**:
+> **Phase 4.2.1 Completado**:
 > 
-> **Cambios realizados**:
 > 1. **Componente LoginForm.tsx** 
 >    - Client-side validation (email format, password length ≥3)
 >    - Integration con AuthContext para guardar token/user
@@ -100,7 +99,20 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 >
 > **Git**: Commiteado a main branch ✅
 >
-> **Próximo paso**: Phase 4.2.2 (Register Page) — mismos principios
+> ---
+>
+> **Phase 4.2.2 Spec Creada (▶️ EN PROGRESO)**:
+> - **Ubicación**: `specs/frontend/phase-4.2.2-register-page.spec.md`
+> - **Objetivo**: Agregar tests formales a componentes existentes (RegisterForm + register/page ya existen pero SIN TESTS)
+> - **Cobertura**: 26 tests (20 component + 6 page)
+> - **Validaciones a testear**:
+>   * Email: requerido + formato válido
+>   * Password: requerido + mínimo 8 caracteres + complejidad (mayús, minús, número)
+>   * Confirm Password: debe coincidir
+>   * DisplayName: 2-50 caracteres
+> - **Escenarios**: rendering, validation, submission, errors, accessibility, redirect
+> - **Backend endpoint** (ya existe ✅): POST `/api/v1/auth/register`
+> - **Próximo**: Ejecutar spec-implement para agregar tests siguiendo SDD+TDD
 
 ## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
 
