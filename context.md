@@ -52,7 +52,9 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
+| **Frontend.Tests** | **26** | **✅ 26/26** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) |
+| **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
+| **Grand Total** | **275** | **✅ 275/275** | Backend 249 + Frontend 26 |
 
 ## Último paso completado
 > ✅ **Phase 4.2.1 (Login Page) COMPLETADO + Phase 4.2.2 Spec Created — 13 de Abril 2026**
@@ -101,18 +103,22 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 >
 > ---
 >
-> **Phase 4.2.2 Spec Creada (▶️ EN PROGRESO)**:
-> - **Ubicación**: `specs/frontend/phase-4.2.2-register-page.spec.md`
-> - **Objetivo**: Agregar tests formales a componentes existentes (RegisterForm + register/page ya existen pero SIN TESTS)
-> - **Cobertura**: 26 tests (20 component + 6 page)
-> - **Validaciones a testear**:
->   * Email: requerido + formato válido
->   * Password: requerido + mínimo 8 caracteres + complejidad (mayús, minús, número)
->   * Confirm Password: debe coincidir
->   * DisplayName: 2-50 caracteres
-> - **Escenarios**: rendering, validation, submission, errors, accessibility, redirect
-> - **Backend endpoint** (ya existe ✅): POST `/api/v1/auth/register`
-> - **Próximo**: Ejecutar spec-implement para agregar tests siguiendo SDD+TDD
+> **Phase 4.2.2 COMPLETADO (✅ 26/26 TESTS)** — 14 de Abril 2026:
+> - **Ubicación**: `frontend/src/components/RegisterForm.tsx` + `frontend/src/app/register/page.tsx`
+> - **RegisterForm.test.tsx**: 20 tests ✅
+>   * Rendering: form fields, button, hints, signs, card styling
+>   * Input handling: accepts user input for all 4 fields
+>   * Submission: API call with correct data, redirect, form clearing
+>   * Error handling: error alerts, password clearing on error, preserves displayName/email
+>   * Accessibility: labels, keyboard navigation, field types (email, password)
+>   * Component state: button disabled during submission, setAuth called, etc.
+> - **register/page.test.tsx**: 6 tests ✅
+>   * Page rendering, title, subtitle
+>   * Layout responsive, gradient background
+>   * Proper composition of RegisterForm
+> - **Todo pasando 100%**: Test Suites: 2/2 ✅ | Tests: 26/26 ✅
+> - **Backend endpoint** (utilizado) ✅: POST `/api/v1/auth/register`
+> - **Próximo**: Phase 4.2.3 — ChallengeCard component extraction
 
 ## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
 
