@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 import AttemptForm from './AttemptForm';
@@ -19,6 +19,10 @@ describe('AttemptForm', () => {
     (useAuth as jest.Mock).mockReturnValue({ clearAuth: mockClearAuth });
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should render answer input and submit button', () => {
     render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
     expect(screen.getByLabelText(/your answer/i)).toBeInTheDocument();
@@ -27,7 +31,31 @@ describe('AttemptForm', () => {
 
   it('should render time limit hint', () => {
     render(<AttemptForm challengeId="c-1" timeLimitSecs={90} />);
-    expect(screen.getByText(/time limit: 90s/i)).toBeInTheDocument();
+    expect(screen.getByText(/time remaining/i)).toBeInTheDocument();
+    expect(screen.getByText(/90s \//i)).toBeInTheDocument();
+  });
+
+  it('should update the timer as time passes', () => {
+    jest.useFakeTimers();
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={90} />);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText((content) => content.includes('88s / 90s'))).toBeInTheDocument();
+  });
+
+  it('should switch timer styling to warning state near the limit', () => {
+    jest.useFakeTimers();
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={10} />);
+
+    act(() => {
+      jest.advanceTimersByTime(6000);
+    });
+
+    const timerContainer = screen.getByText(/time remaining/i).closest('[aria-live="polite"]');
+    expect(timerContainer).toHaveClass('border-amber-200');
   });
 
   it('should show validation error when answer is empty', async () => {
@@ -91,7 +119,7 @@ describe('AttemptForm', () => {
     const submitButton = screen.getByRole('button', { name: /submit attempt/i });
     await user.click(submitButton);
 
-    expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /submitting attempt/i })).toBeDisabled();
 
     resolveRequest({
       data: {
@@ -153,6 +181,58 @@ describe('AttemptForm', () => {
       expect(screen.getByText(/incorrect\. keep training/i)).toBeInTheDocument();
       expect(screen.getByText(/correct answer: right answer/i)).toBeInTheDocument();
     });
+  });
+
+  it('should render retry and back to challenges actions after success', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'answer',
+        isCorrect: true,
+        elapsedSeconds: 1,
+      },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /back to challenges/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should reset the form when retry is clicked', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'answer',
+        isCorrect: true,
+        elapsedSeconds: 1,
+      },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+
+    expect(screen.getByLabelText(/your answer/i)).toHaveValue('');
+    expect(screen.queryByText(/correct! great job/i)).not.toBeInTheDocument();
   });
 
   it('should call onSuccess callback with result data', async () => {

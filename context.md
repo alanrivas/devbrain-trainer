@@ -45,6 +45,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433, tests siguen en verde (108/108)
 - [x] Spec frontend de **Phase 4.3** creada — `specs/frontend/phase-4.3-challenge-detail-attempt.spec.md`
 - [x] Phase 4.3 implementada — Challenge Detail Page + AttemptForm + navegación desde listado
+- [x] Spec frontend de **Phase 4.4** creada — `specs/frontend/phase-4.4-attempt-ux.spec.md`
+- [x] Phase 4.4 implementada — UX del intento (timer visual, estados ricos, acciones post-attempt)
 
 ## Test Suites Status
 
@@ -54,11 +56,37 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **90** | **✅ 90/90** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) |
+| **Frontend.Tests** | **94** | **✅ 94/94** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX enhancement tests |
 | **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **339** | **✅ 339/339** | Backend 249 + Frontend 90 |
+| **Grand Total** | **343** | **✅ 343/343** | Backend 249 + Frontend 94 |
 
 ## Último paso completado
+> ✅ **Phase 4.4 (Attempt UX Enhancements) COMPLETADO — 14 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Spec creada**:
+>    - `specs/frontend/phase-4.4-attempt-ux.spec.md`
+>
+> 2. **Implementación UX**:
+>    - `AttemptForm` ahora muestra timer visual con barra de progreso y estados normal/warning/critical
+>    - Estado de envío más expresivo (`Submitting attempt...`)
+>    - Resultado enriquecido con tiempo reportado y acciones explícitas post-intento
+>    - Acciones post-attempt: `Try again` + `Back to challenges`
+>
+> 3. **Tests actualizados**:
+>    - `frontend/src/components/AttemptForm.test.tsx` ampliado a **17 tests**
+>    - Cobertura nueva para timer, transición de estilos y reset post-attempt
+>
+> 4. **Verificación**:
+>    - `npm test -- --runInBand --passWithNoTests` ✅
+>    - Frontend total: **94/94 ✅**
+>
+> **Próximo paso**: Phase 4.5 — challenge flow polishing
+> (persistencia de borrador local, navegación entre retos y mejoras de feedback)
+>
+> ---
+>
 > ✅ **Phase 4.3 (Challenge Detail + Attempt Form) COMPLETADO — 14 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:

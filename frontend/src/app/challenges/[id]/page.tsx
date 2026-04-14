@@ -133,6 +133,9 @@ export default function ChallengeDetailPage() {
             <p className="mt-2 text-sm text-gray-700">
               Result: {lastAttempt.isCorrect ? 'Correct' : 'Incorrect'} • Elapsed: {lastAttempt.elapsedSeconds}s
             </p>
+            <p className="mt-1 text-sm text-gray-600">
+              Use the actions in the attempt card to retry this challenge or return to the list.
+            </p>
           </section>
         )}
       </div>

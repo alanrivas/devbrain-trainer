@@ -147,6 +147,7 @@ describe('ChallengeDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/last attempt/i)).toBeInTheDocument();
       expect(screen.getByText(/result: correct/i)).toBeInTheDocument();
+      expect(screen.getByText(/use the actions in the attempt card/i)).toBeInTheDocument();
     });
   });
 });
