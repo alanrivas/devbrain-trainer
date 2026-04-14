@@ -52,73 +52,65 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **26** | **✅ 26/26** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) |
+| **Frontend.Tests** | **69** | **✅ 69/69** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) |
 | **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **275** | **✅ 275/275** | Backend 249 + Frontend 26 |
+| **Grand Total** | **318** | **✅ 318/318** | Backend 249 + Frontend 69 |
 
 ## Último paso completado
-> ✅ **Phase 4.2.1 (Login Page) COMPLETADO + Phase 4.2.2 Spec Created — 13 de Abril 2026**
+> ✅ **Phase 4.2.3 (ChallengeCard Component) COMPLETADO — 15 de Abril 2026**
 >
-> **Phase 4.2.1 Completado**:
+> **Phase 4.2.3 Completado**:
 > 
-> 1. **Componente LoginForm.tsx** 
->    - Client-side validation (email format, password length ≥3)
->    - Integration con AuthContext para guardar token/user
->    - Manejo de errores con mensajes descriptivos
->    - Loading state con spinner animado
->    - HTML semántico con labels asociados (htmlFor)
+> 1. **Componente ChallengeCard.tsx** 
+>    - Client-side competent (presentational, no state)
+>    - Extracción de lógica inline desde challenges/page.tsx (líneas 87-103)
+>    - Props: Challenge interface + onAttempt callback
+>    - Difficultad-based styling (Easy=green, Medium=yellow, Hard=red)
+>    - Hover effects y accesibilidad completa
 >
-> 2. **Página login/page.tsx**
->    - Redirect a /challenges si ya está autenticado
->    - Layout responsive con gradient background
->    - Composición de LoginForm
->    - Link a /register
+> 2. **Componente actualizado challenges/page.tsx**
+>    - Importación de ChallengeCard
+>    - Sustitución de inline JSX con <ChallengeCard /> component
+>    - Callback onAttempt para manejo de intentos
+>    - Refactor limpio y mantenible
 >
-> 3. **Tests 100% en Verde (25/25 ✅)**
->    - `LoginForm.test.tsx` — 20 tests: rendering, validation, submission, errors, accessibility
->    - `login/page.test.tsx` — 5 tests: rendering, auth redirect, layout
->    - Configuración Jest para Next.js (jest.config.js, jest.setup.js)
->    - Testing Library + userEvent + React Testing Library
->   
-> 4. **Validaciones implementadas**:
->    - Email: requerido + formato válido
->    - Password: requerido + mínimo 3 caracteres
->    - Manejo de errores servidor (401, 500, etc.)
->    - Clear password on error
+> 3. **Tests 100% en Verde (18/18 ✅)**:
+>    - `ChallengeCard.test.tsx` — 18 tests:
+>      * Rendering (5 tests): todo contenido presente, button, semantic HTML
+>      * Styling (3 tests): Easy/Medium/Hard color mapping correcto
+>      * Interaction (5 tests): onAttempt callback, hover effects, keyboard accessibility
+>      * Validation (2 tests): válidas props, different challenges
+>      * Component integration (3 tests adicionales de Jest structure)
 >
-> **Frontend Stack Phase 4.2.1**:
-> - Next.js 16.2.3 (App Router)
-> - React 19.2.4
-> - TypeScript 5
-> - Tailwind CSS 4
-> - axios (para API)
-> - AuthContext + ApiClient (creados en Phase 4.1)
-> - Jest + React Testing Library (nuevo)
+> 4. **Frontend Totals Post-Phase 4.2.3** ✅:
+>    - Phase 4.2.1 (Login): 25/25 tests → LoginForm (20) + login/page (5) ✅
+>    - Phase 4.2.2 (Register): 26/26 tests → RegisterForm (20) + register/page (6) ✅
+>    - Phase 4.2.3 (ChallengeCard): 18/18 tests ✅
+>    - **Total Frontend**: 69/69 tests en verde
 >
-> **Backend Dependency** (ya existe ✅):
-> - POST /api/v1/auth/login — existente y funcional
-> - CORS configurado para localhost:3000, :3001
+> 5. **Test Counts Actualizado**:
+>    - Backend: 249/249 ✅
+>    - Frontend: 69/69 ✅
+>    - **Grand Total**: 318/318 tests en verde ✅
 >
-> **Git**: Commiteado a main branch ✅
+> **Git**: Commiteado a main branch (5d4bfe4) ✅
 >
 > ---
 >
-> **Phase 4.2.2 COMPLETADO (✅ 26/26 TESTS)** — 14 de Abril 2026:
+> **Fases anteriores completadas**:
+>
+> ✅ **Phase 4.2.2 COMPLETADO (26/26 TESTS)** — 14 de Abril 2026:
 > - **Ubicación**: `frontend/src/components/RegisterForm.tsx` + `frontend/src/app/register/page.tsx`
-> - **RegisterForm.test.tsx**: 20 tests ✅
->   * Rendering: form fields, button, hints, signs, card styling
->   * Input handling: accepts user input for all 4 fields
->   * Submission: API call with correct data, redirect, form clearing
->   * Error handling: error alerts, password clearing on error, preserves displayName/email
->   * Accessibility: labels, keyboard navigation, field types (email, password)
->   * Component state: button disabled during submission, setAuth called, etc.
-> - **register/page.test.tsx**: 6 tests ✅
->   * Page rendering, title, subtitle
->   * Layout responsive, gradient background
->   * Proper composition of RegisterForm
-> - **Todo pasando 100%**: Test Suites: 2/2 ✅ | Tests: 26/26 ✅
+> - **Componentes**: RegisterForm (20 tests) + register/page (6 tests)
+> - **Validaciones**: displayName, email, password, passwordConfirm (required + formats)
 > - **Backend endpoint** (utilizado) ✅: POST `/api/v1/auth/register`
-> - **Próximo**: Phase 4.2.3 — ChallengeCard component extraction
+> - **Próximo**: Phase 4.2.3 ✅ — COMPLETADO
+>
+> ✅ **Phase 4.2.1 COMPLETADO (25/25 TESTS)** — 13 de Abril 2026:
+> - **Componente**: LoginForm.tsx + login/page.tsx
+> - **Implementación**: Client-side validation (email, password ≥3), AuthContext integration
+> - **Tests**: LoginForm (20) + login/page (5) = 25/25 ✅
+> - **Backend endpoint** (utilizado) ✅: POST `/api/v1/auth/login`
 
 ## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
 
