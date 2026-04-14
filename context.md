@@ -43,6 +43,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Endpoint POST /challenges/:id/attempt (26 tests en verde) — DTOs, mapper, validación, creación de Attempt, 100% pass rate — **ahora protegido con JWT**
 - [x] Endpoint POST /auth/register (13 tests en verde) — Email/password/displayName validation, PBKDF2 hashing, duplicate detection, 100% pass rate
 - [x] Conectar PostgreSQL con EF Core — migrations aplicadas, schema creado en port 5433, tests siguen en verde (108/108)
+- [x] Spec frontend de **Phase 4.3** creada — `specs/frontend/phase-4.3-challenge-detail-attempt.spec.md`
+- [x] Phase 4.3 implementada — Challenge Detail Page + AttemptForm + navegación desde listado
 
 ## Test Suites Status
 
@@ -52,11 +54,36 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **69** | **✅ 69/69** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) |
+| **Frontend.Tests** | **90** | **✅ 90/90** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) |
 | **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **318** | **✅ 318/318** | Backend 249 + Frontend 69 |
+| **Grand Total** | **339** | **✅ 339/339** | Backend 249 + Frontend 90 |
 
 ## Último paso completado
+> ✅ **Phase 4.3 (Challenge Detail + Attempt Form) COMPLETADO — 14 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Spec creada**:
+>    - `specs/frontend/phase-4.3-challenge-detail-attempt.spec.md`
+>
+> 2. **Implementación frontend**:
+>    - `frontend/src/components/AttemptForm.tsx` (nuevo)
+>    - `frontend/src/app/challenges/[id]/page.tsx` (nuevo)
+>    - `frontend/src/app/challenges/page.tsx` actualizado para navegar a detalle
+>
+> 3. **Cobertura de tests**:
+>    - `frontend/src/components/AttemptForm.test.tsx` (13 tests)
+>    - `frontend/src/app/challenges/[id]/page.test.tsx` (8 tests)
+>    - Suite frontend total: **90/90 ✅**
+>
+> 4. **Verificación**:
+>    - `npm test -- --runInBand --passWithNoTests` ✅
+>
+> **Próximo paso**: Phase 4.4 — mejorar UX del intento
+> (timer visual, estados de envío más ricos y navegación post-attempt)
+>
+> ---
+>
 > ✅ **Phase 4.2.3 (ChallengeCard Component) COMPLETADO — 15 de Abril 2026**
 >
 > **Phase 4.2.3 Completado**:

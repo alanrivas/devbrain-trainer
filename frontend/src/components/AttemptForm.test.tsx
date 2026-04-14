@@ -1,0 +1,237 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useRouter } from 'next/navigation';
+import AttemptForm from './AttemptForm';
+import { useAuth } from './AuthContext';
+import api from '@/lib/api';
+
+jest.mock('next/navigation');
+jest.mock('./AuthContext');
+jest.mock('@/lib/api');
+
+describe('AttemptForm', () => {
+  const mockPush = jest.fn();
+  const mockClearAuth = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+    (useAuth as jest.Mock).mockReturnValue({ clearAuth: mockClearAuth });
+  });
+
+  it('should render answer input and submit button', () => {
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    expect(screen.getByLabelText(/your answer/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /submit attempt/i })).toBeInTheDocument();
+  });
+
+  it('should render time limit hint', () => {
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={90} />);
+    expect(screen.getByText(/time limit: 90s/i)).toBeInTheDocument();
+  });
+
+  it('should show validation error when answer is empty', async () => {
+    const user = userEvent.setup();
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/answer is required/i);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('should reject whitespace-only answers', async () => {
+    const user = userEvent.setup();
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), '   ');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('should submit payload with challengeId, userAnswer and elapsedSeconds', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'SELECT 1',
+        isCorrect: true,
+        elapsedSeconds: 1,
+      },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'SELECT 1');
+    fireEvent.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/challenges/c-1/attempt', {
+        userAnswer: 'SELECT 1',
+        elapsedSeconds: expect.any(Number),
+      });
+    });
+  });
+
+  it('should disable submit button while request is in progress', async () => {
+    const user = userEvent.setup();
+    let resolveRequest: (value: unknown) => void = () => undefined;
+    const pending = new Promise((resolve) => {
+      resolveRequest = resolve;
+    });
+    (api.post as jest.Mock).mockReturnValue(pending);
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    const submitButton = screen.getByRole('button', { name: /submit attempt/i });
+    await user.click(submitButton);
+
+    expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
+
+    resolveRequest({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'answer',
+        isCorrect: true,
+        elapsedSeconds: 1,
+      },
+    });
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /submit attempt/i })).toBeEnabled());
+  });
+
+  it('should show success feedback when attempt is correct', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'answer',
+        isCorrect: true,
+        elapsedSeconds: 1,
+      },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/correct! great job/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show incorrect feedback and correct answer when provided', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: {
+        attemptId: 'a-1',
+        challengeId: 'c-1',
+        userId: 'u-1',
+        userAnswer: 'wrong',
+        isCorrect: false,
+        correctAnswer: 'right answer',
+        elapsedSeconds: 2,
+      },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'wrong');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/incorrect\. keep training/i)).toBeInTheDocument();
+      expect(screen.getByText(/correct answer: right answer/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should call onSuccess callback with result data', async () => {
+    const user = userEvent.setup();
+    const onSuccess = jest.fn();
+    const result = {
+      attemptId: 'a-1',
+      challengeId: 'c-1',
+      userId: 'u-1',
+      userAnswer: 'answer',
+      isCorrect: true,
+      elapsedSeconds: 1,
+    };
+    (api.post as jest.Mock).mockResolvedValue({ data: result });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} onSuccess={onSuccess} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledWith(result);
+    });
+  });
+
+  it('should show 400 validation message', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockRejectedValue({ response: { status: 400 } });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/invalid answer/i);
+    });
+  });
+
+  it('should clear auth and redirect to login on 401', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockRejectedValue({ response: { status: 401 } });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(mockClearAuth).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith('/login');
+    });
+  });
+
+  it('should show 404 message when challenge does not exist', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockRejectedValue({ response: { status: 404 } });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/challenge not found/i);
+    });
+  });
+
+  it('should show generic server error on 500 or network failure', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockRejectedValue({ response: { status: 500 } });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/server error\. try again/i);
+    });
+  });
+});

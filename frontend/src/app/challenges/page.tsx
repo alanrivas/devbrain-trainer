@@ -91,8 +91,7 @@ export default function ChallengesPage() {
                 key={challenge.id} 
                 challenge={challenge}
                 onAttempt={(challengeId) => {
-                  // TODO: implement navigation to challenge detail page
-                  console.log('Attempt challenge:', challengeId);
+                  router.push(`/challenges/${challengeId}`);
                 }}
               />
             ))}
