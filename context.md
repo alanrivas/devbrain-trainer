@@ -1,5 +1,20 @@
 # DevBrain Trainer — Estado del Proyecto
 
+## ⚠️ ADVERTENCIA CRÍTICA: NO ejecutar Stress Tests contra Azure
+
+**NO EJECUTES unittest de stress, load testing, o pruebas de alta concurrencia** (>100 requests) contra Azure App Service.
+
+- El plan **F1 Free** tiene cuota: 60 minutos CPU/mes
+- Un stress test agota esto en **segundos**
+- Cuando se agota → HTTP 403 "quota exceeded" hasta fin de mes
+- **Los tests normales son seguros (5-99 requests concurrentes)**
+
+**Alternativa**: Usar máquina local o cloud con plan de pago.
+
+Ver `docs/DEVELOPMENT.md` sección "⚠️ IMPORTANTE: NO ejecutar Load/Stress Tests en Azure" para detalles completos.
+
+---
+
 ## Objetivo
 App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, memoria y razonamiento con problemas del mundo tech real (SQL, C#, Docker, arquitectura).
 

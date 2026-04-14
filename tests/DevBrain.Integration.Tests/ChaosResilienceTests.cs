@@ -10,6 +10,12 @@ namespace DevBrain.Integration.Tests;
 
 /// <summary>
 /// Chaos/Resilience Integration Tests — validar comportamiento graceful ante fallos de servicios externos.
+/// 
+/// ⚠️ NOTE: These are NOT stress tests. They use minimal concurrency (5 requests).
+/// DO NOT use these tests for load testing or stress testing against Azure App Service.
+/// Stress tests consume Azure F1 quota instantly and will cause HTTP 403 "quota exceeded" errors.
+/// For load testing, use local machines only or cloud services with appropriate pricing plans.
+/// See docs/DEVELOPMENT.md for details.
 /// </summary>
 public class ChaosResilienceTests : IAsyncLifetime
 {

@@ -234,6 +234,37 @@ If tests fail, fix your implementation until all green (🟢).
 
 ---
 
+## ⚠️ IMPORTANTE: NO ejecutar Load/Stress Tests en Azure
+
+**NO EJECUTES tests de stress, load testing, o pruebas de alta concurrencia** contra Azure App Service mientras esté en plan **F1 Free** (quota: 60 minutos CPU/mes).
+
+### Por qué
+- Azure F1 Free tiene límite **muy bajo** de CPU (~60 minutos/mes)
+- Un simple stress test de 1000 requests concurrentes agota la cuota en **segundos**
+- Cuando la cuota se agota, el app se pausa automáticamente → **HTTP 403 "quota exceeded"**
+- Esto requiere esperar hasta fin/inicio de mes para reset o escalar a plan de pago
+
+### ✅ Hacer
+- Ejecutar tests de concurrencia **solo localmente**
+- Si necesitas stress test: usa máquina local o cloud con plan de pago
+- Los tests en `tests/DevBrain.Integration.Tests/ChaosResilienceTests.cs` usan **solo 5 requests concurrentes** (seguro)
+
+### ❌ NO hacer
+- `for (int i = 0; i < 1000; i++) { /* concurrent requests */ }`
+- Apache JMeter, k6, Gatling, LoadRunner contra Azure
+- `ab -n 10000 https://devbrain-trainer.azurewebsites.net/api/v1/challenges`
+- Cualquier prueba que no sea local contra Azure F1
+
+### Si cometes este error
+```
+Estado en Azure Portal: "quota exceeded"
+Solución: Esperar a fin/inicio del mes (reset automático)
+   o: Escalar a plan B1 Basic ($11/mes) o mayor
+   o: Migrar a Static Web Apps (~$0.20/mes, sin cuota de CPU)
+```
+
+---
+
 ## Paso 5: Update context.md
 
 Edit `context.md` — "Último paso completado" section:
