@@ -48,6 +48,43 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - `.env.production` — Backend URL: https://devbrain-trainer.azurewebsites.net/api/v1 ✅
 > - `.env.staging` — Entorno de staging configurado ✅
 > - `web.config` — Configuración IIS para App Service ✅
+
+## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
+
+**Problema**: Plan F1 Free (Azure para estudiantes: Starter) consumió cuota mensual
+- **Estado actual**: `QuotaExceeded` — App rechaza requests con HTTP 403
+- **Duración**: Hasta fin de mes (próximo reset)
+- **Recursos creados**: 
+  - Frontend App: `devbrain-frontend.azurewebsites.net` (parado)
+  - Backend API: `devbrain-trainer.azurewebsites.net` (parado)
+  - Plan: `devbrain-plan` (F1 Free)
+  - Resource Group: `devbrain-rg`
+
+### ⏳ Próximas acciones (cuando la cuota se resetee — fin de mes):
+
+1. **Verificar que cuota se reabre**:
+   ```powershell
+   az webapp show -g devbrain-rg -n devbrain-frontend --query "state"
+   # Debería cambiar de "QuotaExceeded" a "Running"
+   ```
+
+2. **Probar frontend**:
+   ```
+   https://devbrain-frontend.azurewebsites.net
+   ```
+
+3. **Alternativa inmediata** (si no puedo esperar):
+   - Migrar a **Static Web Apps** (~$0.20 USD/mes, sin limites de cuota)
+   - Comando: Ver skill `/deploy-gh-pages` para Static Web Apps
+
+### 📝 Credenciales para prueba:
+- Email: `admin@devbrain.local`
+- Password: `Admin123!`
+
+### 🔗 URLs a recordar:
+- Frontend: `https://devbrain-frontend.azurewebsites.net`
+- Backend: `https://devbrain-trainer.azurewebsites.net/api/v1`
+- Login endpoint: `POST https://devbrain-trainer.azurewebsites.net/api/v1/auth/login`
 > - `.azure/ci-cd.yml` — Pipeline de CI/CD con Azure Pipelines ✅
 > - `docs/AZURE-DEPLOYMENT.md` — Guía completa de deployment ✅
 > 
