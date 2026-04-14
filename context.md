@@ -55,14 +55,35 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Frontend Azure Deployment Configuration — 13 de Abril 2026**
+> ✅ **Frontend Phase 4.1.1 COMPLETADO + Phase 4.2.1 Spec Created — 13 de Abril 2026**
 >
-> **Preparación para Azure App Service**:
+> **Cambios realizados**:
 > 
-> **Archivos de Configuración Creados**:
-> - `.env.production` — Backend URL: https://devbrain-trainer.azurewebsites.net/api/v1 ✅
-> - `.env.staging` — Entorno de staging configurado ✅
-> - `web.config` — Configuración IIS para App Service ✅
+> **1. Agent créado: next-spec** 
+> - Automatiza el ciclo completo: read context → write spec → spec-implement → update context → commit+push
+> - Ubicación: `.github/agents/next-spec/AGENT.md`
+> - Uso: `runSubagent agentName="next-spec"` para implementar siguiente spec
+> - Workflows para Fase 4 (Frontend), Fase 5 (Testing), etc.
+>
+> **2. Primera Spec de Frontend Creada**:
+> - **Phase 4.2.1 — Login Page** spec.md ✅
+> - Ubicación: `specs/frontend/phase-4.2.1-login-page.spec.md`
+> - Completamente especificado con:
+>   - Comportamientos funcionales (rendering, validación, error handling)
+>   - Contrato HTTP (/api/v1/auth/login — ya existe en backend ✅)
+>   - Componentes a crear: LoginForm.tsx, page.tsx
+>   - 5 categorías de tests (15+ casos de test)
+>   - Integración con AuthContext + ApiClient
+>   - Diseño responsive con Tailwind CSS
+>   
+> **3. Estructura de Frontend Specs**:
+> - Carpeta creada: `specs/frontend/`
+> - Patrón de naming: `phase-X.X.X-{feature-name}.spec.md`
+> 
+> **Próximo paso**: 
+> - Ejecutar skill `spec-implement` para generar LoginForm.tsx + login/page.tsx + tests
+> - O usar agente `next-spec` cuando esté integrado en sistema de agentes
+> - Luego: Phase 4.2.2 (Register Page)
 
 ## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
 
@@ -472,12 +493,19 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs stability)
 
 ### 🔄 IN PROGRESS
-6. **▶️ Frontend Phase 4 (4.1.1 COMPLETADO)** — Next.js scaffold con auth context, API client, Header component
-
-### 🎯 PRÓXIMAS FASES DE FRONTEND
+6. **✅ Frontend Phase 4.1** — Next.js scaffold con auth context, API client, Header component
 7. **▶️ Frontend Phase 4.2** — Pages: Login, Register, Challenges list, Challenge detail, User stats, Badges
+   - **4.2.1** — Login Page (spec created, ready for spec-implement) 🚀
+   - **4.2.2** — Register Page (pending)
+   - **4.2.3** — Challenges List (pending)
+   - **4.2.4** — Challenge Detail + Attempt Form (pending)
+   - **4.2.5** — User Stats Dashboard (pending)
+   - **4.2.6** — Badges Page (pending)
+
+### 🎯 PRÓXIMAS FASES
 8. **▶️ Frontend Phase 4.3** — Integration testing (Cypress / Playwright)
 9. **▶️ Frontend Phase 4.4** — Deploy a GitHub Pages / Vercel
+10. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
 
 
 ## Plan paso a paso
