@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
+import ChallengeCard from '@/components/ChallengeCard';
 import api from '@/lib/api';
 
 interface Challenge {
@@ -86,29 +87,14 @@ export default function ChallengesPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {challenges.map((challenge) => (
-              <div key={challenge.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex-1">{challenge.title}</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    challenge.difficulty === 'Easy'
-                      ? 'bg-green-100 text-green-800'
-                      : challenge.difficulty === 'Medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {challenge.difficulty}
-                  </span>
-                </div>
-                <p className="text-gray-600 text-sm mb-4">{challenge.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                    {challenge.category}
-                  </span>
-                  <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                    Attempt →
-                  </button>
-                </div>
-              </div>
+              <ChallengeCard 
+                key={challenge.id} 
+                challenge={challenge}
+                onAttempt={(challengeId) => {
+                  // TODO: implement navigation to challenge detail page
+                  console.log('Attempt challenge:', challengeId);
+                }}
+              />
             ))}
           </div>
         )}
