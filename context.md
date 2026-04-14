@@ -55,35 +55,52 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | **Current** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
 
 ## Último paso completado
-> ✅ **Frontend Phase 4.1.1 COMPLETADO + Phase 4.2.1 Spec Created — 13 de Abril 2026**
+> ✅ **Phase 4.2.1 (Login Page) COMPLETADO — 13 de Abril 2026**
 >
+> **Implementación de Frontend - Phase 4.2.1**:
+> 
 > **Cambios realizados**:
-> 
-> **1. Agent créado: next-spec** 
-> - Automatiza el ciclo completo: read context → write spec → spec-implement → update context → commit+push
-> - Ubicación: `.github/agents/next-spec/AGENT.md`
-> - Uso: `runSubagent agentName="next-spec"` para implementar siguiente spec
-> - Workflows para Fase 4 (Frontend), Fase 5 (Testing), etc.
+> 1. **Componente LoginForm.tsx** 
+>    - Client-side validation (email format, password length ≥3)
+>    - Integration con AuthContext para guardar token/user
+>    - Manejo de errores con mensajes descriptivos
+>    - Loading state con spinner animado
+>    - HTML semántico con labels asociados (htmlFor)
 >
-> **2. Primera Spec de Frontend Creada**:
-> - **Phase 4.2.1 — Login Page** spec.md ✅
-> - Ubicación: `specs/frontend/phase-4.2.1-login-page.spec.md`
-> - Completamente especificado con:
->   - Comportamientos funcionales (rendering, validación, error handling)
->   - Contrato HTTP (/api/v1/auth/login — ya existe en backend ✅)
->   - Componentes a crear: LoginForm.tsx, page.tsx
->   - 5 categorías de tests (15+ casos de test)
->   - Integración con AuthContext + ApiClient
->   - Diseño responsive con Tailwind CSS
+> 2. **Página login/page.tsx**
+>    - Redirect a /challenges si ya está autenticado
+>    - Layout responsive con gradient background
+>    - Composición de LoginForm
+>    - Link a /register
+>
+> 3. **Tests 100% en Verde (25/25 ✅)**
+>    - `LoginForm.test.tsx` — 20 tests: rendering, validation, submission, errors, accessibility
+>    - `login/page.test.tsx` — 5 tests: rendering, auth redirect, layout
+>    - Configuración Jest para Next.js (jest.config.js, jest.setup.js)
+>    - Testing Library + userEvent + React Testing Library
 >   
-> **3. Estructura de Frontend Specs**:
-> - Carpeta creada: `specs/frontend/`
-> - Patrón de naming: `phase-X.X.X-{feature-name}.spec.md`
-> 
-> **Próximo paso**: 
-> - Ejecutar skill `spec-implement` para generar LoginForm.tsx + login/page.tsx + tests
-> - O usar agente `next-spec` cuando esté integrado en sistema de agentes
-> - Luego: Phase 4.2.2 (Register Page)
+> 4. **Validaciones implementadas**:
+>    - Email: requerido + formato válido
+>    - Password: requerido + mínimo 3 caracteres
+>    - Manejo de errores servidor (401, 500, etc.)
+>    - Clear password on error
+>
+> **Frontend Stack Phase 4.2.1**:
+> - Next.js 16.2.3 (App Router)
+> - React 19.2.4
+> - TypeScript 5
+> - Tailwind CSS 4
+> - axios (para API)
+> - AuthContext + ApiClient (creados en Phase 4.1)
+> - Jest + React Testing Library (nuevo)
+>
+> **Backend Dependency** (ya existe ✅):
+> - POST /api/v1/auth/login — existente y funcional
+> - CORS configurado para localhost:3000, :3001
+>
+> **Git**: Commiteado a main branch ✅
+>
+> **Próximo paso**: Phase 4.2.2 (Register Page) — mismos principios
 
 ## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
 
