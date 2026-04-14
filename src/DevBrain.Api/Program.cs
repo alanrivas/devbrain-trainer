@@ -121,6 +121,27 @@ try
         });
     builder.Services.AddAuthorization();
 
+    // 🌐 CORS Configuration - Allow frontend to communicate with backend
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend", corsPolicyBuilder =>
+        {
+            var allowedOrigins = new[] 
+            { 
+                "http://localhost:3000",      // Next.js development
+                "http://localhost:3001",      // Fallback dev port
+                "https://localhost:3000",     // HTTPS dev
+            };
+            
+            corsPolicyBuilder
+                .WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithExposedHeaders("X-Total-Count", "X-Total-Pages"); // For pagination headers
+        });
+    });
+
     builder.Services.AddOpenApi(options =>
     {
         options.AddDocumentTransformer((document, context, _) =>
@@ -155,6 +176,9 @@ try
     {
         app.UseHttpsRedirection();
     }
+
+    // 🌐 Apply CORS middleware BEFORE authentication
+    app.UseCors("AllowFrontend");
 
     app.UseAuthentication();
     app.UseAuthorization();
