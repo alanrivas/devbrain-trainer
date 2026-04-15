@@ -51,6 +51,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Phase 4.5 implementada — Draft persistence (localStorage), navegación prev/next, performance badge
 - [x] Spec frontend de **Phase 4.6** creada — `specs/frontend/phase-4.6-user-stats-page.spec.md`
 - [x] Phase 4.6 implementada — Página `/stats` con stats del usuario y badges
+- [x] Spec frontend de **Phase 4.7** creada — `specs/frontend/phase-4.7-gamification-result-feedback.spec.md`
+- [x] Phase 4.7 implementada — ELO, streak y badges ganados visibles en tarjeta de resultado del intento
 
 ## Test Suites Status
 
@@ -60,11 +62,35 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **120** | **✅ 120/120** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page |
+| **Frontend.Tests** | **127** | **✅ 127/127** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback |
 | **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **369** | **✅ 369/369** | Backend 249 + Frontend 120 |
+| **Grand Total** | **376** | **✅ 376/376** | Backend 249 + Frontend 127 |
 
 ## Último paso completado
+> ✅ **Phase 4.7 (Gamification Result Feedback) COMPLETADO — 15 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Spec creada**:
+>    - `specs/frontend/phase-4.7-gamification-result-feedback.spec.md`
+>
+> 2. **Implementación**:
+>    - `AttemptResult` interface extendida con `newEloRating?: number`, `newStreak?: number`, `newBadges?: string[]`
+>    - Tarjeta de resultado en `AttemptForm` muestra ELO actual, racha y badges ganados
+>    - Campos opcionales → compatible con mock existente en `page.test.tsx` (sin regresiones)
+>
+> 3. **Tests**:
+>    - `AttemptForm.test.tsx`: **7 tests** nuevos (ELO x2, streak x2, badges x3)
+>    - Frontend total: **127/127 ✅**
+>
+> 4. **Verificación**:
+>    - `npx jest --runInBand` ✅
+>    - Grand total: **376/376 ✅**
+>
+> **Próximo paso**: Phase 4.8 — por definir (candidatos: historial de intentos del usuario `GET /users/me/attempts`, leaderboard, navegación con teclado en challenges)
+>
+> ---
+>
 > ✅ **Phase 4.6 (User Stats Page) COMPLETADO — 15 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:

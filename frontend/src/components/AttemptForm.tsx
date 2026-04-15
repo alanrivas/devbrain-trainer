@@ -16,6 +16,9 @@ export interface AttemptResult {
   elapsedSeconds: number;
   challengeTitle?: string;
   occurredAt?: string;
+  newEloRating?: number;
+  newStreak?: number;
+  newBadges?: string[];
 }
 
 interface AttemptFormProps {
@@ -182,6 +185,19 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
               Submitted in {result.elapsedSeconds}s —{' '}
               <span className={badge.className}>{badge.label}</span>
             </p>
+            {result.newEloRating !== undefined && (
+              <p className="mt-1 text-xs opacity-80">ELO: {result.newEloRating}</p>
+            )}
+            {result.newStreak !== undefined && (
+              <p className="mt-1 text-xs opacity-80">Streak: {result.newStreak} days</p>
+            )}
+            {result.newBadges && result.newBadges.length > 0 && (
+              <div className="mt-1">
+                {result.newBadges.map((b) => (
+                  <p key={b} className="text-xs font-medium">New badge: {b}</p>
+                ))}
+              </div>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"

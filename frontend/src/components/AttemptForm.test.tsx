@@ -429,4 +429,109 @@ describe('AttemptForm', () => {
       expect(screen.getByText(/cutting it close/i)).toBeInTheDocument();
     });
   });
+
+  // Gamification Result Feedback
+
+  it('should display ELO rating in result card when present', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10, newEloRating: 1250 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/elo: 1250/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should not display ELO when newEloRating is absent', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
+    expect(screen.queryByText(/elo:/i)).not.toBeInTheDocument();
+  });
+
+  it('should display streak in result card when present', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10, newStreak: 3 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/streak: 3 days/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should not display streak when newStreak is absent', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
+    expect(screen.queryByText(/streak:/i)).not.toBeInTheDocument();
+  });
+
+  it('should display a single new badge when earned', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10, newBadges: ['FirstAttempt'] },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/new badge: FirstAttempt/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display multiple new badges when earned', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10, newBadges: ['FirstAttempt', 'TenAttempts'] },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/new badge: FirstAttempt/i)).toBeInTheDocument();
+      expect(screen.getByText(/new badge: TenAttempts/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should not display badge section when newBadges is empty', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 10, newBadges: [] },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
+    expect(screen.queryByText(/new badge:/i)).not.toBeInTheDocument();
+  });
 });
