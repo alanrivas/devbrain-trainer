@@ -28,6 +28,7 @@ describe('ChallengeDetailPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
     (useParams as jest.Mock).mockReturnValue({ id: 'challenge-1' });
     (useAuth as jest.Mock).mockReturnValue({ token: 'jwt-token', clearAuth: mockClearAuth });
@@ -120,6 +121,111 @@ describe('ChallengeDetailPage', () => {
       const attemptForm = screen.getByTestId('attempt-form');
       expect(attemptForm).toHaveAttribute('data-challenge-id', 'challenge-1');
       expect(attemptForm).toHaveAttribute('data-time-limit', '45');
+    });
+  });
+
+  describe('Challenge navigation', () => {
+    afterEach(() => {
+      sessionStorage.clear();
+    });
+
+    it('should show both previous and next links for a middle challenge', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-0', 'challenge-1', 'ch-2']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'challenge-1', title: 'Mid Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: /← previous challenge/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /next challenge →/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should only show next link for the first challenge in the list', async () => {
+      (useParams as jest.Mock).mockReturnValue({ id: 'ch-0' });
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-0', 'ch-1', 'ch-2']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'ch-0', title: 'First Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByRole('link', { name: /← previous challenge/i })).not.toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /next challenge →/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should only show previous link for the last challenge in the list', async () => {
+      (useParams as jest.Mock).mockReturnValue({ id: 'ch-2' });
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-0', 'ch-1', 'ch-2']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'ch-2', title: 'Last Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: /← previous challenge/i })).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: /next challenge →/i })).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show no navigation links when challenge is the only one in the list', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['challenge-1']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'challenge-1', title: 'Only Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => expect(screen.getByText('Only Challenge')).toBeInTheDocument());
+
+      expect(screen.queryByRole('link', { name: /← previous challenge/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /next challenge →/i })).not.toBeInTheDocument();
+    });
+
+    it('should show no navigation links when sessionStorage has no list', async () => {
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'challenge-1', title: 'Direct Access', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => expect(screen.getByText('Direct Access')).toBeInTheDocument());
+
+      expect(screen.queryByRole('link', { name: /← previous challenge/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /next challenge →/i })).not.toBeInTheDocument();
+    });
+
+    it('should link next button to the correct challenge id', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-0', 'challenge-1', 'ch-2']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'challenge-1', title: 'Mid Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        const nextLink = screen.getByRole('link', { name: /next challenge →/i });
+        expect(nextLink).toHaveAttribute('href', '/challenges/ch-2');
+      });
+    });
+
+    it('should link previous button to the correct challenge id', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-0', 'challenge-1', 'ch-2']));
+      (api.get as jest.Mock).mockResolvedValue({
+        data: { id: 'challenge-1', title: 'Mid Challenge', description: 'Desc', category: 'Sql', difficulty: 'Easy', timeLimitSecs: 60 },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        const prevLink = screen.getByRole('link', { name: /← previous challenge/i });
+        expect(prevLink).toHaveAttribute('href', '/challenges/ch-0');
+      });
     });
   });
 

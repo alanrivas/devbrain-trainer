@@ -40,6 +40,7 @@ export default function ChallengesPage() {
       try {
         const response = await api.get<PagedResult>('/challenges?page=1&pageSize=10');
         setChallenges(response.data.items);
+        sessionStorage.setItem('challenge-list-ids', JSON.stringify(response.data.items.map((c) => c.id)));
       } catch (err: any) {
         if (err.response?.status === 401) {
           clearAuth();

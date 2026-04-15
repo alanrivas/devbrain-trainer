@@ -47,6 +47,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Phase 4.3 implementada — Challenge Detail Page + AttemptForm + navegación desde listado
 - [x] Spec frontend de **Phase 4.4** creada — `specs/frontend/phase-4.4-attempt-ux.spec.md`
 - [x] Phase 4.4 implementada — UX del intento (timer visual, estados ricos, acciones post-attempt)
+- [x] Spec frontend de **Phase 4.5** creada — `specs/frontend/phase-4.5-challenge-flow-polishing.spec.md`
+- [x] Phase 4.5 implementada — Draft persistence (localStorage), navegación prev/next, performance badge
 
 ## Test Suites Status
 
@@ -56,11 +58,36 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **94** | **✅ 94/94** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX enhancement tests |
+| **Frontend.Tests** | **110** | **✅ 110/110** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) |
 | **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **343** | **✅ 343/343** | Backend 249 + Frontend 94 |
+| **Grand Total** | **359** | **✅ 359/359** | Backend 249 + Frontend 110 |
 
 ## Último paso completado
+> ✅ **Phase 4.5 (Challenge Flow Polishing) COMPLETADO — 15 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Spec creada**:
+>    - `specs/frontend/phase-4.5-challenge-flow-polishing.spec.md`
+>
+> 2. **Implementación — tres ejes**:
+>    - **Draft persistence**: `AttemptForm` guarda el borrador en `localStorage` (clave `draft-attempt-{challengeId}`); se restaura al montar, se limpia tras submit exitoso o reset
+>    - **Navegación prev/next**: `challenges/page.tsx` guarda IDs en `sessionStorage`; la página de detalle muestra "← Previous challenge" / "Next challenge →" según posición en la lista
+>    - **Performance badge**: el resultado muestra "Fast answer" / "In time" / "Cutting it close" basado en `result.elapsedSeconds / timeLimitSecs`; textos de resultado cambiados a "Correct!" / "Not quite"
+>
+> 3. **Tests**:
+>    - `AttemptForm.test.tsx`: 26 tests (9 nuevos: 6 draft + 3 badge; 3 textos actualizados)
+>    - `challenges/[id]/page.test.tsx`: 15 tests (7 nuevos: navegación prev/next)
+>    - Frontend total: **110/110 ✅**
+>
+> 4. **Verificación**:
+>    - `npm test -- --runInBand --passWithNoTests` ✅
+>    - Grand total: **359/359 ✅**
+>
+> **Próximo paso**: Phase 4.6 — por definir (candidatos: stats de usuario, historial de intentos, leaderboard)
+>
+> ---
+>
 > ✅ **Phase 4.4 (Attempt UX Enhancements) COMPLETADO — 14 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:

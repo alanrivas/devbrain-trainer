@@ -24,7 +24,16 @@ interface AttemptFormProps {
   onSuccess?: (result: AttemptResult) => void;
 }
 
+function getTimeBadge(elapsed: number, limit: number): { label: string; className: string } {
+  const ratio = limit > 0 ? elapsed / limit : 1;
+  if (ratio <= 0.5) return { label: 'Fast answer', className: 'text-green-600' };
+  if (ratio <= 0.8) return { label: 'In time', className: 'text-blue-600' };
+  return { label: 'Cutting it close', className: 'text-amber-600' };
+}
+
 export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: AttemptFormProps) {
+  const DRAFT_KEY = `draft-attempt-${challengeId}`;
+
   const [userAnswer, setUserAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +42,14 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
   const startedAtMs = useRef<number>(Date.now());
   const router = useRouter();
   const { clearAuth } = useAuth();
+
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved && saved.trim()) {
+      setUserAnswer(saved);
+    }
+  }, [DRAFT_KEY]);
 
   useEffect(() => {
     if (result || loading) {
@@ -64,11 +81,22 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
       : 'bg-blue-500';
 
   const resetForm = () => {
+    localStorage.removeItem(DRAFT_KEY);
     startedAtMs.current = Date.now();
     setElapsedSeconds(0);
     setUserAnswer('');
     setError('');
     setResult(null);
+  };
+
+  const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setUserAnswer(val);
+    if (val) {
+      localStorage.setItem(DRAFT_KEY, val);
+    } else {
+      localStorage.removeItem(DRAFT_KEY);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,6 +121,7 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
       });
 
       const attemptResult = response.data as AttemptResult;
+      localStorage.removeItem(DRAFT_KEY);
       setResult(attemptResult);
       onSuccess?.(attemptResult);
     } catch (err: any) {
@@ -135,38 +164,42 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
         </div>
       )}
 
-      {result && (
-        <div
-          className={`mb-4 p-3 rounded border text-sm ${
-            result.isCorrect
-              ? 'border-green-200 bg-green-50 text-green-700'
-              : 'border-amber-200 bg-amber-50 text-amber-700'
-          }`}
-        >
-          <p className="font-medium">{result.isCorrect ? 'Correct! Great job.' : 'Incorrect. Keep training.'}</p>
-          <p className="mt-1 text-xs opacity-80">
-            Submitted in {result.elapsedSeconds}s.
-          </p>
-          {!result.isCorrect && result.correctAnswer && (
-            <p className="mt-1">Correct answer: {result.correctAnswer}</p>
-          )}
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="rounded-md border border-current px-3 py-1.5 text-xs font-medium transition hover:bg-white/50"
-            >
-              Try again
-            </button>
-            <Link
-              href="/challenges"
-              className="rounded-md bg-current px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90"
-            >
-              Back to challenges
-            </Link>
+      {result && (() => {
+        const badge = getTimeBadge(result.elapsedSeconds, timeLimitSecs);
+        return (
+          <div
+            className={`mb-4 p-4 rounded border text-sm ${
+              result.isCorrect
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-amber-200 bg-amber-50 text-amber-700'
+            }`}
+          >
+            <p className="font-semibold text-base">{result.isCorrect ? 'Correct!' : 'Not quite'}</p>
+            {!result.isCorrect && result.correctAnswer && (
+              <p className="mt-1">Correct answer: {result.correctAnswer}</p>
+            )}
+            <p className="mt-1 text-xs opacity-80">
+              Submitted in {result.elapsedSeconds}s —{' '}
+              <span className={badge.className}>{badge.label}</span>
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-md border border-current px-3 py-1.5 text-xs font-medium transition hover:bg-white/50"
+              >
+                Try again
+              </button>
+              <Link
+                href="/challenges"
+                className="rounded-md bg-current px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90"
+              >
+                Back to challenges
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
@@ -176,7 +209,7 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
           <textarea
             id="userAnswer"
             value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
+            onChange={handleAnswerChange}
             rows={5}
             disabled={loading}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

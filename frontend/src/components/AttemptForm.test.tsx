@@ -15,6 +15,7 @@ describe('AttemptForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
     (useAuth as jest.Mock).mockReturnValue({ clearAuth: mockClearAuth });
   });
@@ -154,7 +155,7 @@ describe('AttemptForm', () => {
     await user.click(screen.getByRole('button', { name: /submit attempt/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/correct! great job/i)).toBeInTheDocument();
+      expect(screen.getByText(/correct!/i)).toBeInTheDocument();
     });
   });
 
@@ -178,7 +179,7 @@ describe('AttemptForm', () => {
     await user.click(screen.getByRole('button', { name: /submit attempt/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/incorrect\. keep training/i)).toBeInTheDocument();
+      expect(screen.getByText(/not quite/i)).toBeInTheDocument();
       expect(screen.getByText(/correct answer: right answer/i)).toBeInTheDocument();
     });
   });
@@ -232,7 +233,7 @@ describe('AttemptForm', () => {
     await user.click(screen.getByRole('button', { name: /try again/i }));
 
     expect(screen.getByLabelText(/your answer/i)).toHaveValue('');
-    expect(screen.queryByText(/correct! great job/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/correct!/i)).not.toBeInTheDocument();
   });
 
   it('should call onSuccess callback with result data', async () => {
@@ -312,6 +313,120 @@ describe('AttemptForm', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/server error\. try again/i);
+    });
+  });
+
+  // Draft Persistence
+
+  it('should save draft to localStorage as user types', async () => {
+    const user = userEvent.setup();
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await user.type(screen.getByLabelText(/your answer/i), 'my draft');
+
+    expect(localStorage.getItem('draft-attempt-c-1')).toBe('my draft');
+  });
+
+  it('should pre-fill textarea with existing draft on mount', async () => {
+    localStorage.setItem('draft-attempt-c-1', 'saved draft text');
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/your answer/i)).toHaveValue('saved draft text');
+    });
+  });
+
+  it('should leave textarea empty when no draft exists', () => {
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    expect(screen.getByLabelText(/your answer/i)).toHaveValue('');
+  });
+
+  it('should clear draft from localStorage after successful submit', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('draft-attempt-c-1', 'my answer');
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'my answer', isCorrect: true, elapsedSeconds: 5 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'my answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem('draft-attempt-c-1')).toBeNull();
+    });
+  });
+
+  it('should clear draft from localStorage when form is reset', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('draft-attempt-c-1', 'old answer');
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'old answer', isCorrect: true, elapsedSeconds: 5 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'old answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+    await waitFor(() => screen.getByRole('button', { name: /try again/i }));
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+
+    expect(localStorage.getItem('draft-attempt-c-1')).toBeNull();
+  });
+
+  it('should ignore whitespace-only draft on mount', () => {
+    localStorage.setItem('draft-attempt-c-1', '   ');
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    expect(screen.getByLabelText(/your answer/i)).toHaveValue('');
+  });
+
+  // Performance Badge
+
+  it('should show "Fast answer" badge when elapsed is at most 50% of time limit', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 25 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/fast answer/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show "In time" badge when elapsed is between 50% and 80% of time limit', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 36 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/in time/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show "Cutting it close" badge when elapsed exceeds 80% of time limit', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'ans', isCorrect: true, elapsedSeconds: 54 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'ans');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/cutting it close/i)).toBeInTheDocument();
     });
   });
 });

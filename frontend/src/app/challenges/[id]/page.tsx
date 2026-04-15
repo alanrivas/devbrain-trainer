@@ -25,6 +25,8 @@ export default function ChallengeDetailPage() {
   const [error, setError] = useState('');
   const [notFound, setNotFound] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<AttemptResult | null>(null);
+  const [prevId, setPrevId] = useState<string | null>(null);
+  const [nextId, setNextId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -62,6 +64,25 @@ export default function ChallengeDetailPage() {
 
     fetchChallenge();
   }, [token, params, router, clearAuth]);
+
+  // Compute prev/next from sessionStorage challenge list
+  useEffect(() => {
+    if (!challenge) return;
+
+    try {
+      const stored = sessionStorage.getItem('challenge-list-ids');
+      if (!stored) return;
+
+      const ids: string[] = JSON.parse(stored);
+      const idx = ids.indexOf(challenge.id);
+      if (idx === -1) return;
+
+      setPrevId(idx > 0 ? ids[idx - 1] : null);
+      setNextId(idx < ids.length - 1 ? ids[idx + 1] : null);
+    } catch {
+      // ignore parse errors
+    }
+  }, [challenge]);
 
   if (loading) {
     return (
@@ -103,10 +124,31 @@ export default function ChallengeDetailPage() {
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div>
+        <div className="flex items-center justify-between">
           <Link href="/challenges" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
             ← Back to challenges
           </Link>
+
+          {(prevId || nextId) && (
+            <nav className="flex items-center gap-3 text-sm">
+              {prevId && (
+                <Link
+                  href={`/challenges/${prevId}`}
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  ← Previous challenge
+                </Link>
+              )}
+              {nextId && (
+                <Link
+                  href={`/challenges/${nextId}`}
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Next challenge →
+                </Link>
+              )}
+            </nav>
+          )}
         </div>
 
         <section className="bg-white rounded-lg shadow p-6">
