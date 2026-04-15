@@ -126,6 +126,18 @@ describe('StatsPage', () => {
     });
   });
 
+  it('should render a link to view attempt history', async () => {
+    (api.get as jest.Mock)
+      .mockResolvedValueOnce({ data: mockStats })
+      .mockResolvedValueOnce({ data: mockBadges });
+
+    render(<StatsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /view history/i })).toBeInTheDocument();
+    });
+  });
+
   it('should show error alert on fetch failure', async () => {
     (api.get as jest.Mock).mockRejectedValue({ response: { status: 500 } });
 

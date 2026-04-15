@@ -53,6 +53,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Phase 4.6 implementada — Página `/stats` con stats del usuario y badges
 - [x] Spec frontend de **Phase 4.7** creada — `specs/frontend/phase-4.7-gamification-result-feedback.spec.md`
 - [x] Phase 4.7 implementada — ELO, streak y badges ganados visibles en tarjeta de resultado del intento
+- [x] Spec frontend de **Phase 4.8** creada — `specs/frontend/phase-4.8-attempt-history.spec.md`
+- [x] Phase 4.8 implementada — Historial de intentos en `/history`, endpoint `GET /api/v1/users/me/attempts` y link desde `/stats`
 
 ## Test Suites Status
 
@@ -60,13 +62,43 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 |-------|-------|--------|---------|
 | Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
-| Api.Tests | 99 | ✅ 99/99 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) |
+| Api.Tests | 104 | ✅ 104/104 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) + Phase 4.8: GetUserAttempts (5) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **127** | **✅ 127/127** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback |
-| **Backend Total** | **249** | **✅ 249/249** | Domain (69) + Infrastructure (71) + Api.Tests (99) + Integration.Tests (10) |
-| **Grand Total** | **376** | **✅ 376/376** | Backend 249 + Frontend 127 |
+| **Frontend.Tests** | **136** | **✅ 136/136** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback • **Phase 4.8** (9): history page (8) + stats link (1) |
+| **Backend Total** | **254** | **✅ 254/254** | Domain (69) + Infrastructure (71) + Api.Tests (104) + Integration.Tests (10) |
+| **Grand Total** | **390** | **✅ 390/390** | Backend 254 + Frontend 136 |
 
 ## Último paso completado
+> ✅ **Phase 4.8 (Attempt History) COMPLETADO — 15 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Spec creada**:
+>    - `specs/frontend/phase-4.8-attempt-history.spec.md`
+>
+> 2. **Implementación**:
+>    - Nuevo endpoint `GET /api/v1/users/me/attempts` en `UserEndpoints`
+>    - `AttemptHistoryItemDto` para serializar `challengeTitle`, `isCorrect`, `elapsedSecs` y `occurredAt`
+>    - `EFAttemptRepository.GetByUserAsync` ahora incluye `Challenge` para resolver el título del challenge
+>    - Nueva página `/history` con lista de intentos, estados de carga/vacío/error y navegación a `/challenges/{challengeId}`
+>    - Link `View history` agregado en `/stats`
+>
+> 3. **Tests**:
+>    - `GetUserAttemptsTests.cs`: **5 tests** nuevos
+>    - `frontend/src/app/history/page.test.tsx`: **8 tests** nuevos
+>    - `frontend/src/app/stats/page.test.tsx`: **1 test** nuevo
+>    - Backend total: **254/254 ✅**
+>    - Frontend total: **136/136 ✅**
+>
+> 4. **Verificación**:
+>    - `dotnet test .\DevBrain.slnx -c Release --no-restore --logger "console;verbosity=minimal"` ✅
+>    - `npm test -- --runInBand --passWithNoTests` ✅
+>    - Grand total: **390/390 ✅**
+>
+> **Próximo paso**: Phase 4.9 — por definir (candidatos: leaderboard, filtros del historial, navegación por teclado en challenges)
+>
+> ---
+>
 > ✅ **Phase 4.7 (Gamification Result Feedback) COMPLETADO — 15 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:

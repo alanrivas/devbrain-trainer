@@ -23,6 +23,11 @@ public static class UserEndpoints
             .WithName("GetUserBadges")
             .WithDescription("Obtiene los badges del usuario autenticado")
             .RequireAuthorization();
+
+        group.MapGet("/me/attempts", GetUserAttempts)
+            .WithName("GetUserAttempts")
+            .WithDescription("Obtiene el historial de intentos del usuario autenticado")
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> GetUserStats(
@@ -119,6 +124,36 @@ public static class UserEndpoints
             logger.LogInformation("GetUserBadges completed: BadgeCount={BadgeCount}", badges.Count());
             
             return Results.Ok(badges.Select(b => new UserBadgeResponseDto(b.Type.ToString(), b.EarnedAt)));
+        }
+    }
+
+    private static async Task<IResult> GetUserAttempts(
+        HttpContext httpContext,
+        IAttemptRepository attemptRepository,
+        ILoggerFactory loggerFactory
+    )
+    {
+        var logger = loggerFactory.CreateLogger(typeof(UserEndpoints));
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        using (LogContext.PushProperty("UserId", userId))
+        {
+            logger.LogInformation("GetUserAttempts called");
+
+            var attempts = await attemptRepository.GetByUserAsync(userId);
+            var response = attempts.Select(attempt => new AttemptHistoryItemDto(
+                AttemptId: attempt.Id,
+                ChallengeId: attempt.ChallengeId,
+                ChallengeTitle: attempt.Challenge?.Title ?? "Unknown",
+                IsCorrect: attempt.IsCorrect,
+                ElapsedSecs: attempt.ElapsedSecs,
+                OccurredAt: attempt.OccurredAt
+            ));
+
+            logger.LogInformation("GetUserAttempts completed: AttemptCount={AttemptCount}", attempts.Count);
+            return Results.Ok(response);
         }
     }
 }

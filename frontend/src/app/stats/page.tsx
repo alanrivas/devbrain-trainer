@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthContext';
@@ -132,6 +133,12 @@ export default function StatsPage() {
               ))}
             </ul>
           )}
+
+          <div className="mt-6">
+            <Link href="/history" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              View history
+            </Link>
+          </div>
         </section>
       </div>
     </main>

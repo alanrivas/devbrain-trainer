@@ -25,6 +25,7 @@ public sealed class EFAttemptRepository : IAttemptRepository
             return new List<Attempt>().AsReadOnly();
 
         var attempts = await _context.Attempts
+            .Include(a => a.Challenge)
             .Where(a => a.UserId == userId)
             .OrderByDescending(a => a.OccurredAt)
             .ToListAsync();
