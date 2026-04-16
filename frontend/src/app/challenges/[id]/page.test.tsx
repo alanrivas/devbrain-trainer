@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthContext';
@@ -226,6 +226,71 @@ describe('ChallengeDetailPage', () => {
         const prevLink = screen.getByRole('link', { name: /← previous challenge/i });
         expect(prevLink).toHaveAttribute('href', '/challenges/ch-0');
       });
+    });
+  });
+
+  describe('Keyboard navigation', () => {
+    const challengeData = {
+      id: 'challenge-1',
+      title: 'SQL Challenge',
+      description: 'Write a query',
+      category: 'Sql',
+      difficulty: 'Easy' as const,
+      timeLimitSecs: 60,
+    };
+
+    beforeEach(() => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-prev', 'challenge-1', 'ch-next']));
+      (api.get as jest.Mock).mockResolvedValue({ data: challengeData });
+    });
+
+    it('ArrowRight_GivenNextIdExists_Should_NavigateToNextChallenge', async () => {
+      render(<ChallengeDetailPage />);
+      // Wait for nextId to be set (nav link visible confirms the keyboard effect has re-registered)
+      await waitFor(() => expect(screen.getByRole('link', { name: /next challenge/i })).toBeInTheDocument());
+
+      fireEvent.keyDown(document, { key: 'ArrowRight' });
+
+      expect(mockPush).toHaveBeenCalledWith('/challenges/ch-next');
+    });
+
+    it('ArrowLeft_GivenPrevIdExists_Should_NavigateToPrevChallenge', async () => {
+      render(<ChallengeDetailPage />);
+      // Wait for prevId to be set (nav link visible confirms the keyboard effect has re-registered)
+      await waitFor(() => expect(screen.getByRole('link', { name: /← previous challenge/i })).toBeInTheDocument());
+
+      fireEvent.keyDown(document, { key: 'ArrowLeft' });
+
+      expect(mockPush).toHaveBeenCalledWith('/challenges/ch-prev');
+    });
+
+    it('ArrowRight_GivenNoNextId_Should_NotNavigate', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['ch-prev', 'challenge-1']));
+      render(<ChallengeDetailPage />);
+      await waitFor(() => expect(screen.getByText('SQL Challenge')).toBeInTheDocument());
+
+      fireEvent.keyDown(document, { key: 'ArrowRight' });
+
+      expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('/challenges/ch'));
+    });
+
+    it('ArrowLeft_GivenNoPrevId_Should_NotNavigate', async () => {
+      sessionStorage.setItem('challenge-list-ids', JSON.stringify(['challenge-1', 'ch-next']));
+      render(<ChallengeDetailPage />);
+      await waitFor(() => expect(screen.getByText('SQL Challenge')).toBeInTheDocument());
+
+      fireEvent.keyDown(document, { key: 'ArrowLeft' });
+
+      expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('/challenges/ch'));
+    });
+
+    it('Escape_Should_NavigateBackToChallengesList', async () => {
+      render(<ChallengeDetailPage />);
+      await waitFor(() => expect(screen.getByText('SQL Challenge')).toBeInTheDocument());
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(mockPush).toHaveBeenCalledWith('/challenges');
     });
   });
 

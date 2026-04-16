@@ -65,6 +65,20 @@ export default function ChallengeDetailPage() {
     fetchChallenge();
   }, [token, params, router, clearAuth]);
 
+  // Keyboard navigation: ArrowLeft/ArrowRight for prev/next, Escape for back
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+
+      if (e.key === 'ArrowLeft' && prevId) router.push(`/challenges/${prevId}`);
+      if (e.key === 'ArrowRight' && nextId) router.push(`/challenges/${nextId}`);
+      if (e.key === 'Escape') router.push('/challenges');
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [prevId, nextId, router]);
+
   // Compute prev/next from sessionStorage challenge list
   useEffect(() => {
     if (!challenge) return;

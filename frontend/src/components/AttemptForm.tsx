@@ -43,6 +43,7 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const startedAtMs = useRef<number>(Date.now());
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const { clearAuth } = useAuth();
 
@@ -64,6 +65,20 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
     }, 1000);
 
     return () => window.clearInterval(interval);
+  }, [loading, result]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        if (!loading) formRef.current?.requestSubmit();
+        return;
+      }
+      if ((e.key === 'r' || e.key === 'R') && result !== null) {
+        resetForm();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
   }, [loading, result]);
 
   const remainingSeconds = Math.max(timeLimitSecs - elapsedSeconds, 0);
@@ -217,7 +232,7 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
         );
       })()}
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label htmlFor="userAnswer" className="block text-sm font-medium text-gray-700 mb-1">
             Your answer
@@ -231,6 +246,7 @@ export default function AttemptForm({ challengeId, timeLimitSecs, onSuccess }: A
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Type your solution here..."
           />
+          <p className="text-xs text-gray-400 mt-1">Ctrl+Enter to submit</p>
         </div>
 
         <button

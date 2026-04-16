@@ -534,4 +534,72 @@ describe('AttemptForm', () => {
     await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
     expect(screen.queryByText(/new badge:/i)).not.toBeInTheDocument();
   });
+
+  // Keyboard Navigation
+
+  it('CtrlEnter_GivenTextareaHasText_Should_SubmitForm', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'my answer', isCorrect: true, elapsedSeconds: 5 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'my answer');
+
+    fireEvent.keyDown(document, { key: 'Enter', ctrlKey: true });
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/challenges/c-1/attempt', expect.objectContaining({ userAnswer: 'my answer' }));
+    });
+  });
+
+  it('CtrlEnter_GivenTextareaIsEmpty_Should_ShowValidationError', async () => {
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+
+    fireEvent.keyDown(document, { key: 'Enter', ctrlKey: true });
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/answer is required/i);
+    });
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('R_GivenResultIsVisible_Should_ResetForm', async () => {
+    const user = userEvent.setup();
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'answer', isCorrect: true, elapsedSeconds: 5 },
+    });
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+    await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
+
+    fireEvent.keyDown(document, { key: 'r' });
+
+    expect(screen.getByLabelText(/your answer/i)).toHaveValue('');
+    expect(screen.queryByText(/correct!/i)).not.toBeInTheDocument();
+  });
+
+  it('CtrlEnter_GivenLoadingInProgress_Should_NotSubmitAgain', async () => {
+    const user = userEvent.setup();
+    let resolveRequest!: (value: unknown) => void;
+    const pending = new Promise((resolve) => { resolveRequest = resolve; });
+    (api.post as jest.Mock).mockReturnValue(pending);
+
+    render(<AttemptForm challengeId="c-1" timeLimitSecs={60} />);
+    await user.type(screen.getByLabelText(/your answer/i), 'answer');
+    await user.click(screen.getByRole('button', { name: /submit attempt/i }));
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /submitting attempt/i })).toBeDisabled());
+
+    fireEvent.keyDown(document, { key: 'Enter', ctrlKey: true });
+
+    resolveRequest({
+      data: { attemptId: 'a-1', challengeId: 'c-1', userId: 'u-1', userAnswer: 'answer', isCorrect: true, elapsedSeconds: 5 },
+    });
+
+    await waitFor(() => expect(screen.getByText(/correct!/i)).toBeInTheDocument());
+    expect(api.post).toHaveBeenCalledTimes(1);
+  });
 });
