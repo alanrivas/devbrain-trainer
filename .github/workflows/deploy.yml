@@ -3,6 +3,12 @@ name: Build and Deploy to Azure
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'DevBrain.slnx'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:

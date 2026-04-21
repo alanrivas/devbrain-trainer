@@ -2,7 +2,17 @@
 
 App de entrenamiento cognitivo gamificada para desarrolladores. Mejora tu lógica, memoria y razonamiento con problemas del mundo tech real.
 
-**Estado**: Backend API completo — **212 tests (100% passing)** ✅ | Phase 3.2: Serilog logging infrastructure | Frontend próximo
+**Estado**: Full-stack en producción ✅ | 399 tests (100% passing) | Frontend + Backend deployados en Azure
+
+## Producción
+
+| Servicio | URL |
+|----------|-----|
+| Frontend | https://devbrain-frontend.azurewebsites.net |
+| Backend API | https://devbrain-trainer.azurewebsites.net/api/v1 |
+| API Docs (Scalar) | https://devbrain-trainer.azurewebsites.net/scalar/v1 |
+
+> Registrate en `/register` para crear tu cuenta — no hay credenciales de demo precargadas en producción.
 
 **Docs**: 
 - [`context.md`](./context.md) — Estado del proyecto y roadmap detallado

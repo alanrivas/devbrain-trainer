@@ -276,42 +276,34 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 > - **Tests**: LoginForm (20) + login/page (5) = 25/25 ✅
 > - **Backend endpoint** (utilizado) ✅: POST `/api/v1/auth/login`
 
-## 🟠 ESTADO DE DEPLOYMENTS — PARADO POR CUOTA
+## ✅ ESTADO DE DEPLOYMENTS — EN PRODUCCIÓN
 
-**Problema**: Plan F1 Free (Azure para estudiantes: Starter) consumió cuota mensual
-- **Estado actual**: `QuotaExceeded` — App rechaza requests con HTTP 403
-- **Duración**: Hasta fin de mes (próximo reset)
-- **Recursos creados**: 
-  - Frontend App: `devbrain-frontend.azurewebsites.net` (parado)
-  - Backend API: `devbrain-trainer.azurewebsites.net` (parado)
-  - Plan: `devbrain-plan` (F1 Free)
-  - Resource Group: `devbrain-rg`
+**Última actualización**: 21 de Abril 2026
 
-### ⏳ Próximas acciones (cuando la cuota se resetee — fin de mes):
+| Recurso | URL | Estado |
+|---------|-----|--------|
+| Frontend (Next.js) | https://devbrain-frontend.azurewebsites.net | ✅ Running |
+| Backend API (.NET 10) | https://devbrain-trainer.azurewebsites.net/api/v1 | ✅ Running |
+| API Docs | https://devbrain-trainer.azurewebsites.net/scalar/v1 | ✅ Running |
+| Plan | `devbrain-plan` (F1 Free) — Resource Group: `devbrain-rg` | ✅ |
 
-1. **Verificar que cuota se reabre**:
-   ```powershell
-   az webapp show -g devbrain-rg -n devbrain-frontend --query "state"
-   # Debería cambiar de "QuotaExceeded" a "Running"
-   ```
+### CI/CD — GitHub Actions
 
-2. **Probar frontend**:
-   ```
-   https://devbrain-frontend.azurewebsites.net
-   ```
+| Workflow | Archivo | Se dispara cuando... |
+|----------|---------|----------------------|
+| Backend deploy | `.github/workflows/deploy.yml` | Cambios en `src/**`, `tests/**`, `DevBrain.slnx` |
+| Frontend deploy | `.github/workflows/deploy-frontend.yml` | Cambios en `frontend/**` |
 
-3. **Alternativa inmediata** (si no puedo esperar):
-   - Migrar a **Static Web Apps** (~$0.20 USD/mes, sin limites de cuota)
-   - Comando: Ver skill `/deploy-gh-pages` para Static Web Apps
+Ambos admiten `workflow_dispatch` para trigger manual desde GitHub Actions.
 
-### 📝 Credenciales para prueba:
-- Email: `admin@devbrain.local`
-- Password: `Admin123!`
+### 📝 Credenciales de producción:
+- No hay usuario precargado — registrarse en `/register`
+- El usuario `admin@devbrain.local` existe solo en BD local (Docker)
 
-### 🔗 URLs a recordar:
+### 🔗 URLs de referencia:
 - Frontend: `https://devbrain-frontend.azurewebsites.net`
 - Backend: `https://devbrain-trainer.azurewebsites.net/api/v1`
-- Login endpoint: `POST https://devbrain-trainer.azurewebsites.net/api/v1/auth/login`
+- Login: `POST https://devbrain-trainer.azurewebsites.net/api/v1/auth/login`
 > - `.azure/ci-cd.yml` — Pipeline de CI/CD con Azure Pipelines ✅
 > - `docs/AZURE-DEPLOYMENT.md` — Guía completa de deployment ✅
 > 
