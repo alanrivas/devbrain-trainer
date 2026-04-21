@@ -1,4 +1,4 @@
-# DevBrain Trainer — Estado del Proyecto
+﻿# DevBrain Trainer — Estado del Proyecto
 
 ## ⚠️ ADVERTENCIA CRÍTICA: NO ejecutar Stress Tests contra Azure
 
@@ -683,20 +683,20 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 4. **🚀 Concurrency Tests (Phase 3.2)** — simultaneous user attempts, race conditions, streak service parallel calls
 5. **🚀 Post-MVP Optimizations (Phase 3.5)** — Benchmarks (BenchmarkDotNet), Contract Tests (DTOs stability)
 
-### 🔄 IN PROGRESS
-6. **✅ Frontend Phase 4.1** — Next.js scaffold con auth context, API client, Header component
-7. **▶️ Frontend Phase 4.2** — Pages: Login, Register, Challenges list, Challenge detail, User stats, Badges
-   - **4.2.1** — Login Page (spec created, ready for spec-implement) 🚀
-   - **4.2.2** — Register Page (pending)
-   - **4.2.3** — Challenges List (pending)
-   - **4.2.4** — Challenge Detail + Attempt Form (pending)
-   - **4.2.5** — User Stats Dashboard (pending)
-   - **4.2.6** — Badges Page (pending)
+### ✅ COMPLETADAS (Phase 4 Frontend — hasta 4.9)
+6. **✅ Frontend Phase 4.1** — Next.js scaffold (auth context, API client, Header)
+7. **✅ Frontend Phase 4.2** — Auth pages: Login (4.2.1), Register (4.2.2), ChallengeCard (4.2.3)
+8. **✅ Frontend Phase 4.3** — Challenge detail page + AttemptForm
+9. **✅ Frontend Phase 4.4** — UX del intento (timer, estados ricos, acciones post-attempt)
+10. **✅ Frontend Phase 4.5** — Draft persistence, navegación prev/next, performance badge
+11. **✅ Frontend Phase 4.6** — Página `/stats` con stats y badges del usuario
+12. **✅ Frontend Phase 4.7** — ELO, streak y badges ganados en tarjeta de resultado
+13. **✅ Frontend Phase 4.8** — Historial de intentos `/history` + endpoint GET /users/me/attempts
+14. **✅ Frontend Phase 4.9** — Navegación por teclado (Ctrl+Enter, ArrowLeft/Right, Escape, R)
 
 ### 🎯 PRÓXIMAS FASES
-8. **▶️ Frontend Phase 4.3** — Integration testing (Cypress / Playwright)
-9. **▶️ Frontend Phase 4.4** — Deploy a GitHub Pages / Vercel
-10. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
+15. **▶️ Frontend Phase 4.10** — Por definir (candidatos: leaderboard, filtros en historial, hint visual de atajos)
+16. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
 
 
 ## Plan paso a paso
@@ -752,10 +752,17 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 - [ ] Spec: JWT secret rotation entre requests → rechazo correcto
 - [ ] Spec: Out of memory en AttemptService → logueo y error handling
 
-### Fase 4 — Frontend
-- [ ] Next.js + Tailwind
-- [ ] UI de desafío con timer
-- [ ] Dashboard de progreso
+### Fase 4 — Frontend ✅ COMPLETADA (Phases 4.1–4.9)
+- [x] Next.js + Tailwind — scaffold, auth context, API client
+- [x] Auth pages: Login, Register
+- [x] Challenges list + ChallengeCard component
+- [x] Challenge detail page + AttemptForm con timer visual
+- [x] Draft persistence (localStorage) + navegación prev/next
+- [x] Stats page (`/stats`) con ELO, streak, badges
+- [x] Gamification result feedback (ELO, streak, badges en resultado)
+- [x] Historial de intentos (`/history`)
+- [x] Navegación por teclado (Ctrl+Enter, ArrowLeft/Right, Escape, R)
+- [x] Scripts de desarrollo local: `start-local.ps1` / `stop-local.ps1`
 
 ### Fase 5 — Post-Frontend Testing
 
@@ -904,129 +911,3 @@ Remove-Item -Force @(
 ✅ `.gitignore` actualizado (artifacts serán ignorados)
 ✅ Archivos auxiliares borrados (workspace limpio)
 ⏳ Integración en skill (cuando se implemente `debug-test-failures`)
-
-
-## 🚀 PRODUCTION DEPLOYMENT - COMPLETED ✅
-
-**Deployment Date**: April 13, 2026  
-**Status**: ✅ LIVE
-
-### Azure Resources
-- **Frontend Web App**: https://devbrain-frontend.azurewebsites.net
-- **Backend API**: https://devbrain-trainer.azurewebsites.net/api/v1
-- **Resource Group**: devbrain-rg (eastus)
-- **App Service Plan**: devbrain-plan (Free tier)
-- **Runtime**: Node.js 20 LTS
-
-### Environment Configuration
-- Frontend builds with Next.js 16.2.3
-- Backend API: ASP.NET Core 10
-- Database: PostgreSQL 16 (Neon)
-- Authentication: JWT (24h expiry)
-- CORS: Configured for production
-
-### Test Access
-- Email: admin@devbrain.local
-- Password: Admin123!
-- URL: https://devbrain-frontend.azurewebsites.net
-
-### Monitoring
-- Logs: \z webapp log tail -g devbrain-rg -n devbrain-frontend\
-- Dashboard: Azure Portal → devbrain-frontend
-- Alerts: Configure in Azure Portal if needed
-
-### Deployment Method
-- ZIP deployment from local build
-- Frontend: .next directory + Next.js runtime
-- Node startup: \
-pm start\ configured
-
-### Next Steps (Optional)
-1. Configure custom domain
-2. Set up Azure Monitor alerts
-3. Implement CI/CD via GitHub Actions
-4. Scale up from Free tier if needed
-
-
-## 🚀 PRODUCTION DEPLOYMENT - COMPLETED ✅
-
-**Deployment Date**: April 13, 2026  
-**Status**: ✅ LIVE
-
-### Azure Resources
-- **Frontend Web App**: https://devbrain-frontend.azurewebsites.net
-- **Backend API**: https://devbrain-trainer.azurewebsites.net/api/v1
-- **Resource Group**: devbrain-rg (eastus)
-- **App Service Plan**: devbrain-plan (Free tier)
-- **Runtime**: Node.js 20 LTS
-
-### Environment Configuration
-- Frontend builds with Next.js 16.2.3
-- Backend API: ASP.NET Core 10
-- Database: PostgreSQL 16 (Neon)
-- Authentication: JWT (24h expiry)
-- CORS: Configured for production
-
-### Test Access
-- Email: admin@devbrain.local
-- Password: Admin123!
-- URL: https://devbrain-frontend.azurewebsites.net
-
-### Monitoring
-- Logs: \z webapp log tail -g devbrain-rg -n devbrain-frontend\
-- Dashboard: Azure Portal → devbrain-frontend
-- Alerts: Configure in Azure Portal if needed
-
-### Deployment Method
-- ZIP deployment from local build
-- Frontend: .next directory + Next.js runtime
-- Node startup: \
-pm start\ configured
-
-### Next Steps (Optional)
-1. Configure custom domain
-2. Set up Azure Monitor alerts
-3. Implement CI/CD via GitHub Actions
-4. Scale up from Free tier if needed
-
-
-## 🚀 PRODUCTION DEPLOYMENT - COMPLETED ✅
-
-**Deployment Date**: April 13, 2026  
-**Status**: ✅ LIVE
-
-### Azure Resources
-- **Frontend Web App**: https://devbrain-frontend.azurewebsites.net
-- **Backend API**: https://devbrain-trainer.azurewebsites.net/api/v1
-- **Resource Group**: devbrain-rg (eastus)
-- **App Service Plan**: devbrain-plan (Free tier)
-- **Runtime**: Node.js 20 LTS
-
-### Environment Configuration
-- Frontend builds with Next.js 16.2.3
-- Backend API: ASP.NET Core 10
-- Database: PostgreSQL 16 (Neon)
-- Authentication: JWT (24h expiry)
-- CORS: Configured for production
-
-### Test Access
-- Email: admin@devbrain.local
-- Password: Admin123!
-- URL: https://devbrain-frontend.azurewebsites.net
-
-### Monitoring
-- Logs: \z webapp log tail -g devbrain-rg -n devbrain-frontend\
-- Dashboard: Azure Portal → devbrain-frontend
-- Alerts: Configure in Azure Portal if needed
-
-### Deployment Method
-- ZIP deployment from local build
-- Frontend: .next directory + Next.js runtime
-- Node startup: \
-pm start\ configured
-
-### Next Steps (Optional)
-1. Configure custom domain
-2. Set up Azure Monitor alerts
-3. Implement CI/CD via GitHub Actions
-4. Scale up from Free tier if needed

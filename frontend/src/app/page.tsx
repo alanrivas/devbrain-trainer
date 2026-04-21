@@ -15,7 +15,7 @@ export default function Home() {
         <p className="text-xl text-gray-600 mb-8">
           Cognitive training platform for developers
         </p>
-        <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-700 mb-12 max-w-2xl mx-auto">
           Improve your logic, memory, and reasoning with real-world tech problems.
           Track your progress with ELO ratings and badges.
         </p>

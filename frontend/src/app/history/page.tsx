@@ -79,7 +79,7 @@ export default function HistoryPage() {
 
         {attempts.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center shadow-sm">
-            <p className="text-gray-500">No attempts yet</p>
+            <p className="text-gray-700">No attempts yet</p>
           </div>
         ) : (
           <ul className="space-y-4">
@@ -98,7 +98,7 @@ export default function HistoryPage() {
                       <span>{attempt.elapsedSecs}s</span>
                     </div>
                   </div>
-                  <time className="text-sm text-gray-500" dateTime={attempt.occurredAt}>
+                  <time className="text-sm text-gray-700" dateTime={attempt.occurredAt}>
                     {new Date(attempt.occurredAt).toLocaleString()}
                   </time>
                 </div>

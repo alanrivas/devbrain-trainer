@@ -1,6 +1,6 @@
 # 🚀 Stack Local — Live & Ready
 
-## Estado Actual (13 Abril 2026)
+## Estado Actual (21 Abril 2026)
 
 ✅ **TODAS LAS DEPENDENCIAS CORRIENDO EN LOCAL:**
 
@@ -12,6 +12,20 @@
 | **Redis** | localhost:6379 | ✅ Running (Docker) | 6379 |
 | **API Docs** | http://localhost:5118/scalar/ | ✅ Available | — |
 | **Health Check** | http://localhost:5118/health | ✅ OK | — |
+
+---
+
+## ⚡ Levantar / Bajar el Stack
+
+```powershell
+# Levantar todo (Docker + Backend + Frontend)
+.\start-local.ps1
+
+# Bajar todo
+.\stop-local.ps1
+```
+
+Los scripts detectan Docker Desktop automáticamente, aplican migraciones EF y guardan los PIDs en `.devbrain.pids`.
 
 ---
 
@@ -45,12 +59,13 @@
 1. En http://localhost:3000/challenges
 2. Verás una lista de desafíos (seeded en PostgreSQL)
 3. Cada challenge muestra:
-   - Título
-   - Dificultad (Easy/Medium/Hard)
-   - Categoría (SQL, C#, Docker, etc.)
-   - Botón "Attempt →"
-
-✅ PRÓXIMO: Phase 4.3 implementará el detail page + attempt form
+   - Título, dificultad (Easy/Medium/Hard) y categoría
+   - Botón "Attempt →" → abre el challenge con timer y AttemptForm
+4. Atajos de teclado en el challenge:
+   - Ctrl+Enter — enviar respuesta
+   - ArrowLeft / ArrowRight — navegar entre challenges
+   - Escape — volver al listado
+   - R — reiniciar formulario (cuando hay resultado)
 ```
 
 ### 3. View Data (Backend)
@@ -158,15 +173,19 @@ services:
 
 ## 🧪 Tests Reportados
 
-**Status:** ✅ All 249 tests passing
+**Status:** ✅ All 399 tests passing
 
 ```
-Domain.Tests:           ✅ 69/69
-Infrastructure.Tests:   ✅ 71/71
-Api.Tests:              ✅ 99/99
-Integration.Tests:      ✅ 10/10
-─────────────────────────────────
-TOTAL:                  ✅ 249/249
+Domain.Tests:           ✅  69/69
+Infrastructure.Tests:   ✅  71/71
+Api.Tests:              ✅ 104/104
+Integration.Tests:      ✅  10/10
+─────────────────────────
+Backend Total:          ✅ 254/254
+
+Frontend.Tests:         ✅ 145/145
+─────────────────────────
+GRAND TOTAL:            ✅ 399/399
 ```
 
 Para correr tests:
@@ -245,11 +264,9 @@ docker-compose up -d
 ## 🎉 ¡Todo listo para testing!
 
 **Próximos Pasos:**
-1. ✅ Phase 4.2 completado (Auth Pages)
-2. ⏳ Phase 4.3 — Challenge Pages (detail + attempt form)
-3. ⏳ Phase 4.4 — Stats & Dashboard
-4. ⏳ Phase 3.2 — Backend Concurrency Tests
-5. ⏳ Phase 3.5 — Post-MVP Optimizations
+1. ✅ Phases 4.1–4.9 completadas (Frontend completo)
+2. ▶️ Phase 4.10 — Por definir (candidatos: leaderboard, filtros en historial, hint visual de atajos)
+3. ⏳ Phase 5 — Post-Frontend Testing (Benchmarks, Contract Tests)
 
 **Acceder:**
 - http://localhost:3000 — Frontend
@@ -261,4 +278,4 @@ docker-compose up -d
 
 ---
 
-*Generated: 2026-04-13 | Frontend: Next.js 16.2.3 | Backend: .NET 10 | DB: PostgreSQL 17 + Redis 7*
+*Updated: 2026-04-21 | Frontend: Next.js 16.2.3 | Backend: .NET 10 | DB: PostgreSQL 17 + Redis 7*

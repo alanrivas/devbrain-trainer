@@ -89,27 +89,27 @@ export default function StatsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Stats</h2>
           <dl className="grid grid-cols-2 gap-4">
             <div>
-              <dt className="text-sm text-gray-500">Total Attempts</dt>
+              <dt className="text-sm text-gray-700">Total Attempts</dt>
               <dd className="text-2xl font-bold text-gray-900">{stats.totalAttempts}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Correct Attempts</dt>
+              <dt className="text-sm text-gray-700">Correct Attempts</dt>
               <dd className="text-2xl font-bold text-gray-900">{stats.correctAttempts}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Accuracy</dt>
+              <dt className="text-sm text-gray-700">Accuracy</dt>
               <dd className="text-2xl font-bold text-gray-900">{stats.accuracyRate.toFixed(1)}%</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Current Streak</dt>
+              <dt className="text-sm text-gray-700">Current Streak</dt>
               <dd className="text-2xl font-bold text-gray-900">{stats.currentStreak} days</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">ELO Rating</dt>
+              <dt className="text-sm text-gray-700">ELO Rating</dt>
               <dd className="text-2xl font-bold text-gray-900">{stats.eloRating}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Last Attempt</dt>
+              <dt className="text-sm text-gray-700">Last Attempt</dt>
               <dd className="text-2xl font-bold text-gray-900">
                 {stats.lastAttemptAt
                   ? new Date(stats.lastAttemptAt).toLocaleDateString()
@@ -122,13 +122,13 @@ export default function StatsPage() {
         <section className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Badges</h2>
           {badges.length === 0 ? (
-            <p className="text-gray-500">No badges earned yet</p>
+            <p className="text-gray-700">No badges earned yet</p>
           ) : (
             <ul className="space-y-2">
               {badges.map((badge, idx) => (
                 <li key={idx} className="flex items-center justify-between text-sm">
                   <span className="font-medium text-gray-900">{badge.type}</span>
-                  <span className="text-gray-500">{new Date(badge.earnedAt).toLocaleDateString()}</span>
+                  <span className="text-gray-700">{new Date(badge.earnedAt).toLocaleDateString()}</span>
                 </li>
               ))}
             </ul>

@@ -180,7 +180,7 @@ export default function RegisterForm() {
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}
-            <p className="text-xs text-gray-500 mt-1">Min 8 chars: uppercase, lowercase, number</p>
+            <p className="text-xs text-gray-700 mt-1">Min 8 chars: uppercase, lowercase, number</p>
           </div>
 
           <div>
