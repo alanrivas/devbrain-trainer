@@ -11,7 +11,7 @@ interface Challenge {
   title: string;
   description: string;
   category: string;
-  difficulty: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
 interface PagedResult {
