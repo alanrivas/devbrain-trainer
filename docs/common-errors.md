@@ -127,3 +127,124 @@ Cuando una app crashea en un entorno cloud pero no localmente, la primera hipót
 En este caso el error estaba en el formato del connection string, que era invisible mientras se usaba la DB local (que no tiene ese problema). Recién apareció cuando se apuntó a un proveedor externo.
 
 ---
+
+## Error 002 — Frontend muestra "Application Error" en Azure — cuatro causas combinadas
+
+**Fecha**: 21 de Abril 2026  
+**Contexto**: Primer deploy del frontend Next.js a Azure App Service Linux (plan F1 Free).
+
+---
+
+### Síntoma
+
+`https://devbrain-frontend.azurewebsites.net` mostraba la pantalla genérica de Azure "Application Error :(" en lugar de la app. El portal de Azure mostraba el App Service en estado "Running". El Log stream decía "No instances found".
+
+---
+
+### Falsa conclusión inicial
+
+El `context.md` del proyecto tenía documentado que el problema era la **cuota del plan F1 Free agotada** (`QuotaExceeded`). Esto era plausible porque había ocurrido antes con el backend, y el mensaje de error genérico de Azure no da pistas del motivo real.
+
+La hipótesis era: "la suscripción gratuita no soporta este tipo de deploy o agotó la cuota mensual".
+
+---
+
+### Causas raíz reales (eran cuatro, acumuladas)
+
+#### 1. Pipeline de Azure DevOps nunca corrió correctamente
+
+El archivo `.azure/ci-cd.yml` ejecutaba `npm ci` y `npm run build` desde la **raíz del repositorio**, pero `package.json` está en `frontend/`. Como resultado:
+
+- Las dependencias nunca se instalaron
+- El build nunca corrió
+- Se deployó la carpeta raíz del repo **sin el folder `.next`**
+- Azure recibió código fuente sin compilar
+
+#### 2. Startup command no configurado
+
+Azure App Service en Linux con Node.js busca `node server.js` por defecto. Next.js no tiene ese archivo — necesita `npm start` (que ejecuta `next start`). Sin startup command, el contenedor arrancaba y fallaba inmediatamente.
+
+> Nota: el startup command ya estaba seteado en `npm start` en el portal — lo que confirmó que este no era el único problema.
+
+#### 3. CORS no incluía el origen de producción
+
+La política CORS del backend solo tenía `localhost`. Al hacer login desde `devbrain-frontend.azurewebsites.net`, el navegador bloqueaba la respuesta del backend porque el origen no estaba en la lista permitida. El error en DevTools era silencioso desde el punto de vista del usuario (solo veía que el login fallaba).
+
+#### 4. Error de TypeScript en el build
+
+`challenges/page.tsx` definía `difficulty: string` mientras que `ChallengeCard` esperaba `'Easy' | 'Medium' | 'Hard'`. El build de Next.js fallaba con un type error, así que aunque el pipeline corriera, el artefacto nunca se producía.
+
+---
+
+### Cómo se llegó a la solución
+
+1. **Log stream → "No instances found"**: indicó que no había código deployado, descartando problemas de runtime.
+2. **Revisión del pipeline**: se encontró que `workingDirectory` no estaba especificado en ningún paso.
+3. **Revisión del startup command**: ya estaba correcto (`npm start`), así que no era el único problema.
+4. **Revisión de CORS en `Program.cs`**: la lista de `allowedOrigins` solo tenía `localhost`.
+5. **Ejecución manual del build**: `npm run build` reveló el error de TypeScript en `ChallengeCard`.
+
+---
+
+### Fix aplicado
+
+**1. Corregir el pipeline** (`.azure/ci-cd.yml`):
+
+```yaml
+variables:
+  frontendDir: '$(System.DefaultWorkingDirectory)/frontend'
+
+steps:
+  - script: npm ci
+    workingDirectory: $(frontendDir)          # ← era la raíz del repo
+
+  - script: npm run build
+    workingDirectory: $(frontendDir)          # ← era la raíz del repo
+
+  - task: AzureWebApp@1
+    inputs:
+      package: $(frontendDir)                 # ← era $(System.DefaultWorkingDirectory)
+      startUpCommand: 'npm start'             # ← no existía
+```
+
+**2. Migrar a GitHub Actions** (más simple dado que el repo ya estaba en GitHub):
+
+Se creó `.github/workflows/deploy-frontend.yml` que reemplaza al pipeline de Azure DevOps, con `workingDirectory: frontend` correcto y `workflow_dispatch` para trigger manual.
+
+**3. Agregar CORS para producción** (`Program.cs` + `appsettings.json`):
+
+```json
+// appsettings.json
+"AllowedOrigins": [
+  "https://devbrain-frontend.azurewebsites.net"
+]
+```
+
+```csharp
+// Program.cs — leer desde configuración en vez de hardcodear
+var configuredOrigins = builder.Configuration
+    .GetSection("AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+var allowedOrigins = defaultOrigins.Concat(configuredOrigins).Distinct().ToArray();
+```
+
+**4. Corregir el tipo en `challenges/page.tsx`**:
+
+```typescript
+// MAL
+difficulty: string;
+
+// BIEN
+difficulty: 'Easy' | 'Medium' | 'Hard';
+```
+
+---
+
+### Lección aprendida
+
+"No instances found" en el Log stream de Azure significa que **nunca hubo un proceso corriendo** — el contenedor ni siquiera arrancó. No confundir con un crash en runtime. En ese estado, el primer lugar donde buscar es el pipeline de CI/CD, no la configuración del App Service.
+
+Cuando hay múltiples problemas acumulados, el síntoma siempre apunta al último guardián que falló — en este caso el pipeline que nunca deployó nada. Los otros tres errores (startup command, CORS, TypeScript) solo se hicieron visibles una vez que el deploy básico funcionó.
+
+---
