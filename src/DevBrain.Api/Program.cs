@@ -126,19 +126,25 @@ try
     {
         options.AddPolicy("AllowFrontend", corsPolicyBuilder =>
         {
-            var allowedOrigins = new[] 
-            { 
-                "http://localhost:3000",      // Next.js development
-                "http://localhost:3001",      // Fallback dev port
-                "https://localhost:3000",     // HTTPS dev
+            var defaultOrigins = new[]
+            {
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "https://localhost:3000",
             };
-            
+
+            var configuredOrigins = builder.Configuration
+                .GetSection("AllowedOrigins")
+                .Get<string[]>() ?? [];
+
+            var allowedOrigins = defaultOrigins.Concat(configuredOrigins).Distinct().ToArray();
+
             corsPolicyBuilder
                 .WithOrigins(allowedOrigins)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithExposedHeaders("X-Total-Count", "X-Total-Pages"); // For pagination headers
+                .WithExposedHeaders("X-Total-Count", "X-Total-Pages");
         });
     });
 
