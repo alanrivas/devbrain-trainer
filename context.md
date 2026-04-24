@@ -67,10 +67,46 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Api.Tests | 104 | ✅ 104/104 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) + Phase 4.8: GetUserAttempts (5) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
 | **Frontend.Tests** | **145** | **✅ 145/145** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback • **Phase 4.8** (9): history page (8) + stats link (1) • **Phase 4.9** (9): keyboard nav — AttemptForm (4) + detail page (5) |
-| **Backend Total** | **254** | **✅ 254/254** | Domain (69) + Infrastructure (71) + Api.Tests (104) + Integration.Tests (10) |
-| **Grand Total** | **399** | **✅ 399/399** | Backend 254 + Frontend 145 |
+| **Backend Total** | **273** | **✅ 273/273** | Domain (80) + Infrastructure (75) + Api.Tests (108) + Integration.Tests (10) |
+| **Grand Total** | **418** | **✅ 418/418** | Backend 273 + Frontend 145 |
 
 ## Último paso completado
+> ✅ **ChallengeType + Multiple Choice Backend — 24 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Specs creadas** (7 nuevas):
+>    - `specs/domain/challenge-types.spec.md` — backend completo Multiple Choice
+>    - `specs/domain/challenge-code-runner.spec.md` — backend Code Runner
+>    - `specs/domain/challenge-ordering.spec.md` — backend Drag & Drop
+>    - `specs/frontend/phase-4.10-multiple-choice.spec.md`
+>    - `specs/frontend/phase-4.11-code-runner.spec.md`
+>    - `specs/frontend/phase-4.12-drag-drop.spec.md`
+>    - `specs/frontend/phase-4.14-sprint-mode.spec.md`
+>
+> 2. **Implementación backend**:
+>    - `ChallengeType` enum (`OpenText=0`, `MultipleChoice=1`) en `DevBrain.Domain/Enums/`
+>    - `Challenge.CreateMultipleChoice()` con validaciones: 2-4 opciones, sin duplicados, correctAnswer en opciones
+>    - `Challenge.CreateForSeeding()` extendido con parámetros opcionales `type` y `options`
+>    - `DevBrainDbContext`: columnas `type` (int, default 0) y `options` (text nullable, pipe-separated) con `HasConversion` y `ValueComparer`
+>    - Migración `AddChallengeTypeAndOptions` generada
+>    - 3 challenges MultipleChoice en seed data (CodeLogic, Sql, Architecture)
+>    - `ChallengeResponseDto` incluye `type: string` y `options: string[]`
+>    - `ChallengeMapper` actualizado (null-safe: `options?.ToArray() ?? Array.Empty<string>()`)
+>
+> 3. **Tests** (+19 nuevos, todos en verde):
+>    - Domain.Tests: 80/80 (+11: CreateMultipleChoice validaciones + IsCorrectAnswer)
+>    - Infrastructure.Tests: 75/75 (+4: persistencia Type/Options round-trip)
+>    - Api.Tests: 108/108 (+4: type/options en DTOs de GET /challenges)
+>    - Integration.Tests: 10/10 (sin regresiones)
+>    - **Backend total: 273/273 ✅**
+>
+> 4. **Git**: commit `a6fb905` pusheado a main
+>
+> **Próximo paso**: Phase 4.10 — Frontend `MultipleChoiceForm` (spec: `specs/frontend/phase-4.10-multiple-choice.spec.md`)
+>
+> ---
+>
 > ✅ **Phase 4.9 (Keyboard Navigation) COMPLETADO — 16 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:
