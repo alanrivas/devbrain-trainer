@@ -190,11 +190,99 @@ public class DevBrainDbContextTests
         context.Database.EnsureCreated();
 
         var challenges = await context.Challenges.ToListAsync();
-        
+
         var categories = challenges.Select(c => c.Category).Distinct().Count();
         var difficulties = challenges.Select(c => c.Difficulty).Distinct().Count();
 
         Assert.True(categories > 1, "Expected challenges in multiple categories");
         Assert.True(difficulties > 1, "Expected challenges with different difficulties");
+    }
+
+    // --- ChallengeType + Options persistence ---
+
+    [Fact]
+    public async Task Challenge_GivenOpenTextChallenge_ShouldPersistTypeAndEmptyOptions()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var challenge = Challenge.Create(
+            "Valid title here",
+            "A description for this challenge",
+            ChallengeCategory.Sql,
+            Difficulty.Easy,
+            "SELECT 1",
+            60
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+        Assert.Equal(ChallengeType.OpenText, saved.Type);
+        Assert.Empty(saved.Options);
+    }
+
+    [Fact]
+    public async Task Challenge_GivenMultipleChoiceChallenge_ShouldPersistTypeAndOptions()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "What is the null-coalescing operator?",
+            description: "Select the correct operator.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "??",
+            timeLimitSecs: 45,
+            options: ["?.", "??", "?:", "!."]
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+        Assert.Equal(ChallengeType.MultipleChoice, saved.Type);
+        Assert.Equal(4, saved.Options.Count);
+        Assert.Contains("??", saved.Options);
+    }
+
+    [Fact]
+    public async Task Challenges_GivenSeeded_ShouldIncludeMultipleChoiceChallenges()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var mcChallenges = await context.Challenges
+            .Where(c => c.Type == ChallengeType.MultipleChoice)
+            .ToListAsync();
+
+        Assert.True(mcChallenges.Count >= 3, $"Expected at least 3 seeded MultipleChoice challenges, got {mcChallenges.Count}");
+    }
+
+    [Fact]
+    public async Task MultipleChoiceChallenge_GivenRoundTrip_ShouldPreserveOptionsOrder()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var options = new[] { "LEFT JOIN", "RIGHT JOIN", "INNER JOIN", "FULL OUTER JOIN" };
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "Which JOIN returns matching rows only?",
+            description: "Select the correct JOIN type.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "INNER JOIN",
+            timeLimitSecs: 45,
+            options: options
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.Equal(options.Length, saved.Options.Count);
+        for (int i = 0; i < options.Length; i++)
+            Assert.Equal(options[i], saved.Options[i]);
     }
 }

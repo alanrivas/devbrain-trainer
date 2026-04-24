@@ -6,5 +6,7 @@ public sealed record ChallengeResponseDto(
     string Description,
     string Category,
     string Difficulty,
-    int TimeLimitSecs
+    int TimeLimitSecs,
+    string Type,
+    string[] Options
 );

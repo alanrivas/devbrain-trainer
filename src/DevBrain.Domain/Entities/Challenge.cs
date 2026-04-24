@@ -13,6 +13,8 @@ public sealed class Challenge
     public string CorrectAnswer { get; }
     public int TimeLimitSecs { get; }
     public DateTimeOffset CreatedAt { get; }
+    public ChallengeType Type { get; }
+    public IReadOnlyList<string> Options { get; }
 
     private Challenge(
         Guid id,
@@ -22,7 +24,9 @@ public sealed class Challenge
         Difficulty difficulty,
         string correctAnswer,
         int timeLimitSecs,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt,
+        ChallengeType type,
+        IReadOnlyList<string> options)
     {
         Id = id;
         Title = title;
@@ -32,6 +36,8 @@ public sealed class Challenge
         CorrectAnswer = correctAnswer;
         TimeLimitSecs = timeLimitSecs;
         CreatedAt = createdAt;
+        Type = type;
+        Options = options;
     }
 
     public static Challenge Create(
@@ -65,7 +71,72 @@ public sealed class Challenge
             difficulty: difficulty,
             correctAnswer: correctAnswer.Trim(),
             timeLimitSecs: timeLimitSecs,
-            createdAt: DateTimeOffset.UtcNow
+            createdAt: DateTimeOffset.UtcNow,
+            type: ChallengeType.OpenText,
+            options: Array.Empty<string>()
+        );
+    }
+
+    public static Challenge CreateMultipleChoice(
+        string title,
+        string description,
+        ChallengeCategory category,
+        Difficulty difficulty,
+        string correctAnswer,
+        int timeLimitSecs,
+        IEnumerable<string> options)
+    {
+        if (string.IsNullOrWhiteSpace(title) || title.Trim().Length < 5)
+            throw new DomainException("Title must be between 5 and 100 characters.");
+
+        if (title.Trim().Length > 100)
+            throw new DomainException("Title must be between 5 and 100 characters.");
+
+        if (string.IsNullOrWhiteSpace(description))
+            throw new DomainException("Description is required.");
+
+        if (timeLimitSecs < 30 || timeLimitSecs > 300)
+            throw new DomainException("Time limit must be between 30 and 300 seconds.");
+
+        var trimmedOptions = options
+            .Select(o => o?.Trim() ?? string.Empty)
+            .ToList();
+
+        if (trimmedOptions.Count < 2 || trimmedOptions.Count > 4)
+            throw new DomainException("Multiple choice challenges must have between 2 and 4 options.");
+
+        if (trimmedOptions.Any(string.IsNullOrEmpty))
+            throw new DomainException("Options cannot be empty or whitespace.");
+
+        var distinct = trimmedOptions
+            .Select(o => o.ToLowerInvariant())
+            .Distinct()
+            .Count();
+
+        if (distinct != trimmedOptions.Count)
+            throw new DomainException("Options must be unique (case-insensitive).");
+
+        var trimmedAnswer = correctAnswer?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(trimmedAnswer))
+            throw new DomainException("Correct answer is required.");
+
+        var answerInOptions = trimmedOptions
+            .Any(o => string.Equals(o, trimmedAnswer, StringComparison.OrdinalIgnoreCase));
+
+        if (!answerInOptions)
+            throw new DomainException("Correct answer must match one of the provided options.");
+
+        return new Challenge(
+            id: Guid.NewGuid(),
+            title: title.Trim(),
+            description: description.Trim(),
+            category: category,
+            difficulty: difficulty,
+            correctAnswer: trimmedAnswer,
+            timeLimitSecs: timeLimitSecs,
+            createdAt: DateTimeOffset.UtcNow,
+            type: ChallengeType.MultipleChoice,
+            options: trimmedOptions.AsReadOnly()
         );
     }
 
@@ -78,7 +149,9 @@ public sealed class Challenge
         Difficulty difficulty,
         string correctAnswer,
         int timeLimitSecs,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt,
+        ChallengeType type = ChallengeType.OpenText,
+        IEnumerable<string>? options = null)
     {
         return new Challenge(
             id: id,
@@ -88,7 +161,9 @@ public sealed class Challenge
             difficulty: difficulty,
             correctAnswer: correctAnswer.Trim(),
             timeLimitSecs: timeLimitSecs,
-            createdAt: createdAt
+            createdAt: createdAt,
+            type: type,
+            options: options?.Select(o => o.Trim()).ToList().AsReadOnly() ?? (IReadOnlyList<string>)Array.Empty<string>()
         );
     }
 

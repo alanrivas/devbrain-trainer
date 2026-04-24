@@ -97,10 +97,35 @@ public class DevBrainDbContext : DbContext
             .IsRequired();
 
         modelBuilder.Entity<Challenge>()
+            .Property(c => c.Type)
+            .HasColumnName("type")
+            .IsRequired()
+            .HasDefaultValue(ChallengeType.OpenText);
+
+        modelBuilder.Entity<Challenge>()
+            .Property(c => c.Options)
+            .HasColumnName("options")
+            .HasConversion(
+                v => v.Count == 0 ? null : string.Join("|", v),
+                v => string.IsNullOrEmpty(v)
+                    ? (IReadOnlyList<string>)Array.Empty<string>()
+                    : v.Split('|').ToList().AsReadOnly(),
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<IReadOnlyList<string>>(
+                    (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
+                    v => v == null ? 0 : v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                    v => v == null ? Array.Empty<string>() : v.ToList().AsReadOnly()
+                )
+            )
+            .IsRequired(false);
+
+        modelBuilder.Entity<Challenge>()
             .HasIndex(c => c.Category);
 
         modelBuilder.Entity<Challenge>()
             .HasIndex(c => c.Difficulty);
+
+        modelBuilder.Entity<Challenge>()
+            .HasIndex(c => c.Type);
 
         // Configure Attempts table
         modelBuilder.Entity<Attempt>()
@@ -305,6 +330,42 @@ public class DevBrainDbContext : DbContext
                 "7",
                 60,
                 seedDate
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("20000000-0000-0000-0000-000000000001"),
+                "Algorithm: Binary Search Complexity",
+                "What is the time complexity of binary search on a sorted array of n elements?",
+                ChallengeCategory.CodeLogic,
+                Difficulty.Medium,
+                "O(log n)",
+                60,
+                seedDate,
+                ChallengeType.MultipleChoice,
+                new[] { "O(n)", "O(n²)", "O(log n)", "O(n log n)" }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("20000000-0000-0000-0000-000000000002"),
+                "SQL: JOIN Type",
+                "Which JOIN returns only rows that have matching values in BOTH tables?",
+                ChallengeCategory.Sql,
+                Difficulty.Easy,
+                "INNER JOIN",
+                45,
+                seedDate,
+                ChallengeType.MultipleChoice,
+                new[] { "LEFT JOIN", "RIGHT JOIN", "INNER JOIN", "FULL OUTER JOIN" }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("20000000-0000-0000-0000-000000000003"),
+                "Architecture: Strategy Pattern",
+                "Which design pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable?",
+                ChallengeCategory.Architecture,
+                Difficulty.Medium,
+                "Strategy",
+                75,
+                seedDate,
+                ChallengeType.MultipleChoice,
+                new[] { "Observer", "Strategy", "Command", "Decorator" }
             )
         };
 

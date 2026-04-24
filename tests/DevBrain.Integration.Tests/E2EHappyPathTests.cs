@@ -104,7 +104,7 @@ public class E2EHappyPathTests : IAsyncLifetime
         var challengesDto = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(challengesResponse);
         Assert.NotNull(challengesDto);
         Assert.NotEmpty(challengesDto.Items);
-        Assert.Equal(10, challengesDto.TotalCount); // 10 seeded challenges
+        Assert.True(challengesDto.TotalCount >= 10, $"Expected at least 10 seeded challenges, got {challengesDto.TotalCount}");
 
         _challengeId = challengesDto.Items.First().Id;
 

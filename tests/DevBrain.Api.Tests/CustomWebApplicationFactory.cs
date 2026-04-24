@@ -118,5 +118,27 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             );
             await repo.AddAsync(challenge);
         }
+
+        // Seed 2 MultipleChoice challenges for type/options API tests
+        var mc1 = Domain.Entities.Challenge.CreateMultipleChoice(
+            "Binary Search Complexity",
+            "What is the time complexity of binary search?",
+            ChallengeCategory.CodeLogic,
+            Difficulty.Medium,
+            "O(log n)",
+            60,
+            new[] { "O(n)", "O(n²)", "O(log n)", "O(n log n)" }
+        );
+        var mc2 = Domain.Entities.Challenge.CreateMultipleChoice(
+            "SQL: JOIN Type",
+            "Which JOIN returns only rows that have matching values in BOTH tables?",
+            ChallengeCategory.Sql,
+            Difficulty.Easy,
+            "INNER JOIN",
+            45,
+            new[] { "LEFT JOIN", "RIGHT JOIN", "INNER JOIN", "FULL OUTER JOIN" }
+        );
+        await repo.AddAsync(mc1);
+        await repo.AddAsync(mc2);
     }
 }

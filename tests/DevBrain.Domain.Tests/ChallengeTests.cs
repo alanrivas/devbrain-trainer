@@ -140,4 +140,171 @@ public class ChallengeTests
 
         Assert.False(challenge.IsCorrectAnswer("deletes all rows"));
     }
+
+    // --- ChallengeType: OpenText defaults ---
+
+    [Fact]
+    public void Create_GivenValidArguments_ShouldHaveTypeOpenText()
+    {
+        var challenge = CreateValid();
+
+        Assert.Equal(ChallengeType.OpenText, challenge.Type);
+        Assert.Empty(challenge.Options);
+    }
+
+    // --- CreateMultipleChoice: casos válidos ---
+
+    [Fact]
+    public void CreateMultipleChoice_GivenFourValidOptions_ShouldHaveTypeMultipleChoice()
+    {
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "What is binary search complexity?",
+            description: "Select the correct time complexity.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Medium,
+            correctAnswer: "O(log n)",
+            timeLimitSecs: 60,
+            options: ["O(n)", "O(n²)", "O(log n)", "O(n log n)"]
+        );
+
+        Assert.Equal(ChallengeType.MultipleChoice, challenge.Type);
+        Assert.Equal(4, challenge.Options.Count);
+        Assert.NotEqual(Guid.Empty, challenge.Id);
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenTwoOptions_ShouldSucceed()
+    {
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "Is INNER JOIN the default JOIN?",
+            description: "True or false.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "True",
+            timeLimitSecs: 45,
+            options: ["True", "False"]
+        );
+
+        Assert.Equal(2, challenge.Options.Count);
+    }
+
+    // --- CreateMultipleChoice: validaciones de opciones ---
+
+    [Fact]
+    public void CreateMultipleChoice_GivenOneOption_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Only one option challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "A",
+            timeLimitSecs: 60,
+            options: ["A"]
+        ));
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenFiveOptions_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Too many options challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "A",
+            timeLimitSecs: 60,
+            options: ["A", "B", "C", "D", "E"]
+        ));
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenEmptyOption_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Empty option challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "A",
+            timeLimitSecs: 60,
+            options: ["A", "B", ""]
+        ));
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenWhitespaceOption_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Whitespace option challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "A",
+            timeLimitSecs: 60,
+            options: ["A", "B", "   "]
+        ));
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenDuplicateOptions_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Duplicate options challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "A",
+            timeLimitSecs: 60,
+            options: ["A", "B", "a"]
+        ));
+    }
+
+    [Fact]
+    public void CreateMultipleChoice_GivenCorrectAnswerNotInOptions_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateMultipleChoice(
+            title: "Answer not in options?",
+            description: "This should fail.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "X",
+            timeLimitSecs: 60,
+            options: ["A", "B", "C"]
+        ));
+    }
+
+    // --- IsCorrectAnswer en MultipleChoice ---
+
+    [Fact]
+    public void IsCorrectAnswer_GivenCorrectOptionInMultipleChoice_ShouldReturnTrue()
+    {
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "What is binary search complexity?",
+            description: "Select the correct time complexity.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Medium,
+            correctAnswer: "O(log n)",
+            timeLimitSecs: 60,
+            options: ["O(n)", "O(n²)", "O(log n)", "O(n log n)"]
+        );
+
+        Assert.True(challenge.IsCorrectAnswer("O(log n)"));
+    }
+
+    [Fact]
+    public void IsCorrectAnswer_GivenWrongOptionInMultipleChoice_ShouldReturnFalse()
+    {
+        var challenge = Challenge.CreateMultipleChoice(
+            title: "What is binary search complexity?",
+            description: "Select the correct time complexity.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Medium,
+            correctAnswer: "O(log n)",
+            timeLimitSecs: 60,
+            options: ["O(n)", "O(n²)", "O(log n)", "O(n log n)"]
+        );
+
+        Assert.False(challenge.IsCorrectAnswer("O(n)"));
+    }
 }

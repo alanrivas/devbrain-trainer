@@ -192,4 +192,50 @@ public class GetChallengesEndpointTests : IAsyncLifetime
         Assert.NotNull(result);
         Assert.NotEmpty(result.Items);
     }
+
+    // --- ChallengeType + Options in DTO ---
+
+    [Fact]
+    public async Task GetChallenges_AllItems_ShouldIncludeTypeField()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.NotEmpty(item.Type));
+    }
+
+    [Fact]
+    public async Task GetChallenges_AllItems_ShouldIncludeOptionsField()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.NotNull(item.Options));
+    }
+
+    [Fact]
+    public async Task GetChallenges_MultipleChoiceChallenges_ShouldHaveNonEmptyOptions()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var mcItems = result.Items.Where(i => i.Type == "MultipleChoice").ToList();
+        Assert.NotEmpty(mcItems);
+        Assert.All(mcItems, item => Assert.NotEmpty(item.Options));
+    }
+
+    [Fact]
+    public async Task GetChallenges_OpenTextChallenges_ShouldHaveEmptyOptions()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var openTextItems = result.Items.Where(i => i.Type == "OpenText").ToList();
+        Assert.NotEmpty(openTextItems);
+        Assert.All(openTextItems, item => Assert.Empty(item.Options));
+    }
 }

@@ -225,11 +225,13 @@ public class EFChallengeRepositoryTests
             150
         );
 
+        var countBeforeAdding = await context.Challenges.CountAsync();
+
         await repository.AddAsync(challenge1);
         await repository.AddAsync(challenge2);
 
-        var countBefore = (await context.Challenges.CountAsync()) - 10; // Subtract seed data
-        Assert.Equal(2, countBefore);
+        var countAfterAdding = await context.Challenges.CountAsync();
+        Assert.Equal(2, countAfterAdding - countBeforeAdding);
     }
 
     [Fact]

@@ -13,7 +13,9 @@ public static class ChallengeMapper
             Description: challenge.Description,
             Category: challenge.Category.ToString(),
             Difficulty: challenge.Difficulty.ToString(),
-            TimeLimitSecs: challenge.TimeLimitSecs
+            TimeLimitSecs: challenge.TimeLimitSecs,
+            Type: challenge.Type.ToString(),
+            Options: challenge.Options?.ToArray() ?? Array.Empty<string>()
         );
     }
 
