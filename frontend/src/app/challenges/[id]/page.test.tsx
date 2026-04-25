@@ -22,6 +22,20 @@ jest.mock('@/components/AttemptForm', () => {
   };
 });
 
+jest.mock('@/components/MultipleChoiceForm', () => {
+  return function MockMultipleChoiceForm(props: {
+    challengeId: string;
+    timeLimitSecs: number;
+    options: string[];
+  }) {
+    return (
+      <div data-testid="multiple-choice-form" data-challenge-id={props.challengeId}>
+        {props.options?.map((opt: string) => <span key={opt}>{opt}</span>)}
+      </div>
+    );
+  };
+});
+
 describe('ChallengeDetailPage', () => {
   const mockPush = jest.fn();
   const mockClearAuth = jest.fn();
@@ -291,6 +305,74 @@ describe('ChallengeDetailPage', () => {
       fireEvent.keyDown(document, { key: 'Escape' });
 
       expect(mockPush).toHaveBeenCalledWith('/challenges');
+    });
+  });
+
+  describe('Challenge type rendering', () => {
+    it('should render MultipleChoiceForm for MultipleChoice challenges', async () => {
+      (api.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'challenge-1',
+          title: 'Binary Search',
+          description: 'Select the complexity',
+          category: 'Algorithms',
+          difficulty: 'Medium',
+          timeLimitSecs: 60,
+          type: 'MultipleChoice',
+          options: ['O(n)', 'O(log n)', 'O(n²)', 'O(n log n)'],
+        },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('multiple-choice-form')).toBeInTheDocument();
+        expect(screen.queryByTestId('attempt-form')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render AttemptForm for OpenText challenges', async () => {
+      (api.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'challenge-1',
+          title: 'SQL Challenge',
+          description: 'Write a query',
+          category: 'Sql',
+          difficulty: 'Easy',
+          timeLimitSecs: 60,
+          type: 'OpenText',
+          options: [],
+        },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attempt-form')).toBeInTheDocument();
+        expect(screen.queryByTestId('multiple-choice-form')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should pass options to MultipleChoiceForm', async () => {
+      const options = ['O(n)', 'O(log n)', 'O(n²)', 'O(n log n)'];
+      (api.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'challenge-1',
+          title: 'Binary Search',
+          description: 'Select complexity',
+          category: 'Algorithms',
+          difficulty: 'Medium',
+          timeLimitSecs: 60,
+          type: 'MultipleChoice',
+          options,
+        },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        options.forEach((opt) => expect(screen.getByText(opt)).toBeInTheDocument());
+      });
     });
   });
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import AttemptForm, { AttemptResult } from '@/components/AttemptForm';
+import MultipleChoiceForm from '@/components/MultipleChoiceForm';
 import api from '@/lib/api';
 
 interface ChallengeDetail {
@@ -14,6 +15,8 @@ interface ChallengeDetail {
   category: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   timeLimitSecs: number;
+  type: 'OpenText' | 'MultipleChoice';
+  options: string[];
 }
 
 export default function ChallengeDetailPage() {
@@ -177,11 +180,20 @@ export default function ChallengeDetailPage() {
           <p className="mt-4 text-gray-700 whitespace-pre-wrap">{challenge.description}</p>
         </section>
 
-        <AttemptForm
-          challengeId={challenge.id}
-          timeLimitSecs={challenge.timeLimitSecs}
-          onSuccess={(attempt) => setLastAttempt(attempt)}
-        />
+        {challenge.type === 'MultipleChoice' ? (
+          <MultipleChoiceForm
+            challengeId={challenge.id}
+            timeLimitSecs={challenge.timeLimitSecs}
+            options={challenge.options}
+            onSuccess={(attempt) => setLastAttempt(attempt)}
+          />
+        ) : (
+          <AttemptForm
+            challengeId={challenge.id}
+            timeLimitSecs={challenge.timeLimitSecs}
+            onSuccess={(attempt) => setLastAttempt(attempt)}
+          />
+        )}
 
         {lastAttempt && (
           <section className="bg-white rounded-lg shadow p-6">
