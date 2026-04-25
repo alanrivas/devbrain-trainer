@@ -59,20 +59,51 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Phase 4.9 implementada — Navegación por teclado: Ctrl+Enter submits, ArrowLeft/Right navega entre challenges, Escape vuelve a lista, R reinicia formulario
 - [x] Spec creada **Phase 4.10** — `specs/frontend/phase-4.10-multiple-choice.spec.md`
 - [x] Phase 4.10 implementada — `MultipleChoiceForm` (radio buttons, timer, result card, accesibilidad) + renderizado condicional en `/challenges/[id]` según `challenge.type`
+- [x] Spec creada **Phase 4.11** — backend (`specs/domain/challenge-code-runner.spec.md`) + frontend (`specs/frontend/phase-4.11-code-runner.spec.md`)
+- [x] Phase 4.11 backend implementada — `CodeTestCase` value object, `Challenge.CreateCodeRunner()`, migración `AddChallengeCodeRunnerFields`, DTOs + mapper actualizados, 2 CodeRunner challenges en seed data
+- [x] Phase 4.11 frontend implementada — `CodeRunnerForm` con Monaco Editor, `runTests()` via `new Function()`, panel de test cases (⏳/✅/❌/💥), submit solo cuando `allPassed`, renderizado condicional en `/challenges/[id]`
 
 ## Test Suites Status
 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
-| Domain.Tests | 69 | ✅ 69/69 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) |
-| Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
-| Api.Tests | 104 | ✅ 104/104 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) + Phase 4.8: GetUserAttempts (5) |
-| Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **172** | **✅ 172/172** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback • **Phase 4.8** (9): history page (8) + stats link (1) • **Phase 4.9** (9): keyboard nav — AttemptForm (4) + detail page (5) • **Phase 4.10** (27): MultipleChoiceForm (24) + detail page type rendering (3) |
-| **Backend Total** | **273** | **✅ 273/273** | Domain (80) + Infrastructure (75) + Api.Tests (108) + Integration.Tests (10) |
-| **Grand Total** | **445** | **✅ 445/445** | Backend 273 + Frontend 172 |
+| Domain.Tests | 89 | ✅ 89/89 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) + CodeTestCase + CreateCodeRunner (9) |
+| Infrastructure.Tests | 78 | ✅ 70/70 non-Redis | DbContext config (12), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8, require Redis), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
+| Api.Tests | 112 | ✅ 112/112 | GetChallenges (23) + GetChallenge (8) + PostAttempt (26) + Auth (26) + UserStats (9) + UserBadges (4) + UserAttempts (5) + CodeRunner fields (4) — NoOpStreakService in tests (no Redis needed) |
+| **Frontend.Tests** | **195** | **✅ 195/195** | Phase 4.10 (27) + Phase 4.11 (23): CodeRunnerForm (21) + detail page CodeRunner (2) |
+| **Grand Total** | **~480** | **✅** | Backend 89+70+112 + Frontend 195 |
 
 ## Último paso completado
+> ✅ **Phase 4.11 — CodeRunner backend + frontend — 25 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Backend**:
+>    - `CodeTestCase` value object (`Create()` valida ExpectedOutput y Description requeridos)
+>    - `ChallengeType.CodeRunner = 2` añadido al enum
+>    - `Challenge.CreateCodeRunner()` — correctAnswer siempre "PASS", 1-5 test cases requeridos
+>    - `Challenge.StarterCode` y `Challenge.TestCases: IReadOnlyList<CodeTestCase>` añadidos
+>    - EF Core: columnas `starter_code` (text nullable) y `test_cases` (JSON nullable) con `HasConversion`
+>    - Migración `AddChallengeCodeRunnerFields` generada
+>    - 2 CodeRunner challenges en seed data ("JS: Sum Two Numbers", "JS: Filter Even Numbers")
+>    - `ChallengeResponseDto` + mapper actualizados con `StarterCode` y `TestCases`
+>    - `CustomWebApplicationFactory` usa `NoOpStreakService` (no requiere Redis corriendo)
+>    - Tests: +9 Domain, +3 Infrastructure, +4 Api
+>
+> 2. **Frontend**:
+>    - `CodeRunnerForm.tsx` — Monaco Editor (vs-dark), `runTests()` con `new Function()`, panel de test cases, botón "Run Tests" (siempre habilitado), "Submit Attempt" solo cuando `allPassed=true`, timer + result card idénticos a MultipleChoiceForm
+>    - `runCode` prop para inyección de mock en tests (sin module mock hacks)
+>    - Monaco mockeado como `<textarea data-testid="code-editor">` en tests
+>    - `page.tsx`: `ChallengeDetail` extendida con `starterCode`, `testCases`, `type: 'CodeRunner'`; triple renderizado condicional
+>    - Tests: 21 CodeRunnerForm + 2 page = 23 nuevos tests
+>    - Frontend total: 195/195 ✅
+>
+> 3. **Git**: commits `79a6f7d` (backend) y `70c8613` (frontend) pusheados a main
+>
+> **Próximo paso**: Phase 4.12 — Drag & Drop (spec: `specs/frontend/phase-4.12-drag-drop.spec.md`)
+>
+> ---
+>
 > ✅ **Phase 4.10 — Frontend MultipleChoiceForm — 25 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:
