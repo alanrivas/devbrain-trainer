@@ -62,18 +62,48 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Spec creada **Phase 4.11** — backend (`specs/domain/challenge-code-runner.spec.md`) + frontend (`specs/frontend/phase-4.11-code-runner.spec.md`)
 - [x] Phase 4.11 backend implementada — `CodeTestCase` value object, `Challenge.CreateCodeRunner()`, migración `AddChallengeCodeRunnerFields`, DTOs + mapper actualizados, 2 CodeRunner challenges en seed data
 - [x] Phase 4.11 frontend implementada — `CodeRunnerForm` con Monaco Editor, `runTests()` via `new Function()`, panel de test cases (⏳/✅/❌/💥), submit solo cuando `allPassed`, renderizado condicional en `/challenges/[id]`
+- [x] Spec creada **Phase 4.12** — `specs/domain/challenge-ordering.spec.md` + `specs/frontend/phase-4.12-drag-drop.spec.md`
+- [x] Phase 4.12 backend implementada — `ChallengeType.Ordering=3`, `Challenge.CreateOrdering()`, `Challenge.Items: IReadOnlyList<string>`, migración `AddChallengeOrderingItems`, DTOs + mapper actualizados, 1 Ordering challenge en seed data (CustomWebApplicationFactory)
+- [x] Phase 4.12 frontend implementada — `OrderingForm` con @dnd-kit (drag & drop), `shuffle()`, `orderedItems.join('|')` como userAnswer, timer + result card, renderizado condicional en `/challenges/[id]`
 
 ## Test Suites Status
 
 | Suite | Tests | Status | Details |
 |-------|-------|--------|---------|
-| Domain.Tests | 89 | ✅ 89/89 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) + CodeTestCase + CreateCodeRunner (9) |
-| Infrastructure.Tests | 78 | ✅ 70/70 non-Redis | DbContext config (12), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8, require Redis), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
-| Api.Tests | 112 | ✅ 112/112 | GetChallenges (23) + GetChallenge (8) + PostAttempt (26) + Auth (26) + UserStats (9) + UserBadges (4) + UserAttempts (5) + CodeRunner fields (4) — NoOpStreakService in tests (no Redis needed) |
-| **Frontend.Tests** | **195** | **✅ 195/195** | Phase 4.10 (27) + Phase 4.11 (23): CodeRunnerForm (21) + detail page CodeRunner (2) |
-| **Grand Total** | **~480** | **✅** | Backend 89+70+112 + Frontend 195 |
+| Domain.Tests | 99 | ✅ 99/99 | User factory + validation, Attempt entity, Challenge logic, EloRatingService (12), BadgeAwardService + UserBadge (27) + CodeTestCase + CreateCodeRunner (9) + CreateOrdering (10) |
+| Infrastructure.Tests | 81 | ✅ 73/73 non-Redis | DbContext config (15 incl. Ordering), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8, require Redis), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
+| Api.Tests | 115 | ✅ 115/115 | GetChallenges (26 incl. Ordering fields) + GetChallenge (8) + PostAttempt (26) + Auth (26) + UserStats (9) + UserBadges (4) + UserAttempts (5) + CodeRunner fields (4) — NoOpStreakService in tests (no Redis needed) |
+| **Frontend.Tests** | **216** | **✅ 216/216** | Phase 4.10 (27) + Phase 4.11 (23) + Phase 4.12 (21): OrderingForm (19) + detail page Ordering (2) |
+| **Grand Total** | **~503** | **✅** | Backend 99+73+115 + Frontend 216 |
 
 ## Último paso completado
+> ✅ **Phase 4.12 — Ordering (Drag & Drop) backend + frontend — 25 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Backend**:
+>    - `ChallengeType.Ordering = 3` añadido al enum
+>    - `Challenge.Items: IReadOnlyList<string>` (lista de ítems para ordenar, separados por `|` en DB)
+>    - `Challenge.CreateOrdering()` — 2-6 ítems, sin duplicados, correctOrder es permutación de items, correctAnswer = `string.Join("|", correctOrder)`
+>    - EF Core: columna `items` (text nullable, pipe-separated) con `HasConversion` + `ValueComparer`
+>    - Migración `AddChallengeOrderingItems` generada
+>    - 1 Ordering challenge en seed data de `CustomWebApplicationFactory` ("Architecture: Hexagonal Layers")
+>    - `ChallengeResponseDto` + mapper actualizados con `Items: string[]`
+>    - Tests: +10 Domain, +3 Infrastructure, +3 Api
+>
+> 2. **Frontend**:
+>    - `OrderingForm.tsx` — @dnd-kit/core + @dnd-kit/sortable, `shuffle()` para orden inicial aleatorio, `SortableItem` con handle `⠿`, `orderedItems.join('|')` como userAnswer, timer + result card idénticos a otros forms, disabled durante loading/result
+>    - `@dnd-kit/core` y `@dnd-kit/sortable` mockeados como passthroughs + CSS mock en tests
+>    - `page.tsx`: `ChallengeDetail` extendida con `type: 'Ordering'` e `items: string[]`; renderizado condicional cuádruple
+>    - Tests: 19 OrderingForm + 2 page = 21 nuevos tests
+>    - Frontend total: 216/216 ✅
+>
+> 3. **Git**: pendiente commit
+>
+> **Próximo paso**: Phase 4.14 — Sprint Mode frontend (spec: `specs/frontend/phase-4.14-sprint-mode.spec.md`)
+>
+> ---
+>
 > ✅ **Phase 4.11 — CodeRunner backend + frontend — 25 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:
@@ -779,10 +809,12 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 ### ✅ COMPLETADAS (Phase 4.10)
 15. **✅ Frontend Phase 4.10** — MultipleChoiceForm + renderizado condicional en challenge detail (172 tests frontend)
 
+### ✅ COMPLETADAS (Phase 4.11–4.12)
+16. **✅ Phase 4.11** — Code Runner backend + frontend Monaco Editor (216 tests frontend)
+17. **✅ Phase 4.12** — Drag & Drop backend + frontend @dnd-kit (216 tests frontend, 99+73+115 backend)
+
 ### 🎯 PRÓXIMAS FASES
-16. **▶️ Phase 4.11** — Code Runner backend + frontend Monaco Editor (spec: `specs/domain/challenge-code-runner.spec.md` + `specs/frontend/phase-4.11-code-runner.spec.md`)
-17. **▶️ Phase 4.14** — Sprint Mode frontend (spec: `specs/frontend/phase-4.14-sprint-mode.spec.md`)
-18. **▶️ Phase 4.12** — Drag & Drop backend + frontend @dnd-kit (spec: `specs/domain/challenge-ordering.spec.md` + `specs/frontend/phase-4.12-drag-drop.spec.md`)
+18. **▶️ Phase 4.14** — Sprint Mode frontend (spec: `specs/frontend/phase-4.14-sprint-mode.spec.md`)
 19. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
 
 

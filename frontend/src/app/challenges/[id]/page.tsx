@@ -8,6 +8,7 @@ import AttemptForm, { AttemptResult } from '@/components/AttemptForm';
 import MultipleChoiceForm from '@/components/MultipleChoiceForm';
 import CodeRunnerForm from '@/components/CodeRunnerForm';
 import type { CodeTestCase } from '@/components/CodeRunnerForm';
+import OrderingForm from '@/components/OrderingForm';
 import api from '@/lib/api';
 
 interface ChallengeDetail {
@@ -17,10 +18,11 @@ interface ChallengeDetail {
   category: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   timeLimitSecs: number;
-  type: 'OpenText' | 'MultipleChoice' | 'CodeRunner';
+  type: 'OpenText' | 'MultipleChoice' | 'CodeRunner' | 'Ordering';
   options: string[];
   starterCode: string;
   testCases: CodeTestCase[];
+  items: string[];
 }
 
 export default function ChallengeDetailPage() {
@@ -197,6 +199,13 @@ export default function ChallengeDetailPage() {
             timeLimitSecs={challenge.timeLimitSecs}
             starterCode={challenge.starterCode}
             testCases={challenge.testCases}
+            onSuccess={(attempt) => setLastAttempt(attempt)}
+          />
+        ) : challenge.type === 'Ordering' ? (
+          <OrderingForm
+            challengeId={challenge.id}
+            timeLimitSecs={challenge.timeLimitSecs}
+            items={challenge.items}
             onSuccess={(attempt) => setLastAttempt(attempt)}
           />
         ) : (
