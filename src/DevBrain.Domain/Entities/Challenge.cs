@@ -1,5 +1,6 @@
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Exceptions;
+using DevBrain.Domain.ValueObjects;
 
 namespace DevBrain.Domain.Entities;
 
@@ -15,6 +16,8 @@ public sealed class Challenge
     public DateTimeOffset CreatedAt { get; }
     public ChallengeType Type { get; }
     public IReadOnlyList<string> Options { get; }
+    public string StarterCode { get; }
+    public IReadOnlyList<CodeTestCase> TestCases { get; }
 
     private Challenge(
         Guid id,
@@ -26,7 +29,9 @@ public sealed class Challenge
         int timeLimitSecs,
         DateTimeOffset createdAt,
         ChallengeType type,
-        IReadOnlyList<string> options)
+        IReadOnlyList<string> options,
+        string starterCode,
+        IReadOnlyList<CodeTestCase> testCases)
     {
         Id = id;
         Title = title;
@@ -38,6 +43,8 @@ public sealed class Challenge
         CreatedAt = createdAt;
         Type = type;
         Options = options;
+        StarterCode = starterCode;
+        TestCases = testCases;
     }
 
     public static Challenge Create(
@@ -73,7 +80,9 @@ public sealed class Challenge
             timeLimitSecs: timeLimitSecs,
             createdAt: DateTimeOffset.UtcNow,
             type: ChallengeType.OpenText,
-            options: Array.Empty<string>()
+            options: Array.Empty<string>(),
+            starterCode: string.Empty,
+            testCases: Array.Empty<CodeTestCase>()
         );
     }
 
@@ -136,7 +145,51 @@ public sealed class Challenge
             timeLimitSecs: timeLimitSecs,
             createdAt: DateTimeOffset.UtcNow,
             type: ChallengeType.MultipleChoice,
-            options: trimmedOptions.AsReadOnly()
+            options: trimmedOptions.AsReadOnly(),
+            starterCode: string.Empty,
+            testCases: Array.Empty<CodeTestCase>()
+        );
+    }
+
+    public static Challenge CreateCodeRunner(
+        string title,
+        string description,
+        ChallengeCategory category,
+        Difficulty difficulty,
+        int timeLimitSecs,
+        string starterCode,
+        IEnumerable<CodeTestCase> testCases)
+    {
+        if (string.IsNullOrWhiteSpace(title) || title.Trim().Length < 5)
+            throw new DomainException("Title must be between 5 and 100 characters.");
+
+        if (title.Trim().Length > 100)
+            throw new DomainException("Title must be between 5 and 100 characters.");
+
+        if (string.IsNullOrWhiteSpace(description))
+            throw new DomainException("Description is required.");
+
+        if (timeLimitSecs < 30 || timeLimitSecs > 300)
+            throw new DomainException("Time limit must be between 30 and 300 seconds.");
+
+        var caseList = testCases?.ToList() ?? [];
+
+        if (caseList.Count < 1 || caseList.Count > 5)
+            throw new DomainException("CodeRunner challenges must have between 1 and 5 test cases.");
+
+        return new Challenge(
+            id: Guid.NewGuid(),
+            title: title.Trim(),
+            description: description.Trim(),
+            category: category,
+            difficulty: difficulty,
+            correctAnswer: "PASS",
+            timeLimitSecs: timeLimitSecs,
+            createdAt: DateTimeOffset.UtcNow,
+            type: ChallengeType.CodeRunner,
+            options: Array.Empty<string>(),
+            starterCode: starterCode ?? string.Empty,
+            testCases: caseList.AsReadOnly()
         );
     }
 
@@ -151,7 +204,9 @@ public sealed class Challenge
         int timeLimitSecs,
         DateTimeOffset createdAt,
         ChallengeType type = ChallengeType.OpenText,
-        IEnumerable<string>? options = null)
+        IEnumerable<string>? options = null,
+        string starterCode = "",
+        IEnumerable<CodeTestCase>? testCases = null)
     {
         return new Challenge(
             id: id,
@@ -163,7 +218,9 @@ public sealed class Challenge
             timeLimitSecs: timeLimitSecs,
             createdAt: createdAt,
             type: type,
-            options: options?.Select(o => o.Trim()).ToList().AsReadOnly() ?? (IReadOnlyList<string>)Array.Empty<string>()
+            options: options?.Select(o => o.Trim()).ToList().AsReadOnly() ?? (IReadOnlyList<string>)Array.Empty<string>(),
+            starterCode: starterCode ?? string.Empty,
+            testCases: testCases?.ToList().AsReadOnly() ?? (IReadOnlyList<CodeTestCase>)Array.Empty<CodeTestCase>()
         );
     }
 

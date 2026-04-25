@@ -15,7 +15,11 @@ public static class ChallengeMapper
             Difficulty: challenge.Difficulty.ToString(),
             TimeLimitSecs: challenge.TimeLimitSecs,
             Type: challenge.Type.ToString(),
-            Options: challenge.Options?.ToArray() ?? Array.Empty<string>()
+            Options: challenge.Options?.ToArray() ?? Array.Empty<string>(),
+            StarterCode: challenge.StarterCode ?? string.Empty,
+            TestCases: challenge.TestCases?
+                .Select(tc => new CodeTestCaseDto(tc.Input, tc.ExpectedOutput, tc.Description))
+                .ToArray() ?? Array.Empty<CodeTestCaseDto>()
         );
     }
 

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
+using DevBrain.Domain.ValueObjects;
 using DevBrain.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -284,5 +285,90 @@ public class DevBrainDbContextTests
         Assert.Equal(options.Length, saved.Options.Count);
         for (int i = 0; i < options.Length; i++)
             Assert.Equal(options[i], saved.Options[i]);
+    }
+
+    // --- CodeRunner persistence ---
+
+    [Fact]
+    public async Task CodeRunnerChallenge_GivenRoundTrip_ShouldPersistTestCases()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var testCases = new[]
+        {
+            CodeTestCase.Create("2, 3", "5", "Returns sum of 2 and 3"),
+            CodeTestCase.Create("0, 0", "0", "Zero sum"),
+            CodeTestCase.Create("-1, 1", "0", "Negative sum")
+        };
+
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "function solution(a, b) {}",
+            testCases: testCases
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.Equal(ChallengeType.CodeRunner, saved.Type);
+        Assert.Equal("PASS", saved.CorrectAnswer);
+        Assert.Equal(3, saved.TestCases.Count);
+        Assert.Equal("5", saved.TestCases[0].ExpectedOutput);
+        Assert.Equal("Returns sum of 2 and 3", saved.TestCases[0].Description);
+    }
+
+    [Fact]
+    public async Task CodeRunnerChallenge_GivenRoundTrip_ShouldPersistStarterCode()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "function solution(a, b) {\n  // your code here\n}",
+            testCases: [CodeTestCase.Create("1", "1", "Identity")]
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.Equal("function solution(a, b) {\n  // your code here\n}", saved.StarterCode);
+    }
+
+    [Fact]
+    public async Task OpenTextChallenge_GivenRoundTrip_ShouldHaveEmptyStarterCodeAndTestCases()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var challenge = Challenge.Create(
+            title: "What does SELECT * do?",
+            description: "Explain SELECT *.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "selects all columns",
+            timeLimitSecs: 60
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.Equal(string.Empty, saved.StarterCode ?? string.Empty);
+        Assert.True((saved.TestCases?.Count ?? 0) == 0, "OpenText challenge should have no test cases");
     }
 }

@@ -1,6 +1,7 @@
 using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Exceptions;
+using DevBrain.Domain.ValueObjects;
 
 namespace DevBrain.Domain.Tests;
 
@@ -306,5 +307,136 @@ public class ChallengeTests
         );
 
         Assert.False(challenge.IsCorrectAnswer("O(n)"));
+    }
+
+    // --- CodeTestCase value object ---
+
+    [Fact]
+    public void CodeTestCase_Create_GivenValidArguments_ShouldCreate()
+    {
+        var tc = CodeTestCase.Create("2, 3", "5", "Returns sum of 2 and 3");
+
+        Assert.Equal("2, 3", tc.Input);
+        Assert.Equal("5", tc.ExpectedOutput);
+        Assert.Equal("Returns sum of 2 and 3", tc.Description);
+    }
+
+    [Fact]
+    public void CodeTestCase_Create_GivenEmptyExpectedOutput_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => CodeTestCase.Create("input", "", "description"));
+    }
+
+    [Fact]
+    public void CodeTestCase_Create_GivenEmptyDescription_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => CodeTestCase.Create("input", "expected", ""));
+    }
+
+    // --- CreateCodeRunner ---
+
+    [Fact]
+    public void CreateCodeRunner_GivenThreeTestCases_ShouldHaveTypeCodeRunnerAndCorrectAnswerPass()
+    {
+        var testCases = new[]
+        {
+            CodeTestCase.Create("2, 3", "5", "Returns sum"),
+            CodeTestCase.Create("0, 0", "0", "Zero sum"),
+            CodeTestCase.Create("-1, 1", "0", "Negative sum")
+        };
+
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "function solution(a, b) {}",
+            testCases: testCases
+        );
+
+        Assert.Equal(ChallengeType.CodeRunner, challenge.Type);
+        Assert.Equal("PASS", challenge.CorrectAnswer);
+        Assert.Equal(3, challenge.TestCases.Count);
+        Assert.Empty(challenge.Options);
+    }
+
+    [Fact]
+    public void CreateCodeRunner_GivenOneTestCase_ShouldSucceed()
+    {
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "",
+            testCases: [CodeTestCase.Create("1", "1", "Identity")]
+        );
+
+        Assert.Equal(1, challenge.TestCases.Count);
+    }
+
+    [Fact]
+    public void CreateCodeRunner_GivenSixTestCases_ShouldThrowDomainException()
+    {
+        var sixCases = Enumerable.Range(1, 6)
+            .Select(i => CodeTestCase.Create(i.ToString(), i.ToString(), $"Case {i}"));
+
+        Assert.Throws<DomainException>(() => Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "",
+            testCases: sixCases
+        ));
+    }
+
+    [Fact]
+    public void CreateCodeRunner_GivenZeroTestCases_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "",
+            testCases: Array.Empty<CodeTestCase>()
+        ));
+    }
+
+    [Fact]
+    public void IsCorrectAnswer_GivenPassInCodeRunner_ShouldReturnTrue()
+    {
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "",
+            testCases: [CodeTestCase.Create("1", "1", "Identity")]
+        );
+
+        Assert.True(challenge.IsCorrectAnswer("PASS"));
+    }
+
+    [Fact]
+    public void IsCorrectAnswer_GivenFailInCodeRunner_ShouldReturnFalse()
+    {
+        var challenge = Challenge.CreateCodeRunner(
+            title: "JS: Sum Two Numbers",
+            description: "Write a function that sums two numbers.",
+            category: ChallengeCategory.CodeLogic,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 120,
+            starterCode: "",
+            testCases: [CodeTestCase.Create("1", "1", "Identity")]
+        );
+
+        Assert.False(challenge.IsCorrectAnswer("FAIL"));
     }
 }

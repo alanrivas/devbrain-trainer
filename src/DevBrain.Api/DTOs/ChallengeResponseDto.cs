@@ -1,5 +1,11 @@
 namespace DevBrain.Api.DTOs;
 
+public sealed record CodeTestCaseDto(
+    string Input,
+    string ExpectedOutput,
+    string Description
+);
+
 public sealed record ChallengeResponseDto(
     Guid Id,
     string Title,
@@ -8,5 +14,7 @@ public sealed record ChallengeResponseDto(
     string Difficulty,
     int TimeLimitSecs,
     string Type,
-    string[] Options
+    string[] Options,
+    string StarterCode,
+    CodeTestCaseDto[] TestCases
 );

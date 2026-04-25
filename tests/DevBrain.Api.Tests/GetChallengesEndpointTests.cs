@@ -238,4 +238,49 @@ public class GetChallengesEndpointTests : IAsyncLifetime
         Assert.NotEmpty(openTextItems);
         Assert.All(openTextItems, item => Assert.Empty(item.Options));
     }
+
+    [Fact]
+    public async Task GetChallenges_AllItems_ShouldIncludeStarterCodeField()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.NotNull(item.StarterCode));
+    }
+
+    [Fact]
+    public async Task GetChallenges_AllItems_ShouldIncludeTestCasesField()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.NotNull(item.TestCases));
+    }
+
+    [Fact]
+    public async Task GetChallenges_CodeRunnerChallenges_ShouldHaveNonEmptyTestCases()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var crItems = result.Items.Where(i => i.Type == "CodeRunner").ToList();
+        Assert.NotEmpty(crItems);
+        Assert.All(crItems, item => Assert.NotEmpty(item.TestCases));
+    }
+
+    [Fact]
+    public async Task GetChallenges_OpenTextChallenges_ShouldHaveEmptyStarterCodeAndTestCases()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var openTextItems = result.Items.Where(i => i.Type == "OpenText").ToList();
+        Assert.NotEmpty(openTextItems);
+        Assert.All(openTextItems, item => Assert.Empty(item.StarterCode));
+        Assert.All(openTextItems, item => Assert.Empty(item.TestCases));
+    }
 }

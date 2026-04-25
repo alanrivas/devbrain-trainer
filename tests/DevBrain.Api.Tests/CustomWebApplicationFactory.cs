@@ -1,6 +1,7 @@
 using DevBrain.Api.Services;
 using DevBrain.Domain.Enums;
 using DevBrain.Domain.Interfaces;
+using DevBrain.Domain.ValueObjects;
 using DevBrain.Domain.Services;
 using DevBrain.Infrastructure.Persistence;
 using DevBrain.Infrastructure.Services;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 
 namespace DevBrain.Api.Tests;
 
@@ -67,11 +67,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IBadgeRepository, EFBadgeRepository>();
             services.AddSingleton<IBadgeAwardService, BadgeAwardService>();
 
-            // Redis + Streak (real Redis at localhost:6379 — needed for AttemptService + GetUserStats)
-            services.AddSingleton<IConnectionMultiplexer>(
-                ConnectionMultiplexer.Connect("localhost:6379")
-            );
-            services.AddScoped<IStreakService, RedisStreakService>();
+            // Use NoOp streak service — tests don't require Redis
+            services.AddScoped<IStreakService, NoOpStreakService>();
         });
 
         // Seed data after app is built
@@ -140,5 +137,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         );
         await repo.AddAsync(mc1);
         await repo.AddAsync(mc2);
+
+        // Seed 1 CodeRunner challenge for starterCode/testCases API tests
+        var cr1 = Domain.Entities.Challenge.CreateCodeRunner(
+            "JS: Sum Two Numbers",
+            "Write a function solution(a, b) that returns the sum.",
+            ChallengeCategory.CodeLogic,
+            Difficulty.Easy,
+            120,
+            "function solution(a, b) {\n  // your code here\n}",
+            new[]
+            {
+                CodeTestCase.Create("2, 3", "5", "Returns sum of 2 and 3"),
+                CodeTestCase.Create("0, 0", "0", "Zero sum")
+            }
+        );
+        await repo.AddAsync(cr1);
     }
 }

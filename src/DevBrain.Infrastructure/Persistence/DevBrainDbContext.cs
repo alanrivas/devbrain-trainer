@@ -1,5 +1,7 @@
+using System.Text.Json;
 using DevBrain.Domain.Entities;
 using DevBrain.Domain.Enums;
+using DevBrain.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevBrain.Infrastructure.Persistence;
@@ -119,6 +121,34 @@ public class DevBrainDbContext : DbContext
             .IsRequired(false);
 
         modelBuilder.Entity<Challenge>()
+            .Property(c => c.StarterCode)
+            .HasColumnName("starter_code")
+            .IsRequired(false);
+
+        modelBuilder.Entity<Challenge>()
+            .Property(c => c.TestCases)
+            .HasColumnName("test_cases")
+            .HasConversion(
+                v => v.Count == 0 ? null : JsonSerializer.Serialize(
+                    v.Select(tc => new { tc.Input, tc.ExpectedOutput, tc.Description }),
+                    (JsonSerializerOptions?)null),
+                v => string.IsNullOrEmpty(v)
+                    ? (IReadOnlyList<CodeTestCase>)Array.Empty<CodeTestCase>()
+                    : JsonSerializer.Deserialize<List<TestCaseJson>>(v, (JsonSerializerOptions?)null)!
+                        .Select(d => CodeTestCase.Create(d.Input, d.ExpectedOutput, d.Description))
+                        .ToList()
+                        .AsReadOnly(),
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<IReadOnlyList<CodeTestCase>>(
+                    (a, b) => (a == null && b == null) || (a != null && b != null && a.Count == b.Count
+                        && a.Zip(b).All(pair => pair.First.ExpectedOutput == pair.Second.ExpectedOutput
+                            && pair.First.Description == pair.Second.Description)),
+                    v => v == null ? 0 : v.Aggregate(0, (h, tc) => HashCode.Combine(h, tc.ExpectedOutput.GetHashCode())),
+                    v => v == null ? Array.Empty<CodeTestCase>() : v.ToList().AsReadOnly()
+                )
+            )
+            .IsRequired(false);
+
+        modelBuilder.Entity<Challenge>()
             .HasIndex(c => c.Category);
 
         modelBuilder.Entity<Challenge>()
@@ -224,6 +254,8 @@ public class DevBrainDbContext : DbContext
         // Note: DisableAutoTraitoryGenerationSeeding() in test factory should prevent double seeding
         SeedChallenges(modelBuilder);
     }
+
+    private sealed record TestCaseJson(string Input, string ExpectedOutput, string Description);
 
     private static void SeedChallenges(ModelBuilder modelBuilder)
     {
@@ -366,6 +398,44 @@ public class DevBrainDbContext : DbContext
                 seedDate,
                 ChallengeType.MultipleChoice,
                 new[] { "Observer", "Strategy", "Command", "Decorator" }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("30000000-0000-0000-0000-000000000001"),
+                "JS: Sum Two Numbers",
+                "Write a JavaScript function `solution(a, b)` that returns the sum of two numbers.",
+                ChallengeCategory.CodeLogic,
+                Difficulty.Easy,
+                "PASS",
+                120,
+                seedDate,
+                ChallengeType.CodeRunner,
+                options: null,
+                starterCode: "function solution(a, b) {\n  // Write your code here\n}",
+                testCases: new[]
+                {
+                    CodeTestCase.Create("2, 3", "5", "Returns sum of 2 and 3"),
+                    CodeTestCase.Create("0, 0", "0", "Returns sum of 0 and 0"),
+                    CodeTestCase.Create("-1, 1", "0", "Returns sum of -1 and 1")
+                }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("30000000-0000-0000-0000-000000000002"),
+                "JS: Filter Even Numbers",
+                "Write a JavaScript function `solution(arr)` that returns a new array containing only the even numbers from the input array.",
+                ChallengeCategory.CodeLogic,
+                Difficulty.Easy,
+                "PASS",
+                120,
+                seedDate,
+                ChallengeType.CodeRunner,
+                options: null,
+                starterCode: "function solution(arr) {\n  // Write your code here\n}",
+                testCases: new[]
+                {
+                    CodeTestCase.Create("[1, 2, 3, 4]", "2,4", "Filters even numbers from mixed array"),
+                    CodeTestCase.Create("[0, 1, 2]", "0,2", "Includes zero as even"),
+                    CodeTestCase.Create("[2, 4, 6]", "2,4,6", "Returns all elements when all are even")
+                }
             )
         };
 
