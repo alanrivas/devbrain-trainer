@@ -126,6 +126,22 @@ public class DevBrainDbContext : DbContext
             .IsRequired(false);
 
         modelBuilder.Entity<Challenge>()
+            .Property(c => c.Items)
+            .HasColumnName("items")
+            .HasConversion(
+                v => v.Count == 0 ? null : string.Join("|", v),
+                v => string.IsNullOrEmpty(v)
+                    ? (IReadOnlyList<string>)Array.Empty<string>()
+                    : v.Split('|').ToList().AsReadOnly(),
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<IReadOnlyList<string>>(
+                    (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
+                    v => v == null ? 0 : v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                    v => v == null ? Array.Empty<string>() : v.ToList().AsReadOnly()
+                )
+            )
+            .IsRequired(false);
+
+        modelBuilder.Entity<Challenge>()
             .Property(c => c.TestCases)
             .HasColumnName("test_cases")
             .HasConversion(
@@ -436,6 +452,30 @@ public class DevBrainDbContext : DbContext
                     CodeTestCase.Create("[0, 1, 2]", "0,2", "Includes zero as even"),
                     CodeTestCase.Create("[2, 4, 6]", "2,4,6", "Returns all elements when all are even")
                 }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("40000000-0000-0000-0000-000000000001"),
+                "Architecture: Hexagonal Layers",
+                "Order the layers of a hexagonal architecture from innermost to outermost.",
+                ChallengeCategory.Architecture,
+                Difficulty.Medium,
+                "Domain|Application|Infrastructure|UI",
+                90,
+                seedDate,
+                ChallengeType.Ordering,
+                items: new[] { "UI", "Infrastructure", "Domain", "Application" }
+            ),
+            Challenge.CreateForSeeding(
+                new Guid("40000000-0000-0000-0000-000000000002"),
+                "DevOps: CI/CD Pipeline Stages",
+                "Order the typical stages of a CI/CD pipeline from first to last.",
+                ChallengeCategory.DevOps,
+                Difficulty.Easy,
+                "Build|Test|Lint|Deploy",
+                75,
+                seedDate,
+                ChallengeType.Ordering,
+                items: new[] { "Deploy", "Lint", "Build", "Test" }
             )
         };
 

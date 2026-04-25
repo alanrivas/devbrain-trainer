@@ -19,7 +19,8 @@ public static class ChallengeMapper
             StarterCode: challenge.StarterCode ?? string.Empty,
             TestCases: challenge.TestCases?
                 .Select(tc => new CodeTestCaseDto(tc.Input, tc.ExpectedOutput, tc.Description))
-                .ToArray() ?? Array.Empty<CodeTestCaseDto>()
+                .ToArray() ?? Array.Empty<CodeTestCaseDto>(),
+            Items: challenge.Items?.ToArray() ?? Array.Empty<string>()
         );
     }
 

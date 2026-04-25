@@ -153,5 +153,17 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             }
         );
         await repo.AddAsync(cr1);
+
+        // Seed 1 Ordering challenge for items API tests
+        var ord1 = Domain.Entities.Challenge.CreateOrdering(
+            "Architecture: Hexagonal Layers",
+            "Order the layers from innermost to outermost.",
+            ChallengeCategory.Architecture,
+            Difficulty.Medium,
+            90,
+            new[] { "UI", "Infrastructure", "Domain", "Application" },
+            new[] { "Domain", "Application", "Infrastructure", "UI" }
+        );
+        await repo.AddAsync(ord1);
     }
 }

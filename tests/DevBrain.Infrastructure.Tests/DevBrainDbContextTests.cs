@@ -371,4 +371,71 @@ public class DevBrainDbContextTests
         Assert.Equal(string.Empty, saved.StarterCode ?? string.Empty);
         Assert.True((saved.TestCases?.Count ?? 0) == 0, "OpenText challenge should have no test cases");
     }
+
+    // --- Ordering persistence ---
+
+    [Fact]
+    public async Task OrderingChallenge_GivenRoundTrip_ShouldPersistItems()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var items = new[] { "UI", "Infrastructure", "Domain", "Application" };
+        var challenge = Challenge.CreateOrdering(
+            title: "Architecture: Hexagonal Layers",
+            description: "Order from innermost to outermost.",
+            category: ChallengeCategory.Architecture,
+            difficulty: Difficulty.Medium,
+            timeLimitSecs: 90,
+            items: items,
+            correctOrder: ["Domain", "Application", "Infrastructure", "UI"]
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.Equal(ChallengeType.Ordering, saved.Type);
+        Assert.Equal(4, saved.Items.Count);
+        foreach (var item in items)
+            Assert.Contains(item, saved.Items);
+    }
+
+    [Fact]
+    public async Task OpenTextChallenge_GivenRoundTrip_ShouldHaveEmptyItems()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var challenge = Challenge.Create(
+            title: "What does SELECT * do?",
+            description: "Explain SELECT *.",
+            category: ChallengeCategory.Sql,
+            difficulty: Difficulty.Easy,
+            correctAnswer: "selects all columns",
+            timeLimitSecs: 60
+        );
+        context.Challenges.Add(challenge);
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Challenges.FirstAsync(c => c.Id == challenge.Id);
+
+        Assert.True((saved.Items?.Count ?? 0) == 0, "OpenText challenge should have no items");
+    }
+
+    [Fact]
+    public async Task Challenges_GivenSeeded_ShouldIncludeOrderingChallenges()
+    {
+        using var context = CreateDbContext();
+        context.Database.EnsureCreated();
+
+        var orderingChallenges = await context.Challenges
+            .Where(c => c.Type == ChallengeType.Ordering)
+            .ToListAsync();
+
+        Assert.True(orderingChallenges.Count >= 2, $"Expected at least 2 seeded Ordering challenges, got {orderingChallenges.Count}");
+        Assert.All(orderingChallenges, c => Assert.True((c.Items?.Count ?? 0) >= 2));
+    }
 }

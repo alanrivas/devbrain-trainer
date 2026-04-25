@@ -283,4 +283,38 @@ public class GetChallengesEndpointTests : IAsyncLifetime
         Assert.All(openTextItems, item => Assert.Empty(item.StarterCode));
         Assert.All(openTextItems, item => Assert.Empty(item.TestCases));
     }
+
+    [Fact]
+    public async Task GetChallenges_AllItems_ShouldIncludeItemsField()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.NotNull(item.Items));
+    }
+
+    [Fact]
+    public async Task GetChallenges_OrderingChallenges_ShouldHaveNonEmptyItems()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var orderingItems = result.Items.Where(i => i.Type == "Ordering").ToList();
+        Assert.NotEmpty(orderingItems);
+        Assert.All(orderingItems, item => Assert.NotEmpty(item.Items));
+    }
+
+    [Fact]
+    public async Task GetChallenges_NonOrderingChallenges_ShouldHaveEmptyItems()
+    {
+        var response = await _client.GetAsync("/api/v1/challenges?pageSize=50");
+        var result = await DeserializeResponse<PaginatedResponseDto<ChallengeResponseDto>>(response);
+
+        Assert.NotNull(result);
+        var nonOrderingItems = result.Items.Where(i => i.Type != "Ordering").ToList();
+        Assert.NotEmpty(nonOrderingItems);
+        Assert.All(nonOrderingItems, item => Assert.Empty(item.Items));
+    }
 }

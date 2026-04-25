@@ -439,4 +439,162 @@ public class ChallengeTests
 
         Assert.False(challenge.IsCorrectAnswer("FAIL"));
     }
+
+    // --- CreateOrdering ---
+
+    [Fact]
+    public void CreateOrdering_GivenFourItemsValidOrder_ShouldHaveTypeOrderingAndItems()
+    {
+        var items = new[] { "UI", "Infrastructure", "Domain", "Application" };
+        var correctOrder = new[] { "Domain", "Application", "Infrastructure", "UI" };
+
+        var challenge = Challenge.CreateOrdering(
+            title: "Architecture: Hexagonal Layers",
+            description: "Order from innermost to outermost.",
+            category: ChallengeCategory.Architecture,
+            difficulty: Difficulty.Medium,
+            timeLimitSecs: 90,
+            items: items,
+            correctOrder: correctOrder
+        );
+
+        Assert.Equal(ChallengeType.Ordering, challenge.Type);
+        Assert.Equal(4, challenge.Items.Count);
+        Assert.Equal("Domain|Application|Infrastructure|UI", challenge.CorrectAnswer);
+        Assert.Empty(challenge.Options);
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenTwoItems_ShouldSucceed()
+    {
+        var challenge = Challenge.CreateOrdering(
+            title: "Order these two steps",
+            description: "Which comes first?",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["Build", "Deploy"],
+            correctOrder: ["Build", "Deploy"]
+        );
+
+        Assert.Equal(2, challenge.Items.Count);
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenOneItem_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Single item ordering?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["OnlyOne"],
+            correctOrder: ["OnlyOne"]
+        ));
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenSevenItems_ShouldThrowDomainException()
+    {
+        var items = new[] { "A", "B", "C", "D", "E", "F", "G" };
+
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Too many items challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: items,
+            correctOrder: items
+        ));
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenEmptyItem_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Empty item challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["A", "B", ""],
+            correctOrder: ["A", "B", ""]
+        ));
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenDuplicateItems_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Duplicate items challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["A", "B", "a"],
+            correctOrder: ["A", "B", "a"]
+        ));
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenCorrectOrderWithItemNotInItems_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Order not subset challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["A", "B", "C"],
+            correctOrder: ["A", "B", "X"]
+        ));
+    }
+
+    [Fact]
+    public void CreateOrdering_GivenCorrectOrderWithFewerItemsThanItems_ShouldThrowDomainException()
+    {
+        Assert.Throws<DomainException>(() => Challenge.CreateOrdering(
+            title: "Incomplete order challenge?",
+            description: "This should fail.",
+            category: ChallengeCategory.DevOps,
+            difficulty: Difficulty.Easy,
+            timeLimitSecs: 60,
+            items: ["A", "B", "C"],
+            correctOrder: ["A", "B"]
+        ));
+    }
+
+    [Fact]
+    public void IsCorrectAnswer_GivenCorrectPipeSeparatedOrder_ShouldReturnTrue()
+    {
+        var challenge = Challenge.CreateOrdering(
+            title: "Architecture: Hexagonal Layers",
+            description: "Order the layers.",
+            category: ChallengeCategory.Architecture,
+            difficulty: Difficulty.Medium,
+            timeLimitSecs: 90,
+            items: ["UI", "Infrastructure", "Domain", "Application"],
+            correctOrder: ["Domain", "Application", "Infrastructure", "UI"]
+        );
+
+        Assert.True(challenge.IsCorrectAnswer("Domain|Application|Infrastructure|UI"));
+    }
+
+    [Fact]
+    public void IsCorrectAnswer_GivenWrongOrderInOrdering_ShouldReturnFalse()
+    {
+        var challenge = Challenge.CreateOrdering(
+            title: "Architecture: Hexagonal Layers",
+            description: "Order the layers.",
+            category: ChallengeCategory.Architecture,
+            difficulty: Difficulty.Medium,
+            timeLimitSecs: 90,
+            items: ["UI", "Infrastructure", "Domain", "Application"],
+            correctOrder: ["Domain", "Application", "Infrastructure", "UI"]
+        );
+
+        Assert.False(challenge.IsCorrectAnswer("UI|Infrastructure|Domain|Application"));
+    }
 }

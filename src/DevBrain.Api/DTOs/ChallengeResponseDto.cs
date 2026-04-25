@@ -16,5 +16,6 @@ public sealed record ChallengeResponseDto(
     string Type,
     string[] Options,
     string StarterCode,
-    CodeTestCaseDto[] TestCases
+    CodeTestCaseDto[] TestCases,
+    string[] Items
 );
