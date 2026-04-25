@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import AttemptForm, { AttemptResult } from '@/components/AttemptForm';
 import MultipleChoiceForm from '@/components/MultipleChoiceForm';
+import CodeRunnerForm from '@/components/CodeRunnerForm';
+import type { CodeTestCase } from '@/components/CodeRunnerForm';
 import api from '@/lib/api';
 
 interface ChallengeDetail {
@@ -15,8 +17,10 @@ interface ChallengeDetail {
   category: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   timeLimitSecs: number;
-  type: 'OpenText' | 'MultipleChoice';
+  type: 'OpenText' | 'MultipleChoice' | 'CodeRunner';
   options: string[];
+  starterCode: string;
+  testCases: CodeTestCase[];
 }
 
 export default function ChallengeDetailPage() {
@@ -185,6 +189,14 @@ export default function ChallengeDetailPage() {
             challengeId={challenge.id}
             timeLimitSecs={challenge.timeLimitSecs}
             options={challenge.options}
+            onSuccess={(attempt) => setLastAttempt(attempt)}
+          />
+        ) : challenge.type === 'CodeRunner' ? (
+          <CodeRunnerForm
+            challengeId={challenge.id}
+            timeLimitSecs={challenge.timeLimitSecs}
+            starterCode={challenge.starterCode}
+            testCases={challenge.testCases}
             onSuccess={(attempt) => setLastAttempt(attempt)}
           />
         ) : (

@@ -36,6 +36,22 @@ jest.mock('@/components/MultipleChoiceForm', () => {
   };
 });
 
+jest.mock('@/components/CodeRunnerForm', () => ({
+  __esModule: true,
+  default: function MockCodeRunnerForm(props: {
+    challengeId: string;
+    starterCode: string;
+    testCases: Array<{ description: string }>;
+  }) {
+    return (
+      <div data-testid="code-runner-form" data-challenge-id={props.challengeId}>
+        <span data-testid="starter-code">{props.starterCode}</span>
+        {props.testCases?.map((tc, i) => <span key={i}>{tc.description}</span>)}
+      </div>
+    );
+  },
+}));
+
 describe('ChallengeDetailPage', () => {
   const mockPush = jest.fn();
   const mockClearAuth = jest.fn();
@@ -372,6 +388,55 @@ describe('ChallengeDetailPage', () => {
 
       await waitFor(() => {
         options.forEach((opt) => expect(screen.getByText(opt)).toBeInTheDocument());
+      });
+    });
+
+    it('should render CodeRunnerForm for CodeRunner challenges', async () => {
+      (api.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'challenge-1',
+          title: 'JS: Sum Two Numbers',
+          description: 'Write a function that sums two numbers.',
+          category: 'CodeLogic',
+          difficulty: 'Easy',
+          timeLimitSecs: 120,
+          type: 'CodeRunner',
+          options: [],
+          starterCode: 'function solution(a, b) {}',
+          testCases: [{ input: '2, 3', expectedOutput: '5', description: 'Returns sum of 2 and 3' }],
+        },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('code-runner-form')).toBeInTheDocument();
+        expect(screen.queryByTestId('attempt-form')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('multiple-choice-form')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should pass starterCode and testCases to CodeRunnerForm', async () => {
+      (api.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'challenge-1',
+          title: 'JS: Sum Two Numbers',
+          description: 'Write a function that sums two numbers.',
+          category: 'CodeLogic',
+          difficulty: 'Easy',
+          timeLimitSecs: 120,
+          type: 'CodeRunner',
+          options: [],
+          starterCode: 'function solution(a, b) {}',
+          testCases: [{ input: '2, 3', expectedOutput: '5', description: 'Returns sum of 2 and 3' }],
+        },
+      });
+
+      render(<ChallengeDetailPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('starter-code')).toHaveTextContent('function solution(a, b) {}');
+        expect(screen.getByText('Returns sum of 2 and 3')).toBeInTheDocument();
       });
     });
   });
