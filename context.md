@@ -57,6 +57,8 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 - [x] Phase 4.8 implementada — Historial de intentos en `/history`, endpoint `GET /api/v1/users/me/attempts` y link desde `/stats`
 - [x] Spec frontend de **Phase 4.9** creada — `specs/frontend/phase-4.9-keyboard-navigation.spec.md`
 - [x] Phase 4.9 implementada — Navegación por teclado: Ctrl+Enter submits, ArrowLeft/Right navega entre challenges, Escape vuelve a lista, R reinicia formulario
+- [x] Spec creada **Phase 4.10** — `specs/frontend/phase-4.10-multiple-choice.spec.md`
+- [x] Phase 4.10 implementada — `MultipleChoiceForm` (radio buttons, timer, result card, accesibilidad) + renderizado condicional en `/challenges/[id]` según `challenge.type`
 
 ## Test Suites Status
 
@@ -66,11 +68,32 @@ App de entrenamiento cognitivo gamificada para desarrolladores. Mejora lógica, 
 | Infrastructure.Tests | 71 | ✅ 71/71 | DbContext config (9), EFChallengeRepository (13), EFAttemptRepository (17), RedisStreakService (8), EFBadgeRepository (6), SerilogLogging (5), LogLevelConfiguration (13) |
 | Api.Tests | 104 | ✅ 104/104 | Phase 3.3 fix: ILoggerFactory, CustomWebApplicationFactory, LoginResponseDto + Phase 3.3.1: DynamicLogLevelConfiguration (6) + Phase 4.8: GetUserAttempts (5) |
 | Integration.Tests | 10 | ✅ 10/10 | E2E happy path (2) + **Phase 3.4: Chaos/Resilience (8)** |
-| **Frontend.Tests** | **145** | **✅ 145/145** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback • **Phase 4.8** (9): history page (8) + stats link (1) • **Phase 4.9** (9): keyboard nav — AttemptForm (4) + detail page (5) |
+| **Frontend.Tests** | **172** | **✅ 172/172** | **Phase 4.2.1** (25): LoginForm (20) + login/page (5) • **Phase 4.2.2** (26): RegisterForm (20) + register/page (6) • **Phase 4.2.3** (18): ChallengeCard (18) • **Phase 4.3** (21): AttemptForm (13) + challenge detail page (8) • **Phase 4.4** (4): AttemptForm UX • **Phase 4.5** (16): AttemptForm draft+badge (9) + detail page nav (7) • **Phase 4.6** (10): stats page • **Phase 4.7** (7): gamification feedback • **Phase 4.8** (9): history page (8) + stats link (1) • **Phase 4.9** (9): keyboard nav — AttemptForm (4) + detail page (5) • **Phase 4.10** (27): MultipleChoiceForm (24) + detail page type rendering (3) |
 | **Backend Total** | **273** | **✅ 273/273** | Domain (80) + Infrastructure (75) + Api.Tests (108) + Integration.Tests (10) |
-| **Grand Total** | **418** | **✅ 418/418** | Backend 273 + Frontend 145 |
+| **Grand Total** | **445** | **✅ 445/445** | Backend 273 + Frontend 172 |
 
 ## Último paso completado
+> ✅ **Phase 4.10 — Frontend MultipleChoiceForm — 25 de Abril 2026**
+>
+> **Resultado de esta iteración (SDD + TDD)**:
+>
+> 1. **Implementación frontend**:
+>    - `frontend/src/components/MultipleChoiceForm.tsx` — nuevo componente con radio buttons, timer visual (igual que AttemptForm), tarjeta de resultado, manejo de errores y accesibilidad (`<fieldset>`/`<legend>`, `role="alert"`)
+>    - `frontend/src/app/challenges/[id]/page.tsx` — interfaz `ChallengeDetail` extendida con `type` y `options`; renderizado condicional: `type === 'MultipleChoice'` → `MultipleChoiceForm`, si no → `AttemptForm`
+>
+> 2. **Tests** (+27 nuevos, todos en verde):
+>    - `MultipleChoiceForm.test.tsx`: **24 tests** (rendering, selección, submit, resultado/reset, errores, accesibilidad)
+>    - `challenges/[id]/page.test.tsx`: **3 tests** nuevos (MultipleChoice renderiza MultipleChoiceForm, OpenText renderiza AttemptForm, opciones pasadas correctamente)
+>    - Frontend total: **172/172 ✅**
+>
+> 3. **Grand Total: 445/445 ✅** (Backend 273 + Frontend 172)
+>
+> 4. **Git**: commit `be7a023` pusheado a main
+>
+> **Próximo paso**: Phase 4.11 — Code Runner backend (spec: `specs/domain/challenge-code-runner.spec.md`)
+>
+> ---
+>
 > ✅ **ChallengeType + Multiple Choice Backend — 24 de Abril 2026**
 >
 > **Resultado de esta iteración (SDD + TDD)**:
@@ -722,9 +745,14 @@ El orden respeta dependencias estrictas. No se puede implementar un paso sin ten
 13. **✅ Frontend Phase 4.8** — Historial de intentos `/history` + endpoint GET /users/me/attempts
 14. **✅ Frontend Phase 4.9** — Navegación por teclado (Ctrl+Enter, ArrowLeft/Right, Escape, R)
 
+### ✅ COMPLETADAS (Phase 4.10)
+15. **✅ Frontend Phase 4.10** — MultipleChoiceForm + renderizado condicional en challenge detail (172 tests frontend)
+
 ### 🎯 PRÓXIMAS FASES
-15. **▶️ Frontend Phase 4.10** — Por definir (candidatos: leaderboard, filtros en historial, hint visual de atajos)
-16. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
+16. **▶️ Phase 4.11** — Code Runner backend + frontend Monaco Editor (spec: `specs/domain/challenge-code-runner.spec.md` + `specs/frontend/phase-4.11-code-runner.spec.md`)
+17. **▶️ Phase 4.14** — Sprint Mode frontend (spec: `specs/frontend/phase-4.14-sprint-mode.spec.md`)
+18. **▶️ Phase 4.12** — Drag & Drop backend + frontend @dnd-kit (spec: `specs/domain/challenge-ordering.spec.md` + `specs/frontend/phase-4.12-drag-drop.spec.md`)
+19. **▶️ Phase 5** — Post-Frontend Testing (Benchmarks, Contract Tests)
 
 
 ## Plan paso a paso
